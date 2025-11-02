@@ -6,7 +6,7 @@ from queue import Queue
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from .Node import Node
+from Node import Node
 
 
 class Graph:
@@ -19,7 +19,7 @@ class Graph:
     def __str__(self) -> str:
         out = ""
         for key in self.adjacency_lists_dict.keys():
-            out = out + "node" + str(key) + ": " + str(self.adjacency_lists_dict[key]) + "\n"
+            out = out + "node: " + str(key) + ": " + str(self.adjacency_lists_dict[key]) + "\n"
         return out
 
 
@@ -31,7 +31,7 @@ class Graph:
         edge: str = ""
         for node in self.node_dict.keys():
             for (node2, cost) in self.adjacency_lists_dict[node]:
-                edge = edge + node + " ->" + node2 + " custo:" + str(cost) + "\n"
+                edge = edge + node + " -> " + node2 + " | cost: " + str(cost) + "\n"
         return edge
 
 

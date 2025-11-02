@@ -1,0 +1,24 @@
+from Graph import Graph
+import json
+
+def parse_graph() -> Graph:
+    file_path = input("File path: ")
+
+    with open(file_path, "r") as graph_file:
+        json_graph = json.load(graph_file)
+
+    g = Graph()
+
+    for node in json_graph["nodes"]:
+        g.add_node(node["name"], node["heuristic"])
+
+    for edge in json_graph["edges"]:
+        g.add_edge(edge["origin"], edge["destiny"], edge["cost"])
+
+    return g
+
+
+g = parse_graph()
+print(g)
+print()
+print(g.str_edges())
