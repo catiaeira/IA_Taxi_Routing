@@ -1,0 +1,34 @@
+{
+  "nodes": [
+	{
+	  "name": "Universidade do Minho",
+	  "heuristic": 1
+	},
+	{
+	  "name": "Estação de Comboios",
+	  "heuristic": 1
+	},
+	{
+	  "name": "Braga Parque",
+	  "heuristic": 1
+	}
+  ],
+
+  "edges": [
+	{
+	  "origin": "Universidade do Minho",
+	  "destiny": "Estação de Comboios",
+	  "cost": 7
+	},
+	{
+	  "origin": "Universidade do Minho",
+	  "destiny": "Braga Parque",
+	  "cost": 5
+	},
+	{
+	  "origin": "Estação de Comboios",
+	  "destiny": "Braga Parque",
+	  "cost": 6
+	}
+  ]
+}

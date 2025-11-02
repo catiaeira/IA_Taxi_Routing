@@ -10,9 +10,8 @@ from .Node import Node
 
 
 class Graph:
-    def __init__(self, directed: bool = False):
+    def __init__(self):
         self.node_dict: dict[str, Node] = {}  
-        self.is_directed: bool = directed
         self.adjacency_lists_dict: dict[str, list[tuple[str, int]]] = {}  
         self.heuristic_dict: dict[str, int] = {}  
 
@@ -36,11 +35,25 @@ class Graph:
         return edge
 
 
-    def add_node(self, name: str) -> None:
+    def add_node(self, name: str, estimate: int) -> None:
         node = Node(name)
         self.node_dict[name] = node
         self.adjacency_lists_dict[name] = []
-        self.heuristic_dict[name] = 0
+        self.heuristic_dict[name] = estimate
+
+
+    def add_heuristic(self, node: str, estimate: int) -> None:
+        if node in self.heuristic_dict.keys():
+            self.heuristic_dict[node] = estimate
+        else:
+            raise KeyError("add_heuristic: node doesn't exist")
+
+
+    def get_heuristic(self, node: str) -> int:
+        if node in self.heuristic_dict.keys():
+            return self.heuristic_dict[node]
+        else:
+            raise KeyError("get_heuristic: node doesn't exist")
 
 
     def add_edge(self, node1: str, node2: str, weight: int) -> None:
@@ -53,9 +66,6 @@ class Graph:
             raise KeyError("add_edge: node2 doesn't exist")
         else:
             self.adjacency_lists_dict[node1].append((node2, weight)) 
-
-            if not self.is_directed:
-                self.adjacency_lists_dict[node2].append((node1, weight))
 
 
     def get_nodes(self) -> list[Node]:
@@ -119,14 +129,6 @@ class Graph:
         plt.show()
 
 
-    def add_heuristic(self, node: str, estimate: int) -> None:
-        if node in self.heuristic_dict.keys():
-            self.heuristic_dict[node] = estimate
-        else:
-            raise KeyError("add_heuristic: node doesn't exist")
-
-
-
     ##########################################
     #    A* - To Do
     ##########################################
@@ -183,13 +185,6 @@ class Graph:
 
         print('Path does not exist!')
         return None
-
-
-    def get_heuristic(self, node: str) -> int:
-        if node in self.heuristic_dict.keys():
-            return self.heuristic_dict[node]
-        else:
-            raise KeyError("get_heuristic: node doesn't exist")
 
 
     ##########################################
