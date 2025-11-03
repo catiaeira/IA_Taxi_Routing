@@ -1,34 +1,184 @@
 {
-  "nodes": [
+	"nodes": [
 	{
-	  "name": "Universidade do Minho",
-	  "heuristic": 1
+		"name": "Elvas",
+		"heuristic": 270
 	},
 	{
-	  "name": "Estação de Comboios",
-	  "heuristic": 1
+		"name": "Borba",
+		"heuristic": 250
 	},
 	{
-	  "name": "Braga Parque",
-	  "heuristic": 1
+		"name": "Estremoz",
+		"heuristic": 145
+	},
+	{
+		"name": "Evora",
+		"heuristic": 95
+	},
+	{
+		"name": "Montemor",
+		"heuristic": 70
+	},
+	{
+		"name": "Vendas Novas",
+		"heuristic": 45
+	},
+	{
+		"name": "Arraiolos",
+		"heuristic": 220
+	},
+	{
+		"name": "Alcacer",
+		"heuristic": 140
+	},
+	{
+		"name": "Palmela",
+		"heuristic": 85
+	},
+	{
+		"name": "Almada",
+		"heuristic": 25
+	},
+	{
+		"name": "Alandroal",
+		"heuristic": 180
+	},
+	{
+		"name": "Redondo",
+		"heuristic": 170
+	},
+	{
+		"name": "Monsaraz",
+		"heuristic": 120
+	},
+	{
+		"name": "Barreiro",
+		"heuristic": 30
+	},
+	{
+		"name": "Baixa da banheira",
+		"heuristic": 33
+	},
+	{
+		"name": "Moita",
+		"heuristic": 35
+	},
+	{
+		"name": "Alcochete",
+		"heuristic": 26
+	},
+	{
+		"name": "Lisboa",
+		"heuristic": 0
 	}
-  ],
+	],
 
-  "edges": [
+	"edges": [
 	{
-	  "origin": "Universidade do Minho",
-	  "destiny": "Estação de Comboios",
-	  "cost": 7
+		"origin": "Elvas",
+		"destiny": "Borba",
+		"cost": 15
 	},
 	{
-	  "origin": "Universidade do Minho",
-	  "destiny": "Braga Parque",
-	  "cost": 5
+		"origin": "Borba",
+		"destiny": "Estremoz",
+		"cost": 15
 	},
 	{
-	  "origin": "Estação de Comboios",
-	  "destiny": "Braga Parque",
-	  "cost": 6
+		"origin": "Estremoz",
+		"destiny": "Evora",
+		"cost": 40
+	},
+	{
+		"origin": "Evora",
+		"destiny": "Montemor",
+		"cost": 20
+	},
+	{
+		"origin": "Montemor",
+		"destiny": "Vendas Novas",
+		"cost": 15
+	},
+	{
+		"origin": "Vendas Novas",
+		"destiny": "Lisboa",
+		"cost": 50
+	},
+	{
+		"origin": "Elvas",
+		"destiny": "Arraiolos",
+		"cost": 50
+	},
+	{
+		"origin": "Arraiolos",
+		"destiny": "Alcacer",
+		"cost": 90
+	},
+	{
+		"origin": "Alcacer",
+		"destiny": "Palmela",
+		"cost": 35
+	},
+	{
+		"origin": "Palmela",
+		"destiny": "Almada",
+		"cost": 25
+	},
+	{
+		"origin": "Palmela",
+		"destiny": "Barreiro",
+		"cost": 25
+	},
+	{
+		"origin": "Barreiro",
+		"destiny": "Palmela",
+		"cost": 30
+	},
+	{
+		"origin": "Almada",
+		"destiny": "Lisboa",
+		"cost": 15
+	},
+	{
+		"origin": "Elvas",
+		"destiny": "Alandroal",
+		"cost": 40
+	},
+	{
+		"origin": "Alandroal",
+		"destiny": "Redondo",
+		"cost": 25
+	},
+	{
+		"origin": "Redondo",
+		"destiny": "Monsaraz",
+		"cost": 30
+	},
+	{
+		"origin": "Monsaraz",
+		"destiny": "Barreiro",
+		"cost": 120
+	},
+	{
+		"origin": "Barreiro",
+		"destiny": "Baixa da banheira",
+		"cost": 5
+	},
+	{
+		"origin": "Baixa da banheira",
+		"destiny": "Moita",
+		"cost": 7
+	},
+	{
+		"origin": "Moita",
+		"destiny": "Alcochete",
+		"cost": 20
+	},
+	{
+		"origin": "Alcochete",
+		"destiny": "Lisboa",
+		"cost": 20
 	}
-  ]
+	]
 }

@@ -103,22 +103,21 @@ class Graph:
         return neighbours
 
     ###########################
-    # desenha grafo  modo grafico
+    # desenha grafo modo grafico
     #########################
 
-    # MUST BE UPDATED
     def desenha(self):
         ##criar lista de vertices
-        lista_v = self.node_list
-        lista_a = []
+        list_v = self.node_dict.values()
+        list_a = []
         g = nx.Graph()
-        for nodo in lista_v:
+        for nodo in list_v:
             n = nodo.getName()
             g.add_node(n)
-            for (adjacente, peso) in self.adjacency_lists_dict[n]:
-                lista = (n, adjacente)
+            for (adjacent, weight) in self.adjacency_lists_dict[n]:
+                list = (n, adjacent)
                 # lista_a.append(lista)
-                g.add_edge(n, adjacente, weight=peso)
+                g.add_edge(n, adjacent, weight=weight)
 
         pos = nx.spring_layout(g)
         nx.draw_networkx(g, pos, with_labels=True, font_weight='bold')
@@ -149,13 +148,13 @@ class Graph:
             n = None
 
             for v in queue:
-                if n is None or cost[v] + self.getH(v) < cost[n] + self.getH(n):
+                if n is None or cost[v] + self.get_heuristic(v) < cost[n] + self.get_heuristic(n):
                     n = v
             
             if n == end:
                 break
             
-            for m, weight in self.getNeighbours(n):
+            for m, weight in self.get_neighbours(n):
                 if m not in queue and m not in visited:
                     queue.add(m)
                     parents[m] = n
@@ -181,7 +180,7 @@ class Graph:
 
             path.insert(0, start)
 
-            return (path, self.calcula_custo(path))
+            return (path, self.calculate_cost(path))
 
         print('Path does not exist!')
         return None
@@ -211,7 +210,7 @@ class Graph:
             if n == end:
                 break
 
-            for m, _ in self.getNeighbours(n):
+            for m, _ in self.get_neighbours(n):
                 if m not in queue and m not in visited:
                     queue.add(m)
                     parents[m] = n
@@ -228,7 +227,7 @@ class Graph:
 
             path.insert(0, start)
 
-            return (path, self.calcula_custo(path))
+            return (path, self.calculate_cost(path))
 
         print("Path does not exist!")
         return None

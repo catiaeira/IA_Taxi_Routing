@@ -2,8 +2,9 @@ from Graph import Graph
 import json
 
 def parse_graph() -> Graph:
-    file_path = input("File path: ")
-
+    #file_path = input("File path: ")
+    file_path = "graph.json"
+    
     with open(file_path, "r") as graph_file:
         json_graph = json.load(graph_file)
 
@@ -16,9 +17,3 @@ def parse_graph() -> Graph:
         g.add_edge(edge["origin"], edge["destiny"], edge["cost"])
 
     return g
-
-
-g = parse_graph()
-print(g)
-print()
-print(g.str_edges())
