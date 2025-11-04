@@ -13,7 +13,7 @@ class Graph:
     def __init__(self):
         self.node_dict: dict[str, Node] = {}  
         self.adjacency_lists_dict: dict[str, list[tuple[str, int, int]]] = {}  
-        self.heuristic_dict: dict[str, int] = {}  
+        self.heuristic_dict: dict[str, int] = {}
 
     @override
     def __str__(self) -> str:
@@ -96,11 +96,8 @@ class Graph:
         return cost
 
 
-    def get_neighbours(self, node: str) -> list[tuple[str, int]]:
-        neighbours = []
-        for adj_wght in self.adjacency_lists_dict[node]:
-            neighbours.append(adj_wght)
-        return neighbours
+    def get_neighbours(self, node: str) -> list[tuple[str, int, int]]:
+        return self.adjacency_lists_dict[node]
 
     ###########################
     # desenha grafo modo grafico
@@ -126,6 +123,50 @@ class Graph:
 
         plt.draw()
         plt.show()
+
+
+    def BFS_search(self, origin: str, dest: str) -> tuple[list[str], int|float]|None:
+
+        queue: Queue[str] = Queue()
+        queue.put(origin)
+
+        parents: dict[str, str] = dict()
+        parents[origin] = origin
+
+        visited: set[str] = set()
+        visited.add(origin)
+
+        while not queue.empty():
+
+            current = queue.get()
+
+            if current == dest:
+                break
+
+            for node, _, _ in self.get_neighbours(current):
+                if node not in visited:
+                    visited.add(node)
+                    queue.put(node)
+                    parents[node] = current
+
+        if parents.get(dest) is None:
+                return None
+    
+        current = dest
+
+        path = []
+        while True:
+            path.insert(0, current)
+
+            parent = parents[current]
+
+            if parent == current:
+                break
+
+            current = parent
+
+        return path, self.calculate_cost(path)
+            
 
 
     ##########################################
@@ -154,14 +195,14 @@ class Graph:
             if n == end:
                 break
             
-            for m, weight in self.get_neighbours(n):
+            for m, dist, _ in self.get_neighbours(n):
                 if m not in queue and m not in visited:
                     queue.add(m)
                     parents[m] = n
-                    cost[m] = cost[n] + weight
+                    cost[m] = cost[n] + dist
 
-                elif cost[m] > cost[n] + weight:
-                    cost[m] = cost[n] + weight
+                elif cost[m] > cost[n] + dist:
+                    cost[m] = cost[n] + dist
                     parents[m] = n
 
                     if m in visited:
