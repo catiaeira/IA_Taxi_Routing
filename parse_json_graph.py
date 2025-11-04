@@ -14,6 +14,6 @@ def parse_graph() -> Graph:
         g.add_node(node["name"], node["heuristic"])
 
     for edge in json_graph["edges"]:
-        g.add_edge(edge["origin"], edge["destiny"], edge["cost"])
+        g.add_edge(edge["origin"], edge["destiny"], edge["dist"], edge["speed"])
 
     return g

@@ -78,107 +78,128 @@
 	{
 		"origin": "Elvas",
 		"destiny": "Borba",
-		"cost": 15
+		"dist": 15,
+		"speed": 50
 	},
 	{
 		"origin": "Borba",
 		"destiny": "Estremoz",
-		"cost": 15
+		"dist": 15,
+		"speed": 50
 	},
 	{
 		"origin": "Estremoz",
 		"destiny": "Evora",
-		"cost": 40
+		"dist": 40,
+		"speed": 50
 	},
 	{
 		"origin": "Evora",
 		"destiny": "Montemor",
-		"cost": 20
+		"dist": 20,
+		"speed": 50
 	},
 	{
 		"origin": "Montemor",
 		"destiny": "Vendas Novas",
-		"cost": 15
+		"dist": 15,
+		"speed": 50
 	},
 	{
 		"origin": "Vendas Novas",
 		"destiny": "Lisboa",
-		"cost": 50
+		"dist": 50,
+		"speed": 50
 	},
 	{
 		"origin": "Elvas",
 		"destiny": "Arraiolos",
-		"cost": 50
+		"dist": 50,
+		"speed": 50
 	},
 	{
 		"origin": "Arraiolos",
 		"destiny": "Alcacer",
-		"cost": 90
+		"dist": 90,
+		"speed": 50
 	},
 	{
 		"origin": "Alcacer",
 		"destiny": "Palmela",
-		"cost": 35
+		"dist": 35,
+		"speed": 50
 	},
 	{
 		"origin": "Palmela",
 		"destiny": "Almada",
-		"cost": 25
+		"dist": 25,
+		"speed": 50
 	},
 	{
 		"origin": "Palmela",
 		"destiny": "Barreiro",
-		"cost": 25
+		"dist": 25,
+		"speed": 50
 	},
 	{
 		"origin": "Barreiro",
 		"destiny": "Palmela",
-		"cost": 30
+		"dist": 30,
+		"speed": 50
 	},
 	{
 		"origin": "Almada",
 		"destiny": "Lisboa",
-		"cost": 15
+		"dist": 15,
+		"speed": 50
 	},
 	{
 		"origin": "Elvas",
 		"destiny": "Alandroal",
-		"cost": 40
+		"dist": 40,
+		"speed": 50
 	},
 	{
 		"origin": "Alandroal",
 		"destiny": "Redondo",
-		"cost": 25
+		"dist": 25,
+		"speed": 50
 	},
 	{
 		"origin": "Redondo",
 		"destiny": "Monsaraz",
-		"cost": 30
+		"dist": 30,
+		"speed": 50
 	},
 	{
 		"origin": "Monsaraz",
 		"destiny": "Barreiro",
-		"cost": 120
+		"dist": 120,
+		"speed": 50
 	},
 	{
 		"origin": "Barreiro",
 		"destiny": "Baixa da banheira",
-		"cost": 5
+		"dist": 5,
+		"speed": 50
 	},
 	{
 		"origin": "Baixa da banheira",
 		"destiny": "Moita",
-		"cost": 7
+		"dist": 7,
+		"speed": 50
 	},
 	{
 		"origin": "Moita",
 		"destiny": "Alcochete",
-		"cost": 20
+		"dist": 20,
+		"speed": 50
 	},
 	{
 		"origin": "Alcochete",
 		"destiny": "Lisboa",
-		"cost": 20
+		"dist": 20,
+		"speed": 50
 	}
 	]
 }

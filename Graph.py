@@ -12,7 +12,7 @@ from Node import Node
 class Graph:
     def __init__(self):
         self.node_dict: dict[str, Node] = {}  
-        self.adjacency_lists_dict: dict[str, list[tuple[str, int]]] = {}  
+        self.adjacency_lists_dict: dict[str, list[tuple[str, int, int]]] = {}  
         self.heuristic_dict: dict[str, int] = {}  
 
     @override
@@ -30,7 +30,7 @@ class Graph:
     def str_edges(self) -> str:
         edge: str = ""
         for node in self.node_dict.keys():
-            for (node2, cost) in self.adjacency_lists_dict[node]:
+            for (node2, cost, speed) in self.adjacency_lists_dict[node]:
                 edge = edge + node + " -> " + node2 + " | cost: " + str(cost) + "\n"
         return edge
 
@@ -56,16 +56,16 @@ class Graph:
             raise KeyError("get_heuristic: node doesn't exist")
 
 
-    def add_edge(self, node1: str, node2: str, weight: int) -> None:
-        n1 = self.get_node_by_name(node1)
-        n2 = self.get_node_by_name(node2)
+    def add_edge(self, origin: str, destiny: str, dist: int, speed: int) -> None:
+        n1 = self.get_node_by_name(origin)
+        n2 = self.get_node_by_name(destiny)
 
         if n1 is None:
-            raise KeyError("add_edge: node1 doesn't exist")
+            raise KeyError(f"add_edge: {origin} doesn't exist")
         elif n2 is None:
-            raise KeyError("add_edge: node2 doesn't exist")
+            raise KeyError(f"add_edge: {destiny} doesn't exist")
         else:
-            self.adjacency_lists_dict[node1].append((node2, weight)) 
+            self.adjacency_lists_dict[origin].append((destiny, dist, speed)) 
 
 
     def get_nodes(self) -> list[Node]:
@@ -79,7 +79,7 @@ class Graph:
     def get_arc_cost(self, node1: str, node2: str) -> int|float:
         total_cost = math.inf
         adj_list = self.adjacency_lists_dict[node1]
-        for (node, cost) in adj_list:
+        for (node, cost, _) in adj_list:
             if node == node2:
                 total_cost = cost
 
@@ -114,7 +114,7 @@ class Graph:
         for nodo in list_v:
             n = nodo.getName()
             g.add_node(n)
-            for (adjacent, weight) in self.adjacency_lists_dict[n]:
+            for (adjacent, weight, _) in self.adjacency_lists_dict[n]:
                 list = (n, adjacent)
                 # lista_a.append(lista)
                 g.add_edge(n, adjacent, weight=weight)
