@@ -10,6 +10,8 @@ def main():
         print("3-Imprimir  nodos de Grafo")
         print("4-A*")
         print("5-Gulosa")
+        print("6-DFS")
+        print("7-BFS")
         print("0-Saír")
 
         saida = int(input("introduza a sua opcao-> "))
@@ -32,6 +34,16 @@ def main():
             inicio = input("Nodo inicial->")
             fim = input("Nodo final->")
             print(graph.greedy(inicio, fim))
+            l = input("prima enter para continuar")
+        elif saida == 6:
+            inicio = input("Nodo inicial->")
+            fim = input("Nodo final->")
+            print(graph.procura_DFS(inicio, fim))
+            l = input("prima enter para continuar")
+        elif saida == 7:
+            inicio = input("Nodo inicial->")
+            fim = input("Nodo final->")
+            print(graph.procura_BFS(inicio, fim))
             l = input("prima enter para continuar")
         else:
             print("you didn't add anything")

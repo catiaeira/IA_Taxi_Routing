@@ -128,6 +128,28 @@ class Graph:
         plt.show()
 
 
+    ################################################################################
+    # Procura DFS
+    ################################################################################
+
+    # recursive DFS, returns (path, cost) --> ([string], int)
+    def procura_DFS(self, start, end, path=[], visited=set()):
+        path.append(start)
+        visited.add(start)
+
+        if start == end:
+            cost = self.calculate_cost(path)
+            return (path, cost)
+
+        for (adjacent, weight) in self.adjacency_lists_dict[start]:
+            if adjacent not in visited:
+                result = self.procura_DFS(adjacent, end, path, visited)
+                if result is not None:
+                    return result
+        path.pop()
+        return None
+
+
     ##########################################
     #    A* - To Do
     ##########################################
