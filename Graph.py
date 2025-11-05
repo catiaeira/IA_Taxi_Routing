@@ -8,12 +8,14 @@ import matplotlib.pyplot as plt
 
 from Node import Node
 
+from Car import Car, ElectricCar, FuelCar
 
 class Graph:
     def __init__(self):
         self.node_dict: dict[str, Node] = {}  
         self.adjacency_lists_dict: dict[str, list[tuple[str, int]]] = {}  
-        self.heuristic_dict: dict[str, int] = {}  
+        self.heuristic_dict: dict[str, int] = {}
+        self.type: str = ""
 
     @override
     def __str__(self) -> str:
@@ -35,8 +37,8 @@ class Graph:
         return edge
 
 
-    def add_node(self, name: str, estimate: int) -> None:
-        node = Node(name)
+    def add_node(self, name: str, estimate: int, typeNode : str) -> None:
+        node = Node(name, typeNode)
         self.node_dict[name] = node
         self.adjacency_lists_dict[name] = []
         self.heuristic_dict[name] = estimate
@@ -155,7 +157,7 @@ class Graph:
     ##########################################
 
     # MUST BE UPDATED
-    def procura_aStar(self, start, end):
+    def procura_aStar(self, start, end, car: Car):
         queue = set()
         queue.add(start)
         visited = set()
@@ -163,47 +165,63 @@ class Graph:
         cost = {}
         cost[start] = 0
 
-        parents = {}
-        parents[start] = start
+        remaining_fuel = {}
+        remaining_fuel[start] = car.energy_level
+
+        path = {}
+        path[start] = [start]
 
         while len(queue) > 0:
-            n = None
+            chosen_node = None
 
-            for v in queue:
-                if n is None or cost[v] + self.get_heuristic(v) < cost[n] + self.get_heuristic(n):
-                    n = v
+            for queue_node in queue:
+                if chosen_node is None or cost[queue_node] + self.get_heuristic(queue_node) < cost[chosen_node] + self.get_heuristic(chosen_node):
+                    chosen_node = queue_node
             
-            if n == end:
+            if chosen_node == end:
                 break
             
-            for m, weight in self.get_neighbours(n):
-                if m not in queue and m not in visited:
-                    queue.add(m)
-                    parents[m] = n
-                    cost[m] = cost[n] + weight
+            cost_chosen_node = cost[chosen_node]
+          
+            for neighbor, weight in self.get_neighbours(chosen_node):
 
-                elif cost[m] > cost[n] + weight:
-                    cost[m] = cost[n] + weight
-                    parents[m] = n
+                fuel_consumed = car.consumption(weight)
+                remaining_fuel_if_move = remaining_fuel[chosen_node] - fuel_consumed
+             
+                if remaining_fuel_if_move < 0:
+                    continue  # dont consider path if we cant make it
 
-                    if m in visited:
-                        visited.remove(m)
-                        queue.add(m)
+                if (self.get_node_by_name(neighbor).type == car.charges_in()):
+                    remaining_fuel_if_move = 100
 
-            queue.remove(n)
-            visited.add(n)
+                new_path = path[chosen_node].copy()
+                new_path.append(neighbor)
 
-        if parents.get(end) is not None:
-            path = []
+                if neighbor not in queue and neighbor not in visited:
+                    queue.add(neighbor)
+                    
+                    cost[neighbor] = cost_chosen_node + weight
 
-            while parents[n] != n:
-                path.insert(0, n)
-                n = parents[n]
+                    path[neighbor] = new_path
+                    remaining_fuel[neighbor] = remaining_fuel_if_move
 
-            path.insert(0, start)
+                # reconsider a visited node if the cost or fuel is now better 
+                elif cost[neighbor] > cost_chosen_node + weight or remaining_fuel[neighbor] <= remaining_fuel_if_move:
+                    cost[neighbor] = cost_chosen_node + weight
+                    
+                    remaining_fuel[neighbor] = remaining_fuel_if_move
+                    path[neighbor] = new_path
 
-            return (path, self.calculate_cost(path))
+                    if neighbor in visited:
+                        visited.remove(neighbor)
+                        queue.add(neighbor)
 
+            queue.remove(chosen_node)
+            visited.add(chosen_node)
+
+        if end in path:
+            return (path[end], self.calculate_cost(path[end]))
+            
         print('Path does not exist!')
         return None
 

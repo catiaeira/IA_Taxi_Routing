@@ -1,9 +1,12 @@
 from Graph import Graph
 from parse_json_graph import parse_graph
+from Car import ElectricCar
 
 def main():
     graph = parse_graph()
     saida = -1
+    eCar = ElectricCar(4)
+
     while saida != 0:
         print("1-Imprimir Grafo")
         print("2-Desenhar Grafo")
@@ -25,11 +28,15 @@ def main():
         elif saida == 3:
             print(graph.adjacency_lists_dict.keys())
             l = input("prima enter para continuar")
+
         elif saida == 4:
             inicio = input("Nodo inicial->")
             fim = input("Nodo final->")
-            print(graph.procura_aStar(inicio, fim))
+
+            eCar.assign_location(inicio)
+            print(graph.procura_aStar(inicio, fim, eCar))
             l = input("prima enter para continuar")
+
         elif saida == 5:
             inicio = input("Nodo inicial->")
             fim = input("Nodo final->")
