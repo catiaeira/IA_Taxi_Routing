@@ -6,7 +6,7 @@ from queue import Queue
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from Node import Node
+from .Node import Node
 
 from Car import Car, ElectricCar, FuelCar
 
