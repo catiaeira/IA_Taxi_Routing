@@ -1,0 +1,35 @@
+Cada carro deverá contar quantas viagens fez desde o início da simulação, além de acumular os
+kilómetros percorridos. Desta forma, é possível calcular a média da distância em cada viagem,
+tornando possível fazer uma melhor aproximação no momento de determinar se o carro deve ser
+carregado ou não. Para inicializar estes parámetros, podemos dar uma aproximação inicial à mão
+com base nos possíveis trajetos do nosso mapa; como o carro começa com a bateria cheia, ainda
+vai fazer algumas viagens até precisar de reabastecer, pelo que já terá uma aproximação
+minimamente indicativa.
+
+
+
+Flow:
+
+Começa com bateria ao máximo
+
+Aparece um cliente
+
+Verifica se a distância da posição atual à origem + da origem ao destino pode ser feita com a
+capacidade atual e se tem espaço para todas as pessoas:
+  Se sim: vai recolher o(s) cliente(s) e faz a viagem
+  Se não: ignora o pedido e este será atendido por outro taxi
+
+Ao acabar a viagem, atualiza as estatísticas (contador de viagens, kilómetros totais e capacidade
+atual) e compara a sua capacidade atual com 2 vezes a média de kms por viagem (2x para dar uma
+margem, de maneira a que o carro não fique sem bateria mesmo ao largar o cliente e depois não
+consiga ir até um posto de carregamento)
+  Se for maior: o taxi continua disponível para fazer serviços (talvez deslocar-se para uma zona
+				de grande afluência de clientes, segundo um possível recomendador global)
+  Se for menor: tem que procurar o posto de carregamento mais próximo (e também aqui, poderá
+				deslocar-se para uma zona mais movimentada)
+
+
+
+Fazer a contagem de viagens e kilómetros em cada carro ou de forma global? Se fizéssemos global,
+todos os carros contribuiriam para a média e consultariam esta média global para decidir se vão
+abastecer ou não.
