@@ -199,7 +199,7 @@ class Graph:
     ##########################################
 
     # MUST BE UPDATED
-    def procura_aStar(self, start, end, car: Car):
+    def procura_aStar(self, start, end, car: Car, can_refuel : bool = False) -> tuple[list[str], int, float]:
         queue = set()
         queue.add(start)
         visited = set()
@@ -233,9 +233,10 @@ class Graph:
                 if remaining_fuel_if_move < 0:
                     continue  # dont consider path if we cant make it
 
-                node_type = self.get_node_by_name(neighbor).type
-                if (node_type == car.charges_in() or node_type == Energy_Station.CHARGING_AND_FUEL_STATION):
-                    remaining_fuel_if_move = 100            # currently refueling even if it doesnt *need* to
+                if can_refuel:
+                    node_type = self.get_node_by_name(neighbor).type
+                    if (node_type == car.charges_in() or node_type == Energy_Station.CHARGING_AND_FUEL_STATION):
+                        remaining_fuel_if_move = 100            # currently refueling even if it doesnt *need* to
 
                 new_path = path[chosen_node].copy()
                 new_path.append(neighbor)
@@ -263,7 +264,7 @@ class Graph:
             visited.add(chosen_node)
 
         if end in path:
-            return (path[end], self.calculate_cost(path[end]))
+            return (path[end], self.calculate_cost(path[end]), remaining_fuel[end])
             
         print('Path does not exist!')
         return None
