@@ -3,92 +3,92 @@
 	{
 		"name": "Elvas",
 		"heuristic": 270,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Borba",
 		"heuristic": 250,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Estremoz",
 		"heuristic": 145,
-		"type":"fuel station"
+		"type":"FUEL_STATION"
 	},
 	{
 		"name": "Evora",
 		"heuristic": 95,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Montemor",
 		"heuristic": 70,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Vendas Novas",
 		"heuristic": 45,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Arraiolos",
 		"heuristic": 220,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Alcacer",
 		"heuristic": 140,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Palmela",
 		"heuristic": 85,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Almada",
 		"heuristic": 25,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Alandroal",
 		"heuristic": 180,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Redondo",
 		"heuristic": 170,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Monsaraz",
 		"heuristic": 120,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Barreiro",
 		"heuristic": 30,
-		"type":"charging station"
+		"type":"CHARGING_STATION"
 	},
 	{
 		"name": "Baixa da banheira",
 		"heuristic": 33,
-		"type":""
+		"type":"CHARGING_AND_FUEL_STATION"
 	},
 	{
 		"name": "Moita",
 		"heuristic": 35,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Alcochete",
 		"heuristic": 26,
-		"type":""
+		"type":"NONE"
 	},
 	{
 		"name": "Lisboa",
 		"heuristic": 0,
-		"type":"fuel station"
+		"type":"FUEL_STATION"
 	}
 	],
 

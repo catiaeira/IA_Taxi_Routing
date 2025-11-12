@@ -1,10 +1,10 @@
 from parser.parse_json_graph import parse_graph
-from Car import ElectricCar
+from car.Car import ElectricCar
 
 def main():
     graph = parse_graph()
     user_input = -1
-    eCar = ElectricCar(4)
+    eCar = ElectricCar()
 
     while user_input != 0:
         print("\n1 - Print graph")
@@ -37,24 +37,24 @@ def main():
                 print(graph.str_edges())
 
             case 5:
-                origin = input("Origin node -> ")
-                destiny = input("Destiny node -> ")
+                origin = input("Origin node -> ").lower().capitalize()
+                destiny = input("Destiny node -> ").lower().capitalize()
                 print(graph.procura_DFS(origin, destiny))
 
             case 6:
-                origin = input("Origin node -> ")
-                destiny = input("Destiny node -> ")
+                origin = input("Origin node -> ").lower().capitalize()
+                destiny = input("Destiny node -> ").lower().capitalize()
                 print(graph.BFS_search(origin, destiny))
 
             case 7:
-                origin = input("Origin node -> ")
-                destiny = input("Destiny node -> ")
+                origin = input("Origin node -> ").lower().capitalize()
+                destiny = input("Destiny node -> ").lower().capitalize()
                 eCar.assign_location(origin)
                 print(graph.procura_aStar(origin, destiny, eCar))
 
             case 8:
-                origin = input("Origin node -> ")
-                destiny = input("Destiny node -> ")
+                origin = input("Origin node -> ").lower().capitalize()
+                destiny = input("Destiny node -> ").lower().capitalize()
                 print(graph.greedy(origin, destiny))
 
             case _:

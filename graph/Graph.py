@@ -8,14 +8,15 @@ import matplotlib.pyplot as plt
 
 from .Node import Node
 
-from Car import Car, ElectricCar, FuelCar
+from car.Car import Car, ElectricCar, FuelCar
+from car.Energy_Station import Energy_Station
 
 class Graph:
     def __init__(self):
         self.node_dict: dict[str, Node] = {}  
         self.adjacency_lists_dict: dict[str, list[tuple[str, int, int]]] = {}  
         self.heuristic_dict: dict[str, int] = {}
-        self.type: str = ""
+        self.type: Energy_Station
 
     @override
     def __str__(self) -> str:
@@ -37,7 +38,7 @@ class Graph:
         return edge
 
 
-    def add_node(self, name: str, estimate: int, typeNode : str) -> None:
+    def add_node(self, name: str, estimate: int, typeNode : Energy_Station) -> None:
         node = Node(name, typeNode)
         self.node_dict[name] = node
         self.adjacency_lists_dict[name] = []
@@ -223,8 +224,8 @@ class Graph:
                 break
             
             cost_chosen_node = cost[chosen_node]
-          
-            for neighbor, weight in self.get_neighbours(chosen_node):
+
+            for neighbor, weight, _ in self.get_neighbours(chosen_node):
 
                 fuel_consumed = car.consumption(weight)
                 remaining_fuel_if_move = remaining_fuel[chosen_node] - fuel_consumed
@@ -232,8 +233,9 @@ class Graph:
                 if remaining_fuel_if_move < 0:
                     continue  # dont consider path if we cant make it
 
-                if (self.get_node_by_name(neighbor).type == car.charges_in()):
-                    remaining_fuel_if_move = 100
+                node_type = self.get_node_by_name(neighbor).type
+                if (node_type == car.charges_in() or node_type == Energy_Station.CHARGING_AND_FUEL_STATION):
+                    remaining_fuel_if_move = 100            # currently refueling even if it doesnt *need* to
 
                 new_path = path[chosen_node].copy()
                 new_path.append(neighbor)
