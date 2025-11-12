@@ -50,7 +50,7 @@ def main():
                 origin = input("Origin node -> ")
                 destiny = input("Destiny node -> ")
                 eCar.assign_location(origin)
-                print(graph.procura_aStar(origin, destiny, eCar))
+                print(graph.a_star_search(origin, destiny))
 
             case 8:
                 origin = input("Origin node -> ")

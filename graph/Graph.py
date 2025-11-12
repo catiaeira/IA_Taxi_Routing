@@ -1,13 +1,13 @@
 from typing_extensions import override
 
 import math
-from queue import Queue
+from queue import Queue, PriorityQueue
 
 import networkx as nx
 import matplotlib.pyplot as plt
 
 from .Node import Node
-
+from .Color import Color
 from Car import Car, ElectricCar, FuelCar
 
 class Graph:
@@ -193,9 +193,64 @@ class Graph:
         return None
 
 
-    ##########################################
-    #    A* - To Do
-    ##########################################
+    # for now it's a dijkstra
+    def a_star_search(self, origin: str, destiny: str) -> tuple[list[str], int|float] | None:
+        # the entries are of the form (priority_number, data)
+        pqueue: PriorityQueue[tuple[int,str]] = PriorityQueue()
+        pqueue.put((0, origin))
+
+        # instead of putting WHITE in all nodes, if get() returns None then it's the same as WHITE (not visited)
+        colors: dict[str,Color] = dict()
+        colors[origin] = Color.GREY
+
+        costs: dict[str,int] = dict()
+        costs[origin] = 0
+
+        parents: dict[str, str] = dict()
+        parents[origin] = origin
+
+        best_node = ""
+
+        while not pqueue.empty():
+
+            # get() will return the item with the lowest priority_number
+            # in our case, the lowest cost (most attractive node)
+            bn_cost, best_node = pqueue.get()
+            colors[best_node] = Color.BLACK
+
+            if best_node == destiny:
+                break
+
+            for node, dist, speed in self.get_neighbours(best_node):
+                if colors.get(node) is None:
+                    node_cost = bn_cost + dist
+                    pqueue.put((node_cost, node))
+                    colors[node] = Color.GREY
+                    parents[node] = best_node
+                    costs[node] = node_cost
+                
+                elif colors[node] == Color.GREY and bn_cost + dist < costs[node]:
+                    parents[node] = best_node
+                    costs[node] = costs[best_node] + dist
+
+        n = best_node
+        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destiny
+        if parents.get(destiny) is not None:
+            path: list[str] = list()
+
+            while parents[n] != n:
+                path.insert(0, n)
+                n = parents[n]
+
+            path.insert(0, origin)
+
+            return (path, self.calculate_cost(path))
+        
+        else:
+            print(f"Path not found for origin {origin} and destiny {destiny}")
+            return None
+
+
 
     # MUST BE UPDATED
     def procura_aStar(self, start, end, car: Car):
