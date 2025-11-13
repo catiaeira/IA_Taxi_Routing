@@ -28,7 +28,7 @@ def main():
                 print(graph.adjacency_lists_dict)
 
             case 2:
-                graph.desenha()
+                graph.draw()
 
             case 3:
                 print(graph.adjacency_lists_dict.keys())

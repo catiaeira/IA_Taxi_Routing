@@ -2,8 +2,8 @@ from graph.Graph import Graph
 import json
 
 def parse_graph() -> Graph:
-    #file_path = input("File path: ")
-    file_path = "parser/graph.json"
+    file_path = input("File path: ")
+    #file_path = "parser/test.json"
     
     with open(file_path, "r") as graph_file:
         json_graph = json.load(graph_file)

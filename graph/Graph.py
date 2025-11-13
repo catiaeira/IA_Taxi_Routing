@@ -7,7 +7,6 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 from .Node import Node
-from .Color import Color
 from Car import Car, ElectricCar, FuelCar
 
 class Graph:
@@ -101,9 +100,41 @@ class Graph:
     def get_neighbours(self, node: str) -> list[tuple[str, int, int]]:
         return self.adjacency_lists_dict[node]
 
-    ###########################
-    # desenha grafo modo grafico
-    #########################
+
+    # draws a directed graph
+    def draw(self):
+        # create directed graph
+        g = nx.DiGraph()
+
+        # add nodes and directed edges
+        for nodo in self.node_dict.values():
+            n = nodo.getName()
+            g.add_node(n)
+            for (adjacent, weight, _) in self.adjacency_lists_dict[n]:
+                g.add_edge(n, adjacent, weight=weight)
+
+        # layout and drawing
+        pos = nx.spring_layout(g, seed=42)  # deterministic layout
+        nx.draw_networkx_nodes(g, pos, node_size=700)
+        nx.draw_networkx_labels(g, pos, font_weight='bold')
+
+        # draw directed edges with arrows
+        nx.draw_networkx_edges(
+            g, pos,
+            arrows=True,
+            arrowstyle='-|>',
+            arrowsize=20,
+            connectionstyle='arc3,rad=0.1'  # slight curve for bidirectional edges
+        )
+
+        # show edge labels
+        labels = nx.get_edge_attributes(g, 'weight')
+        nx.draw_networkx_edge_labels(g, pos, edge_labels=labels)
+
+        plt.axis('off')
+        plt.tight_layout()
+        plt.show()
+
 
     def desenha(self):
         ##criar lista de vertices
@@ -193,16 +224,17 @@ class Graph:
         return None
 
 
-    # for now it's a dijkstra
+    @staticmethod
+    def calculate_time(dist: int, speed: int) -> int:
+        return int((dist/speed) * 60)
+
+    # for now it's just a dijkstra, still need to incorporate heuristics
     def a_star_search(self, origin: str, destiny: str) -> tuple[list[str], int|float] | None:
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[int,str]] = PriorityQueue()
         pqueue.put((0, origin))
 
-        # instead of putting WHITE in all nodes, if get() returns None then it's the same as WHITE (not visited)
-        colors: dict[str,Color] = dict()
-        colors[origin] = Color.GREY
-
+        # the cost is in minutes (calculated based on distance (kms) and speed (kms/h))
         costs: dict[str,int] = dict()
         costs[origin] = 0
 
@@ -216,22 +248,22 @@ class Graph:
             # get() will return the item with the lowest priority_number
             # in our case, the lowest cost (most attractive node)
             bn_cost, best_node = pqueue.get()
-            colors[best_node] = Color.BLACK
+
+            # skip stale entries
+            if bn_cost > costs[best_node]:
+                continue
 
             if best_node == destiny:
                 break
 
             for node, dist, speed in self.get_neighbours(best_node):
-                if colors.get(node) is None:
-                    node_cost = bn_cost + dist
-                    pqueue.put((node_cost, node))
-                    colors[node] = Color.GREY
+                travel_time = Graph.calculate_time(dist, speed)
+                new_cost = costs[best_node] + travel_time
+
+                if node not in costs or new_cost < costs[node]:
+                    costs[node] = new_cost
                     parents[node] = best_node
-                    costs[node] = node_cost
-                
-                elif colors[node] == Color.GREY and bn_cost + dist < costs[node]:
-                    parents[node] = best_node
-                    costs[node] = costs[best_node] + dist
+                    pqueue.put((new_cost, node))
 
         n = best_node
         # if it's None, it means we never entered the cicle's break condition, so we didn't find our destiny

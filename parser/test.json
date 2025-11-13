@@ -1,0 +1,34 @@
+{
+  "nodes": [
+    {"name": "A", "heuristic": 0, "type": ""},
+    {"name": "B", "heuristic": 0, "type": ""},
+    {"name": "C", "heuristic": 0, "type": ""},
+    {"name": "D", "heuristic": 0, "type": ""},
+    {"name": "E", "heuristic": 0, "type": ""},
+    {"name": "F", "heuristic": 0, "type": ""},
+    {"name": "G", "heuristic": 0, "type": ""},
+    {"name": "H", "heuristic": 0, "type": ""},
+    {"name": "I", "heuristic": 0, "type": ""},
+    {"name": "J", "heuristic": 0, "type": ""},
+    {"name": "Z", "heuristic": 0, "type": ""}
+  ],
+
+  "edges": [
+    {"origin": "A", "destiny": "B", "dist": 2, "speed": 50},
+    {"origin": "B", "destiny": "C", "dist": 2, "speed": 50},
+    {"origin": "C", "destiny": "D", "dist": 2, "speed": 50},
+    {"origin": "A", "destiny": "E", "dist": 1, "speed": 50},
+    {"origin": "E", "destiny": "F", "dist": 10, "speed": 50},
+    {"origin": "F", "destiny": "D", "dist": 1, "speed": 50},
+    {"origin": "B", "destiny": "E", "dist": 1, "speed": 50},
+    {"origin": "D", "destiny": "G", "dist": 3, "speed": 50},
+    {"origin": "G", "destiny": "H", "dist": 2, "speed": 50},
+    {"origin": "H", "destiny": "I", "dist": 1, "speed": 50},
+    {"origin": "I", "destiny": "J", "dist": 1, "speed": 50},
+    {"origin": "J", "destiny": "H", "dist": 1, "speed": 50},
+    {"origin": "C", "destiny": "B", "dist": 2, "speed": 50},
+    {"origin": "F", "destiny": "C", "dist": 5, "speed": 50},
+    {"origin": "H", "destiny": "G", "dist": 2, "speed": 50},
+    {"origin": "Z", "destiny": "Z", "dist": 0, "speed": 50}
+  ]
+}
