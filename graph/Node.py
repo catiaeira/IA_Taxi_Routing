@@ -1,5 +1,5 @@
 from typing_extensions import override
-from car.Energy_Station import Energy_Station
+from .Energy_Station import Energy_Station
 
 class Node:
     def __init__(self, name: str, type_node: Energy_Station) -> None:
@@ -12,7 +12,7 @@ class Node:
 
     @override
     def __repr__(self) -> str:
-        return "node " + self.name + self.type.name
+        return "node: " + self.name + " | type: " + self.type.name
 
     def getName(self) -> str:
         return self.name

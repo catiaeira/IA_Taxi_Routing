@@ -7,16 +7,15 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 from .Node import Node
+from .Energy_Station import Energy_Station
 
 from car.Car import Car, ElectricCar, FuelCar
-from car.Energy_Station import Energy_Station
 
 class Graph:
     def __init__(self):
         self.node_dict: dict[str, Node] = {}  
         self.adjacency_lists_dict: dict[str, list[tuple[str, int, int]]] = {}  
         self.heuristic_dict: dict[str, int] = {}
-        self.type: Energy_Station
 
     @override
     def __str__(self) -> str:
@@ -33,13 +32,13 @@ class Graph:
     def str_edges(self) -> str:
         edge: str = ""
         for node in self.node_dict.keys():
-            for (node2, cost, speed) in self.adjacency_lists_dict[node]:
-                edge = edge + node + " -> " + node2 + " | cost: " + str(cost) + "\n"
+            for (node2, dist, speed) in self.adjacency_lists_dict[node]:
+                edge = edge + node + " -> " + node2 + " | dist: " + str(dist) + " | spped : " + str(speed) + "\n"
         return edge
 
 
-    def add_node(self, name: str, estimate: int, typeNode : Energy_Station) -> None:
-        node = Node(name, typeNode)
+    def add_node(self, name: str, estimate: int, type_node: Energy_Station) -> None:
+        node = Node(name, type_node)
         self.node_dict[name] = node
         self.adjacency_lists_dict[name] = []
         self.heuristic_dict[name] = estimate
