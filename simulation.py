@@ -1,13 +1,15 @@
+from Car_Controller import Car_Controller
+
 def run(dynamic_traffic: bool, dynamic_car: bool, dynamic_client: bool): # the "main" loop
     graph = parse_graph()
-    car_controller # = car_controller(dynamic_car)
+    car_controller = Car_Controller(dynamic_car)
     client_controller # = client_controller(dynamic_client)
 
     currTime = 0
     while (True):
         # print (randomEvents(graph, car_controller, client_controller))
 
-        option = menu()
+        option = main_menu()
         if option == -1:
             break 
 
@@ -17,7 +19,7 @@ def run(dynamic_traffic: bool, dynamic_car: bool, dynamic_client: bool): # the "
         currTime += 1
 
 
-def menu():
+def main_menu():
     while user_input != 0:
         print("\n1 - Change cars")
         print("2 - Change clients")

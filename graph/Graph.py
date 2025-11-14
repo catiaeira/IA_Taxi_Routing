@@ -16,7 +16,6 @@ class Graph:
         self.node_dict: dict[str, Node] = {}  
         self.adjacency_lists_dict: dict[str, list[tuple[str, int, int]]] = {}  
         self.heuristic_dict: dict[str, int] = {}
-        self.type: Energy_Station
 
     @override
     def __str__(self) -> str:
@@ -85,8 +84,19 @@ class Graph:
         for (node, cost, _) in adj_list:
             if node == node2:
                 total_cost = cost
+                break
 
         return total_cost
+
+    def get_arc_speed (self, node1: str, node2: str) -> int:
+        total_speed = math.inf
+        adj_list = self.adjacency_lists_dict[node1]
+        for (node, _, speed) in adj_list:
+            if node == node2:
+                total_speed = speed
+                break
+
+        return total_speed
 
 
     def calculate_cost(self, path: list[str]) -> int|float:
