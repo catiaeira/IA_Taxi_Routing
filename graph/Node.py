@@ -1,9 +1,11 @@
 from typing_extensions import override
 
 class Node:
-    def __init__(self, name: str, type_node: str) -> None:
+    def __init__(self, name: str, type_node: str, latitude: float, longitude: float) -> None:
         self.name: str = str(name)
         self.type: str = str(type_node)
+        self.latitude: float = float(latitude)
+        self.longitude: float = float(longitude)
 
     @override
     def __str__(self) -> str:
@@ -15,6 +17,12 @@ class Node:
 
     def getName(self) -> str:
         return self.name
+    
+    def getLatitude(self) -> float:
+        return self.latitude
+    
+    def getLongitude(self) -> float:
+        return self.longitude
 
     @override
     def __eq__(self, other: object) -> bool:
@@ -22,7 +30,7 @@ class Node:
         if not isinstance(other, Node):
             r = False
         else:
-            r = self.name == other.name and self.type == other.type
+            r = self.name == other.name and self.type == other.type and self.latitude == other.latitude and self.longitude == other.longitude
         return r
 
     @override
