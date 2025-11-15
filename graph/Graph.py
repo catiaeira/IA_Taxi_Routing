@@ -9,13 +9,13 @@ import matplotlib.pyplot as plt
 from .Node import Node
 from .Energy_Station import Energy_Station
 
-from car.Car import Car, ElectricCar, FuelCar
+from ca.Car import Car, ElectricCar, FuelCar
+from utils import dist
 
 class Graph:
     def __init__(self):
         self.node_dict: dict[str, Node] = {}  
         self.adjacency_lists_dict: dict[str, list[tuple[str, int, int]]] = {}  
-        self.heuristic_dict: dict[str, int] = {}
 
     @override
     def __str__(self) -> str:
@@ -37,27 +37,12 @@ class Graph:
         return edge
 
 
-    def add_node(self, name: str, estimate: int, type_node: Energy_Station) -> None:
-        node = Node(name, type_node)
+    def add_node(self, name: str, latitude: float, longitude: float, type_node: Energy_Station) -> None:
+        node = Node(name, type_node, latitude, longitude)
         self.node_dict[name] = node
         self.adjacency_lists_dict[name] = []
-        self.heuristic_dict[name] = estimate
 
-
-    def add_heuristic(self, node: str, estimate: int) -> None:
-        if node in self.heuristic_dict.keys():
-            self.heuristic_dict[node] = estimate
-        else:
-            raise KeyError("add_heuristic: node doesn't exist")
-
-
-    def get_heuristic(self, node: str) -> int:
-        if node in self.heuristic_dict.keys():
-            return self.heuristic_dict[node]
-        else:
-            raise KeyError("get_heuristic: node doesn't exist")
-
-
+        
     def add_edge(self, origin: str, destiny: str, dist: int, speed: int) -> None:
         n1 = self.get_node_by_name(origin)
         n2 = self.get_node_by_name(destiny)
@@ -97,6 +82,11 @@ class Graph:
             i += 1
         return cost
 
+    def calculate_heuristic(self, node1: str, goal: str) -> float:
+        origin = self.get_node_by_name(node1)
+        destination = self.get_node_by_name(goal)
+
+        return dist(origin.getLatitude(), origin.getLongitude(), destination.getLatitude(), destination.getLongitude())
 
     def get_neighbours(self, node: str) -> list[tuple[str, int, int]]:
         return self.adjacency_lists_dict[node]
@@ -216,7 +206,7 @@ class Graph:
             chosen_node = None
 
             for queue_node in queue:
-                if chosen_node is None or cost[queue_node] + self.get_heuristic(queue_node) < cost[chosen_node] + self.get_heuristic(chosen_node):
+                if chosen_node is None or cost[queue_node] + self.calculate_heuristic(queue_node, end) < cost[chosen_node] + self.calculate_heuristic(chosen_node, end):
                     chosen_node = queue_node
             
             if chosen_node == end:
@@ -287,7 +277,7 @@ class Graph:
             n = None
 
             for v in queue:
-                if n == None or self.heuristic_dict[v] < self.heuristic_dict[n]:
+                if n == None or self.calculate_heuristic(v, end) < self.calculate_heuristic(n, end):
                     n = v
 
             if n == end:
