@@ -84,7 +84,7 @@ class FuelCar (Car):
         self.consumption_per_km = 0.1 # 1000 km
 
     def CO2_emissions (self):
-        return 100 * kms_travelled
+        return 100 * self.kms_travelled
 
     def charges_in (self) -> Energy_Station:
         return Energy_Station.FUEL_STATION

@@ -7,9 +7,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 from .Node import Node
-from .Energy_Station import Energy_Station
-
-from ca.Car import Car, ElectricCar, FuelCar
+from Energy_Station import Energy_Station
+from car.Car import Car, ElectricCar, FuelCar
 from utils import dist
 
 class Graph:

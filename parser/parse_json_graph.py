@@ -1,5 +1,5 @@
 from graph.Graph import Graph
-from car.Energy_Station import Energy_Station
+from graph.Energy_Station import Energy_Station
 import json
 
 def parse_graph() -> Graph:

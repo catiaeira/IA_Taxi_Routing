@@ -1,5 +1,5 @@
 from typing_extensions import override
-from .Energy_Station import Energy_Station
+from Energy_Station import Energy_Station
 
 class Node:
     def __init__(self, name: str, type_node: Energy_Station, latitude: float, longitude: float) -> None:
