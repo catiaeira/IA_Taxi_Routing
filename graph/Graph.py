@@ -99,7 +99,10 @@ class Graph:
         return cost
 
     def calculate_heuristic(self, node1: str, goal: str) -> float:
-        return dist(self.get_node_by_name(node1), self.get_node_by_name(goal))
+        origin = self.get_node_by_name(node1)
+        destination = self.get_node_by_name(goal)
+
+        return dist(origin.getLatitude(), origin.getLongitude(), destination.getLatitude(), destination.getLongitude())
 
     def get_neighbours(self, node: str) -> list[tuple[str, int, int]]:
         return self.adjacency_lists_dict[node]
