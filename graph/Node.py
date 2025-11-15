@@ -1,9 +1,10 @@
 from typing_extensions import override
+from .Energy_Station import Energy_Station
 
 class Node:
-    def __init__(self, name: str, type_node: str, latitude: float, longitude: float) -> None:
+    def __init__(self, name: str, type_node: Energy_Station, latitude: float, longitude: float) -> None:
         self.name: str = str(name)
-        self.type: str = str(type_node)
+        self.type: Energy_Station = type_node
         self.latitude: float = float(latitude)
         self.longitude: float = float(longitude)
 
@@ -13,7 +14,7 @@ class Node:
 
     @override
     def __repr__(self) -> str:
-        return "node " + self.name + self.type
+        return "node: " + self.name + " | type: " + self.type.name
 
     def getName(self) -> str:
         return self.name
