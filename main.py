@@ -48,16 +48,17 @@ def main():
     eCar = ElectricCar()
 
     while user_input != 0:
-        print("\n1 - Print graph")
-        print("2 - Draw graph")
-        print("3 - Print nodes")
-        print("4 - Print edges")
-        print("5 - DFS")
-        print("6 - BFS")
-        print("7 - A*")
-        print("8 - Greedy")
-        print("9 - Find station (Dijkstra)")
-        print("0 - Quit\n")
+        print("\n1  - Print graph")
+        print("2  - Draw graph")
+        print("3  - Print nodes")
+        print("4  - Print edges")
+        print("5  - DFS")
+        print("6  - BFS")
+        print("7  - Dijkstra")
+        print("8  - Greedy")
+        print("9  - A*")
+        print("10 - Find closest station (Dijkstra)")
+        print("0  - Quit\n")
 
         user_input = int(input("Enter your option -> "))
         
@@ -91,7 +92,6 @@ def main():
             case 7:
                 origin = input("Origin node -> ").lower().capitalize()
                 destiny = input("Destiny node -> ").lower().capitalize()
-                eCar.assign_location(origin)
                 print(graph.dijkstra_search(origin, destiny))
 
             case 8:

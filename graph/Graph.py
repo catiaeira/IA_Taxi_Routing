@@ -248,7 +248,8 @@ class Graph:
 
             # stop if the node has the same type as the requested one
             # if the node is CHARGING_AND_FUEL_STATION it satisfies both types, so we can also stop
-            if self.get_node_by_name(best_node).getType() == station_type or station_type == Energy_Station.CHARGING_AND_FUEL_STATION:
+            bn_type = self.get_node_by_name(best_node).getType()
+            if bn_type == station_type or bn_type == Energy_Station.CHARGING_AND_FUEL_STATION:
                 station = best_node
                 break
 
