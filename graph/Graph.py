@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from .Node import Node
 from graph.Energy_Station import Energy_Station
 from car.Car import Car, ElectricCar, FuelCar
-from utils import dist
+import utils
 
 class Graph:
     def __init__(self):
@@ -81,11 +81,11 @@ class Graph:
             i += 1
         return cost
 
-    def calculate_heuristic(self, node1: str, goal: str) -> float:
+    def calculate_heuristic(self, node1: str, node2: str) -> float:
         origin = self.get_node_by_name(node1)
-        destination = self.get_node_by_name(goal)
+        destination = self.get_node_by_name(node2)
 
-        return dist(origin.getLatitude(), origin.getLongitude(), destination.getLatitude(), destination.getLongitude())
+        return utils.dist(origin.getLatitude(), origin.getLongitude(), destination.getLatitude(), destination.getLongitude())
 
     def get_neighbours(self, node: str) -> list[tuple[str, int, int]]:
         return self.adjacency_lists_dict[node]
@@ -153,11 +153,9 @@ class Graph:
         queue: Queue[str] = Queue()
         queue.put(origin)
 
-        parents: dict[str, str] = dict()
-        parents[origin] = origin
+        parents: dict[str, str] = {origin: origin}
 
-        visited: set[str] = set()
-        visited.add(origin)
+        visited: set[str] = {origin}
 
         while not queue.empty():
 
@@ -214,9 +212,62 @@ class Graph:
         return None
 
 
-    @staticmethod
-    def calculate_time(dist: int, speed: int) -> int:
-        return int((dist/speed) * 60)
+    def find_closest_station(self, origin: str, station_type: Energy_Station):
+        # the entries are of the form (priority_number, data)
+        pqueue: PriorityQueue[tuple[int,str]] = PriorityQueue()
+        pqueue.put((0, origin))
+
+        # the cost is in minutes (calculated based on distance (kms) and speed (kms/h))
+        costs: dict[str,int] = {origin: 0}
+
+        parents: dict[str, str] = {origin: origin}
+
+        best_node = ""
+        station = ""
+
+        while not pqueue.empty():
+
+            # get() will return the item with the lowest priority_number
+            # in our case, the lowest cost (most attractive node)
+            bn_cost, best_node = pqueue.get()
+
+            # skip stale entries
+            if bn_cost > costs[best_node]:
+                continue
+
+            # stop if the node has the same type as the requested one
+            # if the node is CHARGING_AND_FUEL_STATION it satisfies both types, so we can also stop
+            if self.get_node_by_name(best_node).getType() == station_type or station_type == Energy_Station.CHARGING_AND_FUEL_STATION:
+                station = best_node
+                break
+
+            for node, dist, speed in self.get_neighbours(best_node):
+                travel_time = utils.calculate_time(dist, speed)
+                new_cost = costs[best_node] + travel_time
+
+                if node not in costs or new_cost < costs[node]:
+                    costs[node] = new_cost
+                    parents[node] = best_node
+                    pqueue.put((new_cost, node))
+
+        n = best_node
+        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destiny
+        if parents.get(station) is not None:
+            path: list[str] = list()
+
+            while parents[n] != n:
+                path.insert(0, n)
+                n = parents[n]
+
+            path.insert(0, origin)
+
+            return (path, self.calculate_cost(path))
+        
+        else:
+            print(f"Couldn't find any station from {origin}")
+            return None
+        
+
 
     # for now it's just a dijkstra, still need to incorporate heuristics
     def a_star_search(self, origin: str, destiny: str) -> tuple[list[str], int|float] | None:
@@ -225,11 +276,9 @@ class Graph:
         pqueue.put((0, origin))
 
         # the cost is in minutes (calculated based on distance (kms) and speed (kms/h))
-        costs: dict[str,int] = dict()
-        costs[origin] = 0
+        costs: dict[str,int] = {origin: 0}
 
-        parents: dict[str, str] = dict()
-        parents[origin] = origin
+        parents: dict[str, str] = {origin: origin}
 
         best_node = ""
 
@@ -247,7 +296,7 @@ class Graph:
                 break
 
             for node, dist, speed in self.get_neighbours(best_node):
-                travel_time = Graph.calculate_time(dist, speed)
+                travel_time = utils.calculate_time(dist, speed)
                 new_cost = costs[best_node] + travel_time
 
                 if node not in costs or new_cost < costs[node]:
@@ -274,7 +323,6 @@ class Graph:
 
 
 
-    # MUST BE UPDATED
     def procura_aStar(self, start, end, car: Car, can_refuel : bool = False) -> tuple[list[str], int, float]:
         queue = set()
         queue.add(start)

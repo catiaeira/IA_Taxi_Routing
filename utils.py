@@ -12,3 +12,8 @@ def dist(latOr: float, longOr: float, latDest: float, longDest: float) -> float:
     distance = 2 * 6371 * math.asin(math.sqrt(math.pow(math.sin((lat2 - lat1)/2), 2) + math.cos(lat1)*math.cos(lat2)*math.pow(math.sin((long2 - long1)/2),2)))
 
     return distance
+
+
+def calculate_time(dist: int, speed: int) -> int:
+    return int((dist/speed) * 60)
+

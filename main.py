@@ -1,3 +1,4 @@
+from graph.Energy_Station import Energy_Station
 from parser.parse_json_graph import parse_graph
 from car.Car import ElectricCar
 from Client import Client
@@ -55,6 +56,7 @@ def main():
         print("6 - BFS")
         print("7 - A*")
         print("8 - Greedy")
+        print("9 - Find station (Dijkstra)")
         print("0 - Quit\n")
 
         user_input = int(input("Enter your option -> "))
@@ -96,6 +98,11 @@ def main():
                 origin = input("Origin node -> ").lower().capitalize()
                 destiny = input("Destiny node -> ").lower().capitalize()
                 print(graph.greedy(origin, destiny))
+
+            case 9:
+                origin = input("Origin node -> ").lower().capitalize()
+                station = input("Station type -> ").upper()
+                print(graph.find_closest_station(origin, Energy_Station.convert_from_str(station)))
 
             case _:
                 print("Enter a valid option")

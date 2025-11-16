@@ -1,5 +1,5 @@
 from typing_extensions import override
-from Energy_Station import Energy_Station
+from graph.Energy_Station import Energy_Station
 
 class Node:
     def __init__(self, name: str, type_node: Energy_Station, latitude: float, longitude: float) -> None:
@@ -18,6 +18,9 @@ class Node:
 
     def getName(self) -> str:
         return self.name
+
+    def getType(self) -> Energy_Station:
+        return self.type
     
     def getLatitude(self) -> float:
         return self.latitude
