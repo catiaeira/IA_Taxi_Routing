@@ -2,93 +2,111 @@
 	"nodes": [
 	{
 		"name": "Elvas",
-		"heuristic": 270,
-		"type":""
+		"latitude": 38.88027880,
+		"longitude": -7.16366370,
+		"type":"NONE"
 	},
 	{
 		"name": "Borba",
-		"heuristic": 250,
-		"type":""
+		"latitude": 38.80611860,
+		"longitude": -7.45562130,
+		"type":"NONE"
 	},
 	{
 		"name": "Estremoz",
-		"heuristic": 145,
-		"type":"fuel station"
+		"latitude": 38.84251230,
+		"longitude": -7.58883780,
+		"type":"FUEL_STATION"
 	},
 	{
 		"name": "Evora",
-		"heuristic": 95,
-		"type":""
+		"latitude": 38.57143100,
+		"longitude": -7.91350200,
+		"type":"NONE"
 	},
 	{
 		"name": "Montemor",
-		"heuristic": 70,
-		"type":""
+		"latitude": 38.64811078,
+		"longitude": -8.21184297,
+		"type":"NONE"
 	},
 	{
 		"name": "Vendas Novas",
-		"heuristic": 45,
-		"type":""
+		"latitude": 38.67689240,
+		"longitude": -8.46335580,
+		"type":"NONE"
 	},
 	{
 		"name": "Arraiolos",
-		"heuristic": 220,
-		"type":""
+		"latitude": 38.76131970,
+		"longitude": -7.91570990,
+		"type":"NONE"
 	},
 	{
 		"name": "Alcacer",
-		"heuristic": 140,
-		"type":""
+		"latitude": 38.42304370,
+		"longitude": -8.57210160,
+		"type":"NONE"
 	},
 	{
 		"name": "Palmela",
-		"heuristic": 85,
-		"type":""
+		"latitude": 38.56944100,
+		"longitude": -8.90169370,
+		"type":"NONE"
 	},
 	{
 		"name": "Almada",
-		"heuristic": 25,
-		"type":""
+		"latitude": 38.68019450,
+		"longitude": -9.15613820,
+		"type":"NONE"
 	},
 	{
 		"name": "Alandroal",
-		"heuristic": 180,
-		"type":""
+		"latitude": 38.70213310,
+		"longitude": -7.40364880,
+		"type":"NONE"
 	},
 	{
 		"name": "Redondo",
-		"heuristic": 170,
-		"type":""
+		"latitude": 38.63714240,
+		"longitude": -7.58973720,
+		"type":"NONE"
 	},
 	{
 		"name": "Monsaraz",
-		"heuristic": 120,
-		"type":""
+		"latitude": 38.45185330,
+		"longitude": -7.38407290,
+		"type":"NONE"
 	},
 	{
 		"name": "Barreiro",
-		"heuristic": 30,
-		"type":"charging station"
+		"latitude": 38.66081490,
+		"longitude": -9.07907240,
+		"type":"CHARGING_STATION"
 	},
 	{
 		"name": "Baixa da banheira",
-		"heuristic": 33,
-		"type":""
+		"latitude": 38.65953240,
+		"longitude": -9.04343130,
+		"type":"CHARGING_AND_FUEL_STATION"
 	},
 	{
 		"name": "Moita",
-		"heuristic": 35,
-		"type":""
+		"latitude": 38.65128600,
+		"longitude": -9.00184240,
+		"type":"NONE"
 	},
 	{
 		"name": "Alcochete",
-		"heuristic": 26,
-		"type":""
+		"latitude": 38.71428310,
+		"longitude": -8.85833090,
+		"type":"NONE"
 	},
 	{
 		"name": "Lisboa",
-		"heuristic": 0,
-		"type":"fuel station"
+		"latitude": 38.72225240,
+		"longitude": -9.13933660,
+		"type":"FUEL_STATION"
 	}
 	],
 
