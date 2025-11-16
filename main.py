@@ -73,7 +73,7 @@ def main():
                 graph.draw()
 
             case 3:
-                print(graph.adjacency_lists_dict.keys())
+                print(graph.str_nodes())
 
             case 4:
                 print(graph.str_edges())
@@ -92,7 +92,7 @@ def main():
                 origin = input("Origin node -> ").lower().capitalize()
                 destiny = input("Destiny node -> ").lower().capitalize()
                 eCar.assign_location(origin)
-                print(graph.a_star_search(origin, destiny))
+                print(graph.dijkstra_search(origin, destiny))
 
             case 8:
                 origin = input("Origin node -> ").lower().capitalize()
@@ -100,6 +100,11 @@ def main():
                 print(graph.greedy(origin, destiny))
 
             case 9:
+                origin = input("Origin node -> ").lower().capitalize()
+                destiny = input("Destiny node -> ").lower().capitalize()
+                
+
+            case 10:
                 origin = input("Origin node -> ").lower().capitalize()
                 station = input("Station type -> ").upper()
                 print(graph.find_closest_station(origin, Energy_Station.convert_from_str(station)))

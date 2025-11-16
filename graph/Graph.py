@@ -24,16 +24,28 @@ class Graph:
         return out
 
 
-    def get_node_by_name(self, name: str) -> Node|None:
-        return self.node_dict.get(name)
+    def get_node_by_name(self, name: str) -> Node:
+        node = self.node_dict.get(name)
+        if node is None:
+            raise KeyError(f"Node {name} doesn't exist")
+        else:
+            return node
 
 
     def str_edges(self) -> str:
         edge: str = ""
         for node in self.node_dict.keys():
             for (node2, dist, speed) in self.adjacency_lists_dict[node]:
-                edge = edge + node + " -> " + node2 + " | dist: " + str(dist) + " | spped : " + str(speed) + "\n"
+                edge = edge + f"{node} -> {node2} | dist: {dist} | speed: {speed}\n"
         return edge
+
+
+    def str_nodes(self) -> str:
+        result: str = ""
+        for name in self.node_dict.keys():
+            node = self.get_node_by_name(name)
+            result = result + f"{name} | ({node.getLatitude()}, {node.getLongitude()}) | {node.getType()}\n"
+        return result
 
 
     def add_node(self, name: str, latitude: float, longitude: float, type_node: Energy_Station) -> None:
@@ -43,15 +55,14 @@ class Graph:
 
         
     def add_edge(self, origin: str, destiny: str, dist: int, speed: int) -> None:
-        n1 = self.get_node_by_name(origin)
-        n2 = self.get_node_by_name(destiny)
+        try:
+            # just to make sure the nodes exist
+            _ = self.get_node_by_name(origin)
+            _ = self.get_node_by_name(destiny)
+        except KeyError:
+            print(f"Couldn't add edge from {origin} to {destiny}")
 
-        if n1 is None:
-            raise KeyError(f"add_edge: {origin} doesn't exist")
-        elif n2 is None:
-            raise KeyError(f"add_edge: {destiny} doesn't exist")
-        else:
-            self.adjacency_lists_dict[origin].append((destiny, dist, speed)) 
+        self.adjacency_lists_dict[origin].append((destiny, dist, speed)) 
 
 
     def get_nodes(self) -> list[Node]:
@@ -269,8 +280,7 @@ class Graph:
         
 
 
-    # for now it's just a dijkstra, still need to incorporate heuristics
-    def a_star_search(self, origin: str, destiny: str) -> tuple[list[str], int|float] | None:
+    def dijkstra_search(self, origin: str, destiny: str) -> tuple[list[str], int|float] | None:
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[int,str]] = PriorityQueue()
         pqueue.put((0, origin))
