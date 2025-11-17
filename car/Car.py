@@ -1,11 +1,13 @@
 from typing_extensions import override
 from car.Energy_Station import Energy_Station
 from Client import Client
+import copy
 
 class Car:
     total_trips_done:int = 0
     total_kms_travelled:int = 0
     total_kms_travelled_w_passengers:int = 0
+    total_trips_done:int = 0
 
     def __init__(self, energy_level : int =100, capacity: int =4):
         self.trips_done: int = 0
@@ -24,22 +26,19 @@ class Car:
     def assign_location (self, curr_node :str):
         self.curr_node = curr_node
 
-    def update_car_after_trip (self, trip: tuple[list[str], int, float], count_for_global_stats : bool, client : Client = None): 
-        nodes_visited = trip[0]
-        total_cost = trip[1]
-        new_fuel = trip[2]
-
+    def update_car_after_trip (self, distance, new_fuel, count_for_global_stats : bool): 
         self.energy_level = new_fuel
         if count_for_global_stats:
-            Car.total_kms_travelled += total_cost
-        self.kms_travelled += total_cost
-        self.curr_node = nodes_visited[len(nodes_visited)-1]
+            Car.total_kms_travelled += distance
+        self.kms_travelled += distance
 
         if self.passengers_inside > 0:
             if count_for_global_stats:
-                Car.total_kms_travelled_w_passengers += total_cost
-            self.kms_travelled_w_passengers += total_cost
+                Car.total_kms_travelled_w_passengers += distance
+            self.kms_travelled_w_passengers += distance
 
+
+    def update_car_clients (self, count_for_global_stats : bool, client : Client): 
         if client is not None:
             if client.start == self.curr_node:
                 self.passengers_inside += client.how_many 
@@ -47,9 +46,11 @@ class Car:
             if client.goal == self.curr_node:
                 self.trips_done += 1
                 if count_for_global_stats:
-                    Car.trips_done += 1
+                    Car.total_trips_done += 1
                 self.passengers_inside -= client.how_many 
         
+    def copy(self):
+        return copy.copy(self)
 
     @override
     def __str__(self) -> str:

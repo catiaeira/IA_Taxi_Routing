@@ -276,7 +276,7 @@ class Graph:
         if end in path:
             return (path[end], self.calculate_cost(path[end]), remaining_fuel[end])
             
-        print('Path does not exist!')
+        #print('Path does not exist!')
         return None
 
 

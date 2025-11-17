@@ -1,39 +1,90 @@
-from car import *
-import Client
-
+from car.Car import *
+from Client import Client
+from Client_Controller import Client_Controller
+from Task import *
 
 class Car_Controller: 
     def __init__(self, dynamic_car: bool):
-        self.simulation_cars : List[Simulation_Car] = []
+        self.simulation_cars : list[Simulation_Car] = []
         self.dynamic_car = dynamic_car
 
-        cars = get_cars()
+        cars = self.get_cars()
         for car in cars:
             sim_car = Simulation_Car(car)
-            simulation_cars.append(sim_car)        
+            self.simulation_cars.append(sim_car)        
 
 
-    def get_cars () -> list(Car): # default cars it starts with... maybe change to import from a file
+    def get_cars (self) -> list[Car]: # default cars it starts with... maybe change to import from a file
         car1 = FuelCar()
-        car2 = ElectricCar()
+        #car2 = ElectricCar()
 
         car1.assign_location("Elvas")
-        car2.assign_location("Lisboa")
+        #car2.assign_location("Lisboa")
 
-        return [car1,car2]
+        return [car1]
 
-    def update (curr_time, client_controller, graph):
-        waiting_clients : List [Client] = []
-        clients_on_route : List[Client] = []
-        # get clients from client controller ...
-        # for each waiting client assign a car ... 
+    def update (self, curr_time, client_controller, graph):
+        waiting_clients : list [Client] = client_controller.waiting_clients
+        clients_on_route : list[Client] = client_controller.clients_on_route
 
-        for s_car in simulation_cars: # update all cars
+        for client in waiting_clients:
+            if (self.assign_car_to_client(client, graph, client_controller)):
+                client_controller.client_got_in_car(client)
+        
+        for s_car in self.simulation_cars: # update all cars
             s_car.update(curr_time, graph)
         
         # if dynamic_car:
         #   remove/add cars with x chance
         
+    def assign_car_to_client (self, client, graph, client_controller): # returns 1 if sucessfull, 0 otherwise
+        best_path = []                              # probably can be better
+        best_distance = None
+        best_car = None
+
+        for sim_car in self.simulation_cars:     
+            car = sim_car.car                       # todo currently not considering if its already in a trip, or the fuel
+            if client.how_many > car.capacity - car.passengers_inside :
+                #print ("No capacity!") 
+                continue
+
+            car_copy = car.copy()
+
+            to_client = graph.procura_aStar(car_copy.curr_node, client.start, car, False)
+            if to_client == None:
+                #print ("Can't get to client!") # no way there or not enough fuel
+                continue 
+            
+            car_copy.update_car_after_trip (to_client[1], to_client[2], False) # start ride 
+
+            to_client_goal = graph.procura_aStar(car_copy.curr_node, client.goal,car, False)
+            if to_client_goal == None:
+                #print ("Can't deliver client!") # no way there or not enough fuel
+                continue 
+
+            car_copy.update_car_after_trip (to_client_goal[1], to_client_goal[2], False)
+
+            dist_travelled = car_copy.kms_travelled - car.kms_travelled
+            
+            # here we need to choose which parameter we're focusing on (eg fastest time, least fuel spent). 
+            # only distance for now
+
+            if best_distance == None or dist_travelled < best_distance:
+                best_distance = dist_travelled
+                to_client_goal[0].pop(0) # remove head of list, since itll be the same as the last element of the first one
+                best_path = to_client[0] + to_client_goal[0]
+                best_car = sim_car 
+        
+        if best_car == None:
+            # couldnt find a suitable car, will wait
+            print ("no suitable car found")
+            return 0
+        
+        print ("client assigned a car!")
+        task = Task_Deliver_Client (best_path, graph, client, client_controller)
+        best_car.tasks_list.append (task)
+        return 1
+
 
 # updates cars based on the tasks they need to do, decided by a priority system
 # eg. refueling might be low priority when theres lots of gas, and become high priority when its running low
@@ -46,7 +97,7 @@ class Simulation_Car:
         self.tasks_list: list[Task] = []
         self.current_task: Task = None 
 
-    def update(self, curr_time, graph):
+    def update(self, curr_time, graph): # is missing fuel control yet
         if self.current_task is None and self.tasks_list:
             self.current_task = max(self.tasks_list, key=lambda t: t.priority)
 
@@ -56,5 +107,3 @@ class Simulation_Car:
             if self.current_task.completed:
                 self.tasks_list.remove(self.current_task)
                 self.current_task = None 
-
-        self.current_task = max(self.tasks_list, key=lambda t: t.priority)
