@@ -114,127 +114,127 @@
 	{
 		"origin": "Elvas",
 		"destiny": "Borba",
-		"dist": 15,
+		"dist": 15000,
 		"speed": 50
 	},
 	{
 		"origin": "Borba",
 		"destiny": "Estremoz",
-		"dist": 15,
+		"dist": 15000,
 		"speed": 50
 	},
 	{
 		"origin": "Estremoz",
 		"destiny": "Evora",
-		"dist": 40,
-		"speed": 50
+		"dist": 40000,
+		"speed": 20
 	},
 	{
 		"origin": "Evora",
 		"destiny": "Montemor",
-		"dist": 20,
+		"dist": 20000,
 		"speed": 50
 	},
 	{
 		"origin": "Montemor",
 		"destiny": "Vendas Novas",
-		"dist": 15,
+		"dist": 15000,
 		"speed": 50
 	},
 	{
 		"origin": "Vendas Novas",
 		"destiny": "Lisboa",
-		"dist": 50,
-		"speed": 50
+		"dist": 50000,
+		"speed": 70
 	},
 	{
 		"origin": "Elvas",
 		"destiny": "Arraiolos",
-		"dist": 50,
-		"speed": 50
+		"dist": 50000,
+		"speed": 100
 	},
 	{
 		"origin": "Arraiolos",
 		"destiny": "Alcacer",
-		"dist": 90,
-		"speed": 50
+		"dist": 90000,
+		"speed": 120
 	},
 	{
 		"origin": "Alcacer",
 		"destiny": "Palmela",
-		"dist": 35,
+		"dist": 35000,
 		"speed": 50
 	},
 	{
 		"origin": "Palmela",
 		"destiny": "Almada",
-		"dist": 25,
+		"dist": 25000,
 		"speed": 50
 	},
 	{
 		"origin": "Palmela",
 		"destiny": "Barreiro",
-		"dist": 25,
+		"dist": 25000,
 		"speed": 50
 	},
 	{
 		"origin": "Barreiro",
 		"destiny": "Palmela",
-		"dist": 30,
+		"dist": 30000,
 		"speed": 50
 	},
 	{
 		"origin": "Almada",
 		"destiny": "Lisboa",
-		"dist": 15,
+		"dist": 15000,
 		"speed": 50
 	},
 	{
 		"origin": "Elvas",
 		"destiny": "Alandroal",
-		"dist": 40,
+		"dist": 40000,
 		"speed": 50
 	},
 	{
 		"origin": "Alandroal",
 		"destiny": "Redondo",
-		"dist": 25,
+		"dist": 25000,
 		"speed": 50
 	},
 	{
 		"origin": "Redondo",
 		"destiny": "Monsaraz",
-		"dist": 30,
+		"dist": 30000,
 		"speed": 50
 	},
 	{
 		"origin": "Monsaraz",
 		"destiny": "Barreiro",
-		"dist": 120,
+		"dist": 120000,
 		"speed": 50
 	},
 	{
 		"origin": "Barreiro",
 		"destiny": "Baixa da banheira",
-		"dist": 5,
+		"dist": 5000,
 		"speed": 50
 	},
 	{
 		"origin": "Baixa da banheira",
 		"destiny": "Moita",
-		"dist": 7,
+		"dist": 7000,
 		"speed": 50
 	},
 	{
 		"origin": "Moita",
 		"destiny": "Alcochete",
-		"dist": 20,
+		"dist": 20000,
 		"speed": 50
 	},
 	{
 		"origin": "Alcochete",
 		"destiny": "Lisboa",
-		"dist": 20,
+		"dist": 20000,
 		"speed": 50
 	}
 	]

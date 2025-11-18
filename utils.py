@@ -14,6 +14,7 @@ def dist(latOr: float, longOr: float, latDest: float, longDest: float) -> float:
     return distance
 
 
-def calculate_time(dist: int, speed: int) -> int:
-    return int((dist/speed) * 60)
+# returns the travel time in seconds
+def calculate_time(dist: int, speed: int) -> float:
+    return (dist/speed) * 3.6
 
