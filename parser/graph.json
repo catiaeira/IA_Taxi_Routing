@@ -113,127 +113,127 @@
 	"edges": [
 	{
 		"origin": "Elvas",
-		"destiny": "Borba",
+		"destination": "Borba",
 		"dist": 15000,
 		"speed": 50
 	},
 	{
 		"origin": "Borba",
-		"destiny": "Estremoz",
+		"destination": "Estremoz",
 		"dist": 15000,
 		"speed": 50
 	},
 	{
 		"origin": "Estremoz",
-		"destiny": "Evora",
+		"destination": "Evora",
 		"dist": 40000,
 		"speed": 20
 	},
 	{
 		"origin": "Evora",
-		"destiny": "Montemor",
+		"destination": "Montemor",
 		"dist": 20000,
 		"speed": 50
 	},
 	{
 		"origin": "Montemor",
-		"destiny": "Vendas Novas",
+		"destination": "Vendas Novas",
 		"dist": 15000,
 		"speed": 50
 	},
 	{
 		"origin": "Vendas Novas",
-		"destiny": "Lisboa",
+		"destination": "Lisboa",
 		"dist": 50000,
 		"speed": 70
 	},
 	{
 		"origin": "Elvas",
-		"destiny": "Arraiolos",
+		"destination": "Arraiolos",
 		"dist": 50000,
 		"speed": 100
 	},
 	{
 		"origin": "Arraiolos",
-		"destiny": "Alcacer",
+		"destination": "Alcacer",
 		"dist": 90000,
 		"speed": 120
 	},
 	{
 		"origin": "Alcacer",
-		"destiny": "Palmela",
+		"destination": "Palmela",
 		"dist": 35000,
 		"speed": 50
 	},
 	{
 		"origin": "Palmela",
-		"destiny": "Almada",
+		"destination": "Almada",
 		"dist": 25000,
 		"speed": 50
 	},
 	{
 		"origin": "Palmela",
-		"destiny": "Barreiro",
+		"destination": "Barreiro",
 		"dist": 25000,
 		"speed": 50
 	},
 	{
 		"origin": "Barreiro",
-		"destiny": "Palmela",
+		"destination": "Palmela",
 		"dist": 30000,
 		"speed": 50
 	},
 	{
 		"origin": "Almada",
-		"destiny": "Lisboa",
+		"destination": "Lisboa",
 		"dist": 15000,
 		"speed": 50
 	},
 	{
 		"origin": "Elvas",
-		"destiny": "Alandroal",
+		"destination": "Alandroal",
 		"dist": 40000,
 		"speed": 50
 	},
 	{
 		"origin": "Alandroal",
-		"destiny": "Redondo",
+		"destination": "Redondo",
 		"dist": 25000,
 		"speed": 50
 	},
 	{
 		"origin": "Redondo",
-		"destiny": "Monsaraz",
+		"destination": "Monsaraz",
 		"dist": 30000,
 		"speed": 50
 	},
 	{
 		"origin": "Monsaraz",
-		"destiny": "Barreiro",
+		"destination": "Barreiro",
 		"dist": 120000,
 		"speed": 50
 	},
 	{
 		"origin": "Barreiro",
-		"destiny": "Baixa da banheira",
+		"destination": "Baixa da banheira",
 		"dist": 5000,
 		"speed": 50
 	},
 	{
 		"origin": "Baixa da banheira",
-		"destiny": "Moita",
+		"destination": "Moita",
 		"dist": 7000,
 		"speed": 50
 	},
 	{
 		"origin": "Moita",
-		"destiny": "Alcochete",
+		"destination": "Alcochete",
 		"dist": 20000,
 		"speed": 50
 	},
 	{
 		"origin": "Alcochete",
-		"destiny": "Lisboa",
+		"destination": "Lisboa",
 		"dist": 20000,
 		"speed": 50
 	}

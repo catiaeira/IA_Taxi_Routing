@@ -21,7 +21,7 @@ def parse_graph() -> Graph:
         if speed > max_speed:
             max_speed = speed
 
-        g.add_edge(edge["origin"], edge["destiny"], edge["dist"], speed)
+        g.add_edge(edge["origin"], edge["destination"], edge["dist"], speed)
 
     g.setMaxSpeed(max_speed)
     return g

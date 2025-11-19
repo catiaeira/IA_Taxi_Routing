@@ -85,28 +85,28 @@ def main():
 
             case 6:
                 origin = input("Origin node -> ").lower().capitalize()
-                destiny = input("Destiny node -> ").lower().capitalize()
-                print(graph.procura_DFS(origin, destiny))
+                destination = input("Destination node -> ").lower().capitalize()
+                print(graph.procura_DFS(origin, destination))
 
             case 7:
                 origin = input("Origin node -> ").lower().capitalize()
-                destiny = input("Destiny node -> ").lower().capitalize()
-                print(graph.BFS_search(origin, destiny))
+                destination = input("Destination node -> ").lower().capitalize()
+                print(graph.BFS_search(origin, destination))
 
             case 8:
                 origin = input("Origin node -> ").lower().capitalize()
-                destiny = input("Destiny node -> ").lower().capitalize()
-                print(graph.dijkstra_search(origin, destiny))
+                destination = input("Destination node -> ").lower().capitalize()
+                print(graph.dijkstra_search(origin, destination))
 
             case 9:
                 origin = input("Origin node -> ").lower().capitalize()
-                destiny = input("Destiny node -> ").lower().capitalize()
-                print(graph.greedy(origin, destiny))
+                destination = input("Destination node -> ").lower().capitalize()
+                print(graph.greedy(origin, destination))
 
             case 10:
                 origin = input("Origin node -> ").lower().capitalize()
-                destiny = input("Destiny node -> ").lower().capitalize()
-                print(graph.a_star_search(origin, destiny))
+                destination = input("Destination node -> ").lower().capitalize()
+                print(graph.a_star_search(origin, destination))
 
             case 11:
                 origin = input("Origin node -> ").lower().capitalize()

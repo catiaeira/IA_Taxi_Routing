@@ -65,15 +65,15 @@ class Graph:
         self.adjacency_lists_dict[name] = []
 
         
-    def add_edge(self, origin: str, destiny: str, dist: int, speed: int) -> None:
+    def add_edge(self, origin: str, destination: str, dist: int, speed: int) -> None:
         try:
             # just to make sure the nodes exist
             _ = self.get_node_by_name(origin)
-            _ = self.get_node_by_name(destiny)
+            _ = self.get_node_by_name(destination)
         except KeyError:
-            print(f"Couldn't add edge from {origin} to {destiny}")
+            print(f"Couldn't add edge from {origin} to {destination}")
 
-        self.adjacency_lists_dict[origin].append((destiny, dist, speed)) 
+        self.adjacency_lists_dict[origin].append((destination, dist, speed)) 
 
 
     def get_nodes(self) -> list[Node]:
@@ -275,7 +275,7 @@ class Graph:
                     pqueue.put((new_cost, node))
 
         n = best_node
-        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destiny
+        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destination
         if parents.get(station) is not None:
             path: list[str] = list()
 
@@ -293,7 +293,7 @@ class Graph:
         
 
 
-    def dijkstra_search(self, origin: str, destiny: str) -> tuple[list[str], int|float] | None:
+    def dijkstra_search(self, origin: str, destination: str) -> tuple[list[str], int|float] | None:
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
         pqueue.put((0, origin))
@@ -315,7 +315,7 @@ class Graph:
             if bn_cost > costs[best_node]:
                 continue
 
-            if best_node == destiny:
+            if best_node == destination:
                 break
 
             for node, dist, speed in self.get_neighbours(best_node):
@@ -328,8 +328,8 @@ class Graph:
                     pqueue.put((new_cost, node))
 
         n = best_node
-        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destiny
-        if parents.get(destiny) is not None:
+        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destination
+        if parents.get(destination) is not None:
             path: list[str] = list()
 
             while parents[n] != n:
@@ -341,14 +341,14 @@ class Graph:
             return (path, self.calculate_cost(path))
         
         else:
-            print(f"Path not found for origin {origin} and destiny {destiny}")
+            print(f"Path not found for origin {origin} and destination {destination}")
             return None
 
 
-    def a_star_search(self, origin: str, destiny: str) -> tuple[list[str], int|float] | None:
+    def a_star_search(self, origin: str, destination: str) -> tuple[list[str], int|float] | None:
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
-        pqueue.put((self.calculate_heuristic(origin, destiny), origin))
+        pqueue.put((self.calculate_heuristic(origin, destination), origin))
 
         # the cost is in minutes (calculated based on distance (kms) and speed (kms/h))
         # heuristics must not be considered here
@@ -365,10 +365,10 @@ class Graph:
             bn_cost, best_node = pqueue.get()
 
             # skip stale entries
-            if bn_cost > costs[best_node] + self.calculate_heuristic(best_node, destiny):
+            if bn_cost > costs[best_node] + self.calculate_heuristic(best_node, destination):
                 continue
 
-            if best_node == destiny:
+            if best_node == destination:
                 break
 
             for node, dist, speed in self.get_neighbours(best_node):
@@ -378,11 +378,11 @@ class Graph:
                 if node not in costs or new_cost < costs[node]:
                     costs[node] = new_cost
                     parents[node] = best_node
-                    pqueue.put((new_cost + self.calculate_heuristic(node, destiny), node))
+                    pqueue.put((new_cost + self.calculate_heuristic(node, destination), node))
 
         n = best_node
-        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destiny
-        if parents.get(destiny) is not None:
+        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destination
+        if parents.get(destination) is not None:
             path: list[str] = list()
 
             while parents[n] != n:
@@ -394,7 +394,7 @@ class Graph:
             return (path, self.calculate_cost(path))
         
         else:
-            print(f"Path not found for origin {origin} and destiny {destiny}")
+            print(f"Path not found for origin {origin} and destination {destination}")
             return None
 
 
