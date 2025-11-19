@@ -1,3 +1,4 @@
+from graph.Energy_Station import Energy_Station
 from parser.parse_json_graph import parse_graph
 from car.Car import ElectricCar
 from Client import Client
@@ -47,15 +48,18 @@ def main():
     eCar = ElectricCar()
 
     while user_input != 0:
-        print("\n1 - Print graph")
-        print("2 - Draw graph")
-        print("3 - Print nodes")
-        print("4 - Print edges")
-        print("5 - DFS")
-        print("6 - BFS")
-        print("7 - A*")
-        print("8 - Greedy")
-        print("0 - Quit\n")
+        print("\n1  - Print graph")
+        print("2  - Draw graph")
+        print("3  - Draw directed graph")
+        print("4  - Print nodes")
+        print("5  - Print edges")
+        print("6  - DFS")
+        print("7  - BFS")
+        print("8  - Dijkstra")
+        print("9  - Greedy")
+        print("10 - A*")
+        print("11 - Find closest station (Dijkstra)")
+        print("0  - Quit\n")
 
         user_input = int(input("Enter your option -> "))
         
@@ -68,34 +72,46 @@ def main():
                 print(graph.adjacency_lists_dict)
 
             case 2:
-                graph.desenha()
+                graph.draw()
 
             case 3:
-                print(graph.adjacency_lists_dict.keys())
+                graph.draw_directed()
 
             case 4:
-                print(graph.str_edges())
+                print(graph.str_nodes())
 
             case 5:
-                origin = input("Origin node -> ").lower().capitalize()
-                destiny = input("Destiny node -> ").lower().capitalize()
-                print(graph.procura_DFS(origin, destiny))
+                print(graph.str_edges())
 
             case 6:
                 origin = input("Origin node -> ").lower().capitalize()
-                destiny = input("Destiny node -> ").lower().capitalize()
-                print(graph.BFS_search(origin, destiny))
+                destination = input("Destination node -> ").lower().capitalize()
+                print(graph.procura_DFS(origin, destination))
 
             case 7:
                 origin = input("Origin node -> ").lower().capitalize()
-                destiny = input("Destiny node -> ").lower().capitalize()
-                eCar.assign_location(origin)
-                print(graph.procura_aStar(origin, destiny, eCar))
+                destination = input("Destination node -> ").lower().capitalize()
+                print(graph.BFS_search(origin, destination))
 
             case 8:
                 origin = input("Origin node -> ").lower().capitalize()
-                destiny = input("Destiny node -> ").lower().capitalize()
-                print(graph.greedy(origin, destiny))
+                destination = input("Destination node -> ").lower().capitalize()
+                print(graph.dijkstra_search(origin, destination))
+
+            case 9:
+                origin = input("Origin node -> ").lower().capitalize()
+                destination = input("Destination node -> ").lower().capitalize()
+                print(graph.greedy(origin, destination))
+
+            case 10:
+                origin = input("Origin node -> ").lower().capitalize()
+                destination = input("Destination node -> ").lower().capitalize()
+                print(graph.a_star_search(origin, destination))
+
+            case 11:
+                origin = input("Origin node -> ").lower().capitalize()
+                station = input("Station type -> ").upper()
+                print(graph.find_closest_station(origin, Energy_Station.convert_from_str(station)))
 
             case _:
                 print("Enter a valid option")

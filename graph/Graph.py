@@ -1,20 +1,31 @@
 from typing_extensions import override
 
 import math
-from queue import Queue
+from queue import Queue, PriorityQueue
 
 import networkx as nx
 import matplotlib.pyplot as plt
 
 from .Node import Node
-from Energy_Station import Energy_Station
+from graph.Energy_Station import Energy_Station
 from car.Car import Car, ElectricCar, FuelCar
-from utils import dist
+import utils
 
 class Graph:
+
     def __init__(self):
         self.node_dict: dict[str, Node] = {}  
         self.adjacency_lists_dict: dict[str, list[tuple[str, int, int]]] = {}  
+        self.max_speed: int = 0
+
+
+    def setMaxSpeed(self, speed: int):
+        self.max_speed = speed
+
+
+    def getMaxSpeed(self):
+        return self.max_speed
+
 
     @override
     def __str__(self) -> str:
@@ -24,16 +35,28 @@ class Graph:
         return out
 
 
-    def get_node_by_name(self, name: str) -> Node|None:
-        return self.node_dict.get(name)
+    def get_node_by_name(self, name: str) -> Node:
+        node = self.node_dict.get(name)
+        if node is None:
+            raise KeyError(f"Node {name} doesn't exist")
+        else:
+            return node
 
 
     def str_edges(self) -> str:
         edge: str = ""
         for node in self.node_dict.keys():
             for (node2, dist, speed) in self.adjacency_lists_dict[node]:
-                edge = edge + node + " -> " + node2 + " | dist: " + str(dist) + " | spped : " + str(speed) + "\n"
+                edge = edge + f"{node} -> {node2} | dist: {dist} | speed: {speed}\n"
         return edge
+
+
+    def str_nodes(self) -> str:
+        result: str = ""
+        for name in self.node_dict.keys():
+            node = self.get_node_by_name(name)
+            result = result + f"{name} | ({node.getLatitude()}, {node.getLongitude()}) | {node.getType()}\n"
+        return result
 
 
     def add_node(self, name: str, latitude: float, longitude: float, type_node: Energy_Station) -> None:
@@ -42,16 +65,15 @@ class Graph:
         self.adjacency_lists_dict[name] = []
 
         
-    def add_edge(self, origin: str, destiny: str, dist: int, speed: int) -> None:
-        n1 = self.get_node_by_name(origin)
-        n2 = self.get_node_by_name(destiny)
+    def add_edge(self, origin: str, destination: str, dist: int, speed: int) -> None:
+        try:
+            # just to make sure the nodes exist
+            _ = self.get_node_by_name(origin)
+            _ = self.get_node_by_name(destination)
+        except KeyError:
+            print(f"Couldn't add edge from {origin} to {destination}")
 
-        if n1 is None:
-            raise KeyError(f"add_edge: {origin} doesn't exist")
-        elif n2 is None:
-            raise KeyError(f"add_edge: {destiny} doesn't exist")
-        else:
-            self.adjacency_lists_dict[origin].append((destiny, dist, speed)) 
+        self.adjacency_lists_dict[origin].append((destination, dist, speed)) 
 
 
     def get_nodes(self) -> list[Node]:
@@ -62,17 +84,17 @@ class Graph:
         return list
 
 
-    def get_arc_cost(self, node1: str, node2: str) -> int|float:
+    def get_arc_cost(self, node1: str, node2: str) -> float:
         total_cost = math.inf
         adj_list = self.adjacency_lists_dict[node1]
-        for (node, cost, _) in adj_list:
+        for (node, dist, speed) in adj_list:
             if node == node2:
-                total_cost = cost
+                total_cost = utils.calculate_time(dist, speed)
 
         return total_cost
 
 
-    def calculate_cost(self, path: list[str]) -> int|float:
+    def calculate_cost(self, path: list[str]) -> float:
         cost = 0
         length = len(path)
         i = 0
@@ -81,20 +103,58 @@ class Graph:
             i += 1
         return cost
 
-    def calculate_heuristic(self, node1: str, goal: str) -> float:
-        origin = self.get_node_by_name(node1)
-        destination = self.get_node_by_name(goal)
 
-        return dist(origin.getLatitude(), origin.getLongitude(), destination.getLatitude(), destination.getLongitude())
+    def calculate_heuristic(self, node1: str, node2: str) -> float:
+        origin = self.get_node_by_name(node1)
+        destination = self.get_node_by_name(node2)
+
+        # this cast ensures types match
+        # it shouldn't be a problem, since the result is in meters, so the decimal part is irrelevant
+        straight_line_dist = int(utils.dist(origin.getLatitude(), origin.getLongitude(), destination.getLatitude(), destination.getLongitude()))
+
+        return utils.calculate_time(straight_line_dist, self.getMaxSpeed())
+
 
     def get_neighbours(self, node: str) -> list[tuple[str, int, int]]:
         return self.adjacency_lists_dict[node]
 
-    ###########################
-    # desenha grafo modo grafico
-    #########################
 
-    def desenha(self):
+    # draws the graph with arrows to indicate edge direction
+    def draw_directed(self):
+        # create directed graph
+        g = nx.DiGraph()
+
+        # add nodes and directed edges
+        for nodo in self.node_dict.values():
+            n = nodo.getName()
+            g.add_node(n)
+            for (adjacent, weight, _) in self.adjacency_lists_dict[n]:
+                g.add_edge(n, adjacent, weight=weight)
+
+        # layout and drawing
+        pos = nx.spring_layout(g, seed=42)  # deterministic layout
+        nx.draw_networkx_nodes(g, pos, node_size=700)
+        nx.draw_networkx_labels(g, pos, font_weight='bold')
+
+        # draw directed edges with arrows
+        nx.draw_networkx_edges(
+            g, pos,
+            arrows=True,
+            arrowstyle='-|>',
+            arrowsize=20,
+            connectionstyle='arc3,rad=0.1'  # slight curve for bidirectional edges
+        )
+
+        # show edge labels
+        labels = nx.get_edge_attributes(g, 'weight')
+        nx.draw_networkx_edge_labels(g, pos, edge_labels=labels)
+
+        plt.axis('off')
+        plt.tight_layout()
+        plt.show()
+
+
+    def draw(self):
         ##criar lista de vertices
         list_v = self.node_dict.values()
         list_a = []
@@ -116,16 +176,14 @@ class Graph:
         plt.show()
 
 
-    def BFS_search(self, origin: str, dest: str) -> tuple[list[str], int|float]|None:
+    def BFS_search(self, origin: str, dest: str) -> tuple[list[str], float]|None:
 
         queue: Queue[str] = Queue()
         queue.put(origin)
 
-        parents: dict[str, str] = dict()
-        parents[origin] = origin
+        parents: dict[str, str] = {origin: origin}
 
-        visited: set[str] = set()
-        visited.add(origin)
+        visited: set[str] = {origin}
 
         while not queue.empty():
 
@@ -159,12 +217,7 @@ class Graph:
         return path, self.calculate_cost(path)
             
 
-
-    ################################################################################
-    # Procura DFS
-    ################################################################################
-
-    # recursive DFS, returns (path, cost) --> ([string], int)
+    # NEEDS TO BE UPDATED
     def procura_DFS(self, start, end, path=[], visited=set()):
         path.append(start)
         visited.add(start)
@@ -182,11 +235,171 @@ class Graph:
         return None
 
 
-    ##########################################
-    #    A* - To Do
-    ##########################################
+    def find_closest_station(self, origin: str, station_type: Energy_Station):
+        # the entries are of the form (priority_number, data)
+        pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
+        pqueue.put((0, origin))
 
-    # MUST BE UPDATED
+        # the cost is in minutes (calculated based on distance (kms) and speed (kms/h))
+        costs: dict[str,float] = {origin: 0}
+
+        parents: dict[str, str] = {origin: origin}
+
+        best_node = ""
+        station = ""
+
+        while not pqueue.empty():
+
+            # get() will return the item with the lowest priority_number
+            # in our case, the lowest cost (most attractive node)
+            bn_cost, best_node = pqueue.get()
+
+            # skip stale entries
+            if bn_cost > costs[best_node]:
+                continue
+
+            # stop if the node has the same type as the requested one
+            # if the node is CHARGING_AND_FUEL_STATION it satisfies both types, so we can also stop
+            bn_type = self.get_node_by_name(best_node).getType()
+            if bn_type == station_type or bn_type == Energy_Station.CHARGING_AND_FUEL_STATION:
+                station = best_node
+                break
+
+            for node, dist, speed in self.get_neighbours(best_node):
+                travel_time = utils.calculate_time(dist, speed)
+                new_cost = costs[best_node] + travel_time
+
+                if node not in costs or new_cost < costs[node]:
+                    costs[node] = new_cost
+                    parents[node] = best_node
+                    pqueue.put((new_cost, node))
+
+        n = best_node
+        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destination
+        if parents.get(station) is not None:
+            path: list[str] = list()
+
+            while parents[n] != n:
+                path.insert(0, n)
+                n = parents[n]
+
+            path.insert(0, origin)
+
+            return (path, self.calculate_cost(path))
+        
+        else:
+            print(f"Couldn't find any station from {origin}")
+            return None
+        
+
+
+    def dijkstra_search(self, origin: str, destination: str) -> tuple[list[str], int|float] | None:
+        # the entries are of the form (priority_number, data)
+        pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
+        pqueue.put((0, origin))
+
+        # the cost is in minutes (calculated based on distance (kms) and speed (kms/h))
+        costs: dict[str,float] = {origin: 0}
+
+        parents: dict[str, str] = {origin: origin}
+
+        best_node = ""
+
+        while not pqueue.empty():
+
+            # get() will return the item with the lowest priority_number
+            # in our case, the lowest cost (most attractive node)
+            bn_cost, best_node = pqueue.get()
+
+            # skip stale entries
+            if bn_cost > costs[best_node]:
+                continue
+
+            if best_node == destination:
+                break
+
+            for node, dist, speed in self.get_neighbours(best_node):
+                travel_time = utils.calculate_time(dist, speed)
+                new_cost = costs[best_node] + travel_time
+
+                if node not in costs or new_cost < costs[node]:
+                    costs[node] = new_cost
+                    parents[node] = best_node
+                    pqueue.put((new_cost, node))
+
+        n = best_node
+        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destination
+        if parents.get(destination) is not None:
+            path: list[str] = list()
+
+            while parents[n] != n:
+                path.insert(0, n)
+                n = parents[n]
+
+            path.insert(0, origin)
+
+            return (path, self.calculate_cost(path))
+        
+        else:
+            print(f"Path not found for origin {origin} and destination {destination}")
+            return None
+
+
+    def a_star_search(self, origin: str, destination: str) -> tuple[list[str], int|float] | None:
+        # the entries are of the form (priority_number, data)
+        pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
+        pqueue.put((self.calculate_heuristic(origin, destination), origin))
+
+        # the cost is in minutes (calculated based on distance (kms) and speed (kms/h))
+        # heuristics must not be considered here
+        costs: dict[str,float] = {origin: 0}
+
+        parents: dict[str, str] = {origin: origin}
+
+        best_node = ""
+
+        while not pqueue.empty():
+
+            # get() will return the item with the lowest priority_number
+            # in our case, the lowest cost (most attractive node)
+            bn_cost, best_node = pqueue.get()
+
+            # skip stale entries
+            if bn_cost > costs[best_node] + self.calculate_heuristic(best_node, destination):
+                continue
+
+            if best_node == destination:
+                break
+
+            for node, dist, speed in self.get_neighbours(best_node):
+                travel_time = utils.calculate_time(dist, speed)
+                new_cost = costs[best_node] + travel_time
+
+                if node not in costs or new_cost < costs[node]:
+                    costs[node] = new_cost
+                    parents[node] = best_node
+                    pqueue.put((new_cost + self.calculate_heuristic(node, destination), node))
+
+        n = best_node
+        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destination
+        if parents.get(destination) is not None:
+            path: list[str] = list()
+
+            while parents[n] != n:
+                path.insert(0, n)
+                n = parents[n]
+
+            path.insert(0, origin)
+
+            return (path, self.calculate_cost(path))
+        
+        else:
+            print(f"Path not found for origin {origin} and destination {destination}")
+            return None
+
+
+
+    # delete this?
     def procura_aStar(self, start, end, car: Car, can_refuel : bool = False) -> tuple[list[str], int, float]:
         queue = set()
         queue.add(start)
