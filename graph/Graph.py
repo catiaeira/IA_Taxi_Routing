@@ -1,7 +1,8 @@
 from typing_extensions import override
 
 import math
-from queue import Queue, PriorityQueue
+from queue import PriorityQueue
+from collections import deque
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -176,63 +177,66 @@ class Graph:
         plt.show()
 
 
-    def BFS_search(self, origin: str, dest: str) -> tuple[list[str], float]|None:
+    def BFS_search(self, origin: str, destination: str) -> tuple[list[str], float]|None:
 
-        queue: Queue[str] = Queue()
-        queue.put(origin)
+        queue: deque[str] = deque()
+        queue.append(origin)
 
         parents: dict[str, str] = {origin: origin}
 
         visited: set[str] = {origin}
 
-        while not queue.empty():
+        while queue:
 
-            current = queue.get()
+            current = queue.popleft()
 
-            if current == dest:
+            if current == destination:
                 break
 
             for node, _, _ in self.get_neighbours(current):
                 if node not in visited:
                     visited.add(node)
-                    queue.put(node)
+                    queue.append(node)
                     parents[node] = current
 
-        if parents.get(dest) is None:
-                return None
-    
-        current = dest
 
-        path = []
-        while True:
-            path.insert(0, current)
+        if parents.get(destination) is not None:
+            path: list[str] = self.build_path(parents, origin, destination)
+            return (path, self.calculate_cost(path))
+        
+        else:
+            print(f"Path not found for origin {origin} and destination {destination}")
+            return None
 
-            parent = parents[current]
 
-            if parent == current:
+    def DFS_search(self, origin: str, destination: str) -> tuple[list[str], float]|None:
+        
+        stack: list[str] = [origin]
+
+        parents: dict[str, str] = {origin: origin}
+
+        visited: set[str] = set()
+
+        while stack:
+            current = stack.pop()
+
+            if current == destination:
                 break
 
-            current = parent
+            if current not in visited:
+                visited.add(current)
+                for node, _, _ in self.get_neighbours(current):
+                    stack.append(node)
+                    parents[node] = current
 
-        return path, self.calculate_cost(path)
-            
+        if parents.get(destination) is not None:
+            path: list[str] = self.build_path(parents, origin, destination)
+            return (path, self.calculate_cost(path))
+        
+        else:
+            print(f"Path not found for origin {origin} and destination {destination}")
+            return None
 
-    # NEEDS TO BE UPDATED
-    def procura_DFS(self, start, end, path=[], visited=set()):
-        path.append(start)
-        visited.add(start)
-
-        if start == end:
-            cost = self.calculate_cost(path)
-            return (path, cost)
-
-        for (adjacent, weight) in self.adjacency_lists_dict[start]:
-            if adjacent not in visited:
-                result = self.procura_DFS(adjacent, end, path, visited)
-                if result is not None:
-                    return result
-        path.pop()
-        return None
 
 
     def find_closest_station(self, origin: str, station_type: Energy_Station):
@@ -274,17 +278,9 @@ class Graph:
                     parents[node] = best_node
                     pqueue.put((new_cost, node))
 
-        n = best_node
         # if it's None, it means we never entered the cicle's break condition, so we didn't find our destination
         if parents.get(station) is not None:
-            path: list[str] = list()
-
-            while parents[n] != n:
-                path.insert(0, n)
-                n = parents[n]
-
-            path.insert(0, origin)
-
+            path: list[str] = self.build_path(parents, origin, station)
             return (path, self.calculate_cost(path))
         
         else:
@@ -298,7 +294,7 @@ class Graph:
         pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
         pqueue.put((0, origin))
 
-        # the cost is in minutes (calculated based on distance (kms) and speed (kms/h))
+        # the cost is in minutes (calculated based on distance (ms) and speed (kms/h))
         costs: dict[str,float] = {origin: 0}
 
         parents: dict[str, str] = {origin: origin}
@@ -327,17 +323,9 @@ class Graph:
                     parents[node] = best_node
                     pqueue.put((new_cost, node))
 
-        n = best_node
         # if it's None, it means we never entered the cicle's break condition, so we didn't find our destination
         if parents.get(destination) is not None:
-            path: list[str] = list()
-
-            while parents[n] != n:
-                path.insert(0, n)
-                n = parents[n]
-
-            path.insert(0, origin)
-
+            path: list[str] = self.build_path(parents, origin, destination)
             return (path, self.calculate_cost(path))
         
         else:
@@ -383,92 +371,13 @@ class Graph:
         n = best_node
         # if it's None, it means we never entered the cicle's break condition, so we didn't find our destination
         if parents.get(destination) is not None:
-            path: list[str] = list()
-
-            while parents[n] != n:
-                path.insert(0, n)
-                n = parents[n]
-
-            path.insert(0, origin)
-
+            path: list[str] = self.build_path(parents, origin, destination)
             return (path, self.calculate_cost(path))
         
         else:
             print(f"Path not found for origin {origin} and destination {destination}")
             return None
 
-
-
-    # delete this?
-    def procura_aStar(self, start, end, car: Car, can_refuel : bool = False) -> tuple[list[str], int, float]:
-        queue = set()
-        queue.add(start)
-        visited = set()
-
-        cost = {}
-        cost[start] = 0
-
-        remaining_fuel = {}
-        remaining_fuel[start] = car.energy_level
-
-        path = {}
-        path[start] = [start]
-
-        while len(queue) > 0:
-            chosen_node = None
-
-            for queue_node in queue:
-                if chosen_node is None or cost[queue_node] + self.calculate_heuristic(queue_node, end) < cost[chosen_node] + self.calculate_heuristic(chosen_node, end):
-                    chosen_node = queue_node
-            
-            if chosen_node == end:
-                break
-            
-            cost_chosen_node = cost[chosen_node]
-
-            for neighbor, weight, _ in self.get_neighbours(chosen_node):
-
-                fuel_consumed = car.consumption(weight)
-                remaining_fuel_if_move = remaining_fuel[chosen_node] - fuel_consumed
-             
-                if remaining_fuel_if_move < 0:
-                    continue  # dont consider path if we cant make it
-
-                if can_refuel:
-                    node_type = self.get_node_by_name(neighbor).type
-                    if (node_type == car.charges_in() or node_type == Energy_Station.CHARGING_AND_FUEL_STATION):
-                        remaining_fuel_if_move = 100            # currently refueling even if it doesnt *need* to
-
-                new_path = path[chosen_node].copy()
-                new_path.append(neighbor)
-
-                if neighbor not in queue and neighbor not in visited:
-                    queue.add(neighbor)
-                    
-                    cost[neighbor] = cost_chosen_node + weight
-
-                    path[neighbor] = new_path
-                    remaining_fuel[neighbor] = remaining_fuel_if_move
-
-                # reconsider a visited node if the cost or fuel is now better 
-                elif cost[neighbor] > cost_chosen_node + weight or remaining_fuel[neighbor] <= remaining_fuel_if_move:
-                    cost[neighbor] = cost_chosen_node + weight
-                    
-                    remaining_fuel[neighbor] = remaining_fuel_if_move
-                    path[neighbor] = new_path
-
-                    if neighbor in visited:
-                        visited.remove(neighbor)
-                        queue.add(neighbor)
-
-            queue.remove(chosen_node)
-            visited.add(chosen_node)
-
-        if end in path:
-            return (path[end], self.calculate_cost(path[end]), remaining_fuel[end])
-            
-        print('Path does not exist!')
-        return None
 
 
     ##########################################
@@ -516,3 +425,15 @@ class Graph:
 
         print("Path does not exist!")
         return None
+
+
+    def build_path(self, parents: dict[str, str], origin: str, destination: str) -> list[str]:
+        path: list[str] = list()
+
+        while parents[destination] != destination:
+            path.insert(0, destination)
+            destination = parents[destination]
+
+        path.insert(0, origin)
+
+        return path
