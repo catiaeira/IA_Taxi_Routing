@@ -191,22 +191,18 @@ class Graph:
             current = queue.popleft()
 
             if current == destination:
-                break
+                path: list[str] = self.build_path(parents, origin, destination)
+                return (path, self.calculate_cost(path))
 
             for node, _, _ in self.get_neighbours(current):
                 if node not in visited:
                     visited.add(node)
                     queue.append(node)
                     parents[node] = current
-
-
-        if parents.get(destination) is not None:
-            path: list[str] = self.build_path(parents, origin, destination)
-            return (path, self.calculate_cost(path))
         
-        else:
-            print(f"Path not found for origin {origin} and destination {destination}")
-            return None
+        # if we exit the cycle, it means the destination wasn't found
+        print(f"Path not found for origin {origin} and destination {destination}")
+        return None
 
 
     def DFS_search(self, origin: str, destination: str) -> tuple[list[str], float]|None:
@@ -221,7 +217,8 @@ class Graph:
             current = stack.pop()
 
             if current == destination:
-                break
+                path: list[str] = self.build_path(parents, origin, destination)
+                return (path, self.calculate_cost(path))
 
             if current not in visited:
                 visited.add(current)
@@ -229,13 +226,9 @@ class Graph:
                     stack.append(node)
                     parents[node] = current
 
-        if parents.get(destination) is not None:
-            path: list[str] = self.build_path(parents, origin, destination)
-            return (path, self.calculate_cost(path))
-        
-        else:
-            print(f"Path not found for origin {origin} and destination {destination}")
-            return None
+        # if we exit the cycle, it means the destination wasn't found
+        print(f"Path not found for origin {origin} and destination {destination}")
+        return None
 
 
 
@@ -248,9 +241,6 @@ class Graph:
         costs: dict[str,float] = {origin: 0}
 
         parents: dict[str, str] = {origin: origin}
-
-        best_node = ""
-        station = ""
 
         while not pqueue.empty():
 
@@ -266,8 +256,8 @@ class Graph:
             # if the node is CHARGING_AND_FUEL_STATION it satisfies both types, so we can also stop
             bn_type = self.get_node_by_name(best_node).getType()
             if bn_type == station_type or bn_type == Energy_Station.CHARGING_AND_FUEL_STATION:
-                station = best_node
-                break
+                path: list[str] = self.build_path(parents, origin, best_node)
+                return (path, bn_cost)
 
             for node, dist, speed in self.get_neighbours(best_node):
                 travel_time = utils.calculate_time(dist, speed)
@@ -278,14 +268,9 @@ class Graph:
                     parents[node] = best_node
                     pqueue.put((new_cost, node))
 
-        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destination
-        if parents.get(station) is not None:
-            path: list[str] = self.build_path(parents, origin, station)
-            return (path, self.calculate_cost(path))
-        
-        else:
-            print(f"Couldn't find any station from {origin}")
-            return None
+        # if we exit the cycle, it means no station was found
+        print(f"Couldn't find any station from {origin}")
+        return None
         
 
 
@@ -310,7 +295,8 @@ class Graph:
                 continue
 
             if best_node == destination:
-                break
+                path: list[str] = self.build_path(parents, origin, destination)
+                return (path, bn_cost)
 
             for node, dist, speed in self.get_neighbours(best_node):
                 travel_time = utils.calculate_time(dist, speed)
@@ -321,14 +307,9 @@ class Graph:
                     parents[node] = best_node
                     pqueue.put((new_cost, node))
 
-        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destination
-        if parents.get(destination) is not None:
-            path: list[str] = self.build_path(parents, origin, destination)
-            return (path, self.calculate_cost(path))
-        
-        else:
-            print(f"Path not found for origin {origin} and destination {destination}")
-            return None
+        # if we exit the cycle, it means the destination wasn't found
+        print(f"Path not found for origin {origin} and destination {destination}")
+        return None
 
 
     def a_star_search(self, origin: str, destination: str) -> tuple[list[str], int|float] | None:
@@ -353,7 +334,9 @@ class Graph:
                 continue
 
             if best_node == destination:
-                break
+                path: list[str] = self.build_path(parents, origin, destination)
+                # here we can't return bn_cost because it has the heuristic value included
+                return (path, costs[destination])
 
             for node, dist, speed in self.get_neighbours(best_node):
                 travel_time = utils.calculate_time(dist, speed)
@@ -364,14 +347,9 @@ class Graph:
                     parents[node] = best_node
                     pqueue.put((new_cost + self.calculate_heuristic(node, destination), node))
 
-        # if it's None, it means we never entered the cicle's break condition, so we didn't find our destination
-        if parents.get(destination) is not None:
-            path: list[str] = self.build_path(parents, origin, destination)
-            return (path, self.calculate_cost(path))
-        
-        else:
-            print(f"Path not found for origin {origin} and destination {destination}")
-            return None
+        # if we exit the cycle, it means the destination wasn't found
+        print(f"Path not found for origin {origin} and destination {destination}")
+        return None
 
 
     def greedy_search(self, origin: str, destination: str) -> tuple[list[str], int|float] | None:
