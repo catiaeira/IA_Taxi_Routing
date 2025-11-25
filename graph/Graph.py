@@ -299,8 +299,6 @@ class Graph:
 
         parents: dict[str, str] = {origin: origin}
 
-        best_node = ""
-
         while not pqueue.empty():
 
             # get() will return the item with the lowest priority_number
@@ -344,8 +342,6 @@ class Graph:
 
         parents: dict[str, str] = {origin: origin}
 
-        best_node = ""
-
         while not pqueue.empty():
 
             # get() will return the item with the lowest priority_number
@@ -368,7 +364,6 @@ class Graph:
                     parents[node] = best_node
                     pqueue.put((new_cost + self.calculate_heuristic(node, destination), node))
 
-        n = best_node
         # if it's None, it means we never entered the cicle's break condition, so we didn't find our destination
         if parents.get(destination) is not None:
             path: list[str] = self.build_path(parents, origin, destination)
@@ -379,51 +374,33 @@ class Graph:
             return None
 
 
+    def greedy_search(self, origin: str, destination: str) -> tuple[list[str], int|float] | None:
+        # the entries are of the form (priority_number, data)
+        pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
+        pqueue.put((self.calculate_heuristic(origin, destination), origin))
 
-    ##########################################
-    #   Greedy - To Do
-    ##########################################
+        parents: dict[str, str] = {origin: origin}
 
+        visited: set[str] = {origin}
 
-    # MUST BE UPDATED
-    def greedy(self, start, end):
-        queue = set()
-        queue.add(start)
-        visited = set()
+        while not pqueue.empty():
 
-        parents = {}
-        parents[start] = start
+            # get() will return the item with the lowest priority_number
+            # in our case, the lowest cost (most attractive node)
+            _, best_node = pqueue.get()
 
-        while len(queue) > 0:
-            n = None
+            if best_node == destination:
+                path: list[str] = self.build_path(parents, origin, destination)
+                return (path, self.calculate_cost(path))
 
-            for v in queue:
-                if n == None or self.calculate_heuristic(v, end) < self.calculate_heuristic(n, end):
-                    n = v
+            for node, _, _ in self.get_neighbours(best_node):
+                if node not in visited:
+                    visited.add(node)
+                    pqueue.put((self.calculate_heuristic(node, destination), node))
+                    parents[node] = best_node
 
-            if n == end:
-                break
-
-            for m, _ in self.get_neighbours(n):
-                if m not in queue and m not in visited:
-                    queue.add(m)
-                    parents[m] = n
-
-            queue.remove(n)
-            visited.add(n)
-
-        if parents.get(end) is not None:
-            path = []
-
-            while parents[n] != n:
-                path.insert(0, n)
-                n = parents[n]
-
-            path.insert(0, start)
-
-            return (path, self.calculate_cost(path))
-
-        print("Path does not exist!")
+        # if we exit the cycle, it means the destination wasn't found
+        print(f"Path not found for origin {origin} and destination {destination}")
         return None
 
 
