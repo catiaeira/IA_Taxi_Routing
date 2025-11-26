@@ -7,7 +7,6 @@ class Car:
     total_trips_done:int = 0
     total_kms_travelled:int = 0
     total_kms_travelled_w_passengers:int = 0
-    total_trips_done:int = 0
 
     def __init__(self, energy_level : int =100, capacity: int =4):
         self.trips_done: int = 0
@@ -81,6 +80,13 @@ class ElectricCar (Car):
     def charges_in (self) -> Energy_Station:
         return Energy_Station.CHARGING_STATION
 
+    def time_to_refuel(self) -> int: 
+        return (100 - self.energy_level) / 4     # could change between cars. 25 mins to fully recharge
+
+    @override
+    def __str__(self) -> str:
+        return "Electric " + super().__str__()
+
 
 class FuelCar (Car):
     def __init__(self, energy_level=100, capacity=4):
@@ -92,3 +98,10 @@ class FuelCar (Car):
 
     def charges_in (self) -> Energy_Station:
         return Energy_Station.FUEL_STATION
+
+    def time_to_refuel (self) -> int:
+        return 5 # minutes
+
+    @override
+    def __str__(self) -> str:
+        return "Fuel " + super().__str__()
