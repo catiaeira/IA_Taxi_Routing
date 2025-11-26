@@ -1,5 +1,5 @@
 from typing_extensions import override
-from car.Energy_Station import Energy_Station
+from graph.Energy_Station import Energy_Station
 from Client import Client
 import copy
 
@@ -26,8 +26,8 @@ class Car:
     def assign_location (self, curr_node :str):
         self.curr_node = curr_node
 
-    def update_car_after_trip (self, distance, new_fuel, count_for_global_stats : bool): 
-        self.energy_level = new_fuel
+    def update_car_after_trip (self, distance, count_for_global_stats : bool): 
+        self.energy_level -= distance * self.consumption
         if count_for_global_stats:
             Car.total_kms_travelled += distance
         self.kms_travelled += distance
@@ -85,7 +85,7 @@ class FuelCar (Car):
         self.consumption_per_km = 0.1 # 1000 km
 
     def CO2_emissions (self):
-        return 100 * kms_travelled
+        return 100 * self.kms_travelled
 
     def charges_in (self) -> Energy_Station:
         return Energy_Station.FUEL_STATION

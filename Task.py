@@ -53,7 +53,7 @@ class Task_Deliver_Client (Task):
         self.client_controller = client_controller
         
     
-    def update(self, curr_time, graph, car):
+    def update(self, curr_time, graph, car): # needs to be able to recalculate the path
         if self.time_started == -1:
             self.time_started = curr_time
             

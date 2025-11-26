@@ -1,5 +1,5 @@
 from graph.Graph import Graph
-from car.Energy_Station import Energy_Station
+from graph.Energy_Station import Energy_Station
 import json
 
 def parse_graph() -> Graph:
@@ -12,9 +12,16 @@ def parse_graph() -> Graph:
     g = Graph()
 
     for node in json_graph["nodes"]:
-        g.add_node(node["name"], node["heuristic"], Energy_Station.convert_from_str(node["type"]))
+        g.add_node(node["name"], node["latitude"], node["longitude"], Energy_Station.convert_from_str(node["type"]))
 
+    max_speed = 0
     for edge in json_graph["edges"]:
-        g.add_edge(edge["origin"], edge["destiny"], edge["dist"], edge["speed"])
+        speed: int = edge["speed"]
 
+        if speed > max_speed:
+            max_speed = speed
+
+        g.add_edge(edge["origin"], edge["destination"], edge["dist"], speed)
+
+    g.setMaxSpeed(max_speed)
     return g

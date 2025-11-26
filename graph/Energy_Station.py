@@ -6,7 +6,8 @@ class Energy_Station(Enum):
     FUEL_STATION = 2
     CHARGING_AND_FUEL_STATION = 3
 
-    def convert_from_str (input : str):
+    @staticmethod
+    def convert_from_str (input: str):
         match (input):
             case ("FUEL_STATION"):
                 return Energy_Station.FUEL_STATION
@@ -18,5 +19,5 @@ class Energy_Station(Enum):
                 return Energy_Station.NONE
             case (_):
                 print ("error reading energy station type")
-                return null
+                return None
     

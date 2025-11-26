@@ -50,19 +50,20 @@ class Car_Controller:
 
             car_copy = car.copy()
 
-            to_client = graph.procura_aStar(car_copy.curr_node, client.start, car, False)
+            to_client = graph.a_star_search(car_copy.curr_node, client.start)
             if to_client == None:
                 #print ("Can't get to client!") # no way there or not enough fuel
                 continue 
             
-            car_copy.update_car_after_trip (to_client[1], to_client[2], False) # start ride 
+            # (path [], custo tempo, custo distancia) 
+            car_copy.update_car_after_trip (to_client[2], False) # start ride 
 
-            to_client_goal = graph.procura_aStar(car_copy.curr_node, client.goal,car, False)
+            to_client_goal = graph.procura_aStar(car_copy.curr_node, client.goal)
             if to_client_goal == None:
                 #print ("Can't deliver client!") # no way there or not enough fuel
                 continue 
 
-            car_copy.update_car_after_trip (to_client_goal[1], to_client_goal[2], False)
+            car_copy.update_car_after_trip (to_client_goal[2], False)
 
             dist_travelled = car_copy.kms_travelled - car.kms_travelled
             

@@ -3,66 +3,74 @@ from parser.parse_json_graph import parse_graph
 from Client_Controller import Client_Controller
 from Car_Controller import Car_Controller
 
-def run(dynamic_traffic: bool, dynamic_car: bool, dynamic_client: bool): # the "main" loop
-    graph = parse_graph()
-    car_controller = Car_Controller(dynamic_car)
-    client_controller = Client_Controller(dynamic_client)
 
-    currTime = 0
-    while (True):
-        #option = main_menu()
-        #if option == -1:
-        #    break 
+while user_input != 0:
+    print("\n1  - Print graph")
+    print("2  - Draw graph")
+    print("3  - Draw directed graph")
+    print("4  - Print nodes")
+    print("5  - Print edges")
+    print("6  - DFS")
+    print("7  - BFS")
+    print("8  - Dijkstra")
+    print("9  - Greedy")
+    print("10 - A*")
+    print("11 - Find closest station (Dijkstra)")
+    print("0  - Quit\n")
 
-        # print (randomEvents(graph, car_controller, client_controller))
+    user_input = int(input("Enter your option -> "))
+    
+    match user_input:
+        case 0:
+            print("\nBye")
+            break
 
-        # function to update the traffic (doesnt need a specific controller...) if dynamic
-        # graph = update_traffic(graph)
-        
-        client_controller.update(currTime, graph)
-        car_controller.update(currTime, client_controller, graph)
-        currTime += 1
+        case 1:
+            print(graph.adjacency_lists_dict)
 
+        case 2:
+            graph.draw()
 
-def main_menu():
-    user_input = -1
-    while user_input != 0:
-        print("\n1 - Change cars")
-        print("2 - Change clients")
-        print("3 - Change traffic")
-        print("4 - Skip to next time instance")
-        print("5 - Skip to specific time instance")
-        print("0 - Quit\n")
+        case 3:
+            graph.draw_directed()
 
-        user_input = int(input("Enter your option -> "))
-        #user_input = 1
+        case 4:
+            print(graph.str_nodes())
 
-        match user_input:
-            case 0:
-                print("\nShutting down...")
-                return -1
+        case 5:
+            print(graph.str_edges())
 
-            case 1:
-                # car
-                return 0
+        case 6:
+            origin = input("Origin node -> ").lower().capitalize()
+            destination = input("Destination node -> ").lower().capitalize()
+            print(graph.procura_DFS(origin, destination))
 
-            case 2:
-                # clients
-                return 0
+        case 7:
+            origin = input("Origin node -> ").lower().capitalize()
+            destination = input("Destination node -> ").lower().capitalize()
+            print(graph.BFS_search(origin, destination))
 
-            case 3:
-                # traffic
-                return 0
+        case 8:
+            origin = input("Origin node -> ").lower().capitalize()
+            destination = input("Destination node -> ").lower().capitalize()
+            print(graph.dijkstra_search(origin, destination))
 
-            case 4:
-                # next time instance
-                return 0
+        case 9:
+            origin = input("Origin node -> ").lower().capitalize()
+            destination = input("Destination node -> ").lower().capitalize()
+            print(graph.greedy(origin, destination))
 
-            case 5:
-                # specific time instance
-                return 0
+        case 10:
+            origin = input("Origin node -> ").lower().capitalize()
+            destination = input("Destination node -> ").lower().capitalize()
+            print(graph.a_star_search(origin, destination))
 
-            case _:
-                print("Enter a valid option")
+        case 11:
+            origin = input("Origin node -> ").lower().capitalize()
+            station = input("Station type -> ").upper()
+            print(graph.find_closest_station(origin, Energy_Station.convert_from_str(station)))
 
-        _ = input("\nPress any key to continue")
+        case _:
+            print("Enter a valid option")
+
+    _ = input("\nPress any key to continue")

@@ -2,92 +2,110 @@
 	"nodes": [
 	{
 		"name": "Elvas",
-		"heuristic": 270,
+		"latitude": 38.88027880,
+		"longitude": -7.16366370,
 		"type":"NONE"
 	},
 	{
 		"name": "Borba",
-		"heuristic": 250,
+		"latitude": 38.80611860,
+		"longitude": -7.45562130,
 		"type":"NONE"
 	},
 	{
 		"name": "Estremoz",
-		"heuristic": 145,
+		"latitude": 38.84251230,
+		"longitude": -7.58883780,
 		"type":"FUEL_STATION"
 	},
 	{
 		"name": "Evora",
-		"heuristic": 95,
+		"latitude": 38.57143100,
+		"longitude": -7.91350200,
 		"type":"NONE"
 	},
 	{
 		"name": "Montemor",
-		"heuristic": 70,
+		"latitude": 38.64811078,
+		"longitude": -8.21184297,
 		"type":"NONE"
 	},
 	{
 		"name": "Vendas Novas",
-		"heuristic": 45,
+		"latitude": 38.67689240,
+		"longitude": -8.46335580,
 		"type":"NONE"
 	},
 	{
 		"name": "Arraiolos",
-		"heuristic": 220,
+		"latitude": 38.76131970,
+		"longitude": -7.91570990,
 		"type":"NONE"
 	},
 	{
 		"name": "Alcacer",
-		"heuristic": 140,
+		"latitude": 38.42304370,
+		"longitude": -8.57210160,
 		"type":"NONE"
 	},
 	{
 		"name": "Palmela",
-		"heuristic": 85,
+		"latitude": 38.56944100,
+		"longitude": -8.90169370,
 		"type":"NONE"
 	},
 	{
 		"name": "Almada",
-		"heuristic": 25,
+		"latitude": 38.68019450,
+		"longitude": -9.15613820,
 		"type":"NONE"
 	},
 	{
 		"name": "Alandroal",
-		"heuristic": 180,
+		"latitude": 38.70213310,
+		"longitude": -7.40364880,
 		"type":"NONE"
 	},
 	{
 		"name": "Redondo",
-		"heuristic": 170,
+		"latitude": 38.63714240,
+		"longitude": -7.58973720,
 		"type":"NONE"
 	},
 	{
 		"name": "Monsaraz",
-		"heuristic": 120,
+		"latitude": 38.45185330,
+		"longitude": -7.38407290,
 		"type":"NONE"
 	},
 	{
 		"name": "Barreiro",
-		"heuristic": 30,
+		"latitude": 38.66081490,
+		"longitude": -9.07907240,
 		"type":"CHARGING_STATION"
 	},
 	{
 		"name": "Baixa da banheira",
-		"heuristic": 33,
+		"latitude": 38.65953240,
+		"longitude": -9.04343130,
 		"type":"CHARGING_AND_FUEL_STATION"
 	},
 	{
 		"name": "Moita",
-		"heuristic": 35,
+		"latitude": 38.65128600,
+		"longitude": -9.00184240,
 		"type":"NONE"
 	},
 	{
 		"name": "Alcochete",
-		"heuristic": 26,
+		"latitude": 38.71428310,
+		"longitude": -8.85833090,
 		"type":"NONE"
 	},
 	{
 		"name": "Lisboa",
-		"heuristic": 0,
+		"latitude": 38.72225240,
+		"longitude": -9.13933660,
 		"type":"FUEL_STATION"
 	}
 	],
@@ -95,128 +113,128 @@
 	"edges": [
 	{
 		"origin": "Elvas",
-		"destiny": "Borba",
-		"dist": 15,
+		"destination": "Borba",
+		"dist": 15000,
 		"speed": 50
 	},
 	{
 		"origin": "Borba",
-		"destiny": "Estremoz",
-		"dist": 15,
+		"destination": "Estremoz",
+		"dist": 15000,
 		"speed": 50
 	},
 	{
 		"origin": "Estremoz",
-		"destiny": "Evora",
-		"dist": 40,
-		"speed": 50
+		"destination": "Evora",
+		"dist": 40000,
+		"speed": 20
 	},
 	{
 		"origin": "Evora",
-		"destiny": "Montemor",
-		"dist": 20,
+		"destination": "Montemor",
+		"dist": 20000,
 		"speed": 50
 	},
 	{
 		"origin": "Montemor",
-		"destiny": "Vendas Novas",
-		"dist": 15,
+		"destination": "Vendas Novas",
+		"dist": 15000,
 		"speed": 50
 	},
 	{
 		"origin": "Vendas Novas",
-		"destiny": "Lisboa",
-		"dist": 50,
-		"speed": 50
+		"destination": "Lisboa",
+		"dist": 50000,
+		"speed": 70
 	},
 	{
 		"origin": "Elvas",
-		"destiny": "Arraiolos",
-		"dist": 50,
-		"speed": 50
+		"destination": "Arraiolos",
+		"dist": 50000,
+		"speed": 100
 	},
 	{
 		"origin": "Arraiolos",
-		"destiny": "Alcacer",
-		"dist": 90,
-		"speed": 50
+		"destination": "Alcacer",
+		"dist": 90000,
+		"speed": 120
 	},
 	{
 		"origin": "Alcacer",
-		"destiny": "Palmela",
-		"dist": 35,
+		"destination": "Palmela",
+		"dist": 35000,
 		"speed": 50
 	},
 	{
 		"origin": "Palmela",
-		"destiny": "Almada",
-		"dist": 25,
+		"destination": "Almada",
+		"dist": 25000,
 		"speed": 50
 	},
 	{
 		"origin": "Palmela",
-		"destiny": "Barreiro",
-		"dist": 25,
+		"destination": "Barreiro",
+		"dist": 25000,
 		"speed": 50
 	},
 	{
 		"origin": "Barreiro",
-		"destiny": "Palmela",
-		"dist": 30,
+		"destination": "Palmela",
+		"dist": 30000,
 		"speed": 50
 	},
 	{
 		"origin": "Almada",
-		"destiny": "Lisboa",
-		"dist": 15,
+		"destination": "Lisboa",
+		"dist": 15000,
 		"speed": 50
 	},
 	{
 		"origin": "Elvas",
-		"destiny": "Alandroal",
-		"dist": 40,
+		"destination": "Alandroal",
+		"dist": 40000,
 		"speed": 50
 	},
 	{
 		"origin": "Alandroal",
-		"destiny": "Redondo",
-		"dist": 25,
+		"destination": "Redondo",
+		"dist": 25000,
 		"speed": 50
 	},
 	{
 		"origin": "Redondo",
-		"destiny": "Monsaraz",
-		"dist": 30,
+		"destination": "Monsaraz",
+		"dist": 30000,
 		"speed": 50
 	},
 	{
 		"origin": "Monsaraz",
-		"destiny": "Barreiro",
-		"dist": 120,
+		"destination": "Barreiro",
+		"dist": 120000,
 		"speed": 50
 	},
 	{
 		"origin": "Barreiro",
-		"destiny": "Baixa da banheira",
-		"dist": 5,
+		"destination": "Baixa da banheira",
+		"dist": 5000,
 		"speed": 50
 	},
 	{
 		"origin": "Baixa da banheira",
-		"destiny": "Moita",
-		"dist": 7,
+		"destination": "Moita",
+		"dist": 7000,
 		"speed": 50
 	},
 	{
 		"origin": "Moita",
-		"destiny": "Alcochete",
-		"dist": 20,
+		"destination": "Alcochete",
+		"dist": 20000,
 		"speed": 50
 	},
 	{
 		"origin": "Alcochete",
-		"destiny": "Lisboa",
-		"dist": 20,
+		"destination": "Lisboa",
+		"dist": 20000,
 		"speed": 50
 	}
 	]
