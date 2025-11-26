@@ -86,7 +86,7 @@ def main():
             case 6:
                 origin = input("Origin node -> ").lower().capitalize()
                 destination = input("Destination node -> ").lower().capitalize()
-                print(graph.procura_DFS(origin, destination))
+                print(graph.DFS_search(origin, destination))
 
             case 7:
                 origin = input("Origin node -> ").lower().capitalize()
@@ -101,7 +101,7 @@ def main():
             case 9:
                 origin = input("Origin node -> ").lower().capitalize()
                 destination = input("Destination node -> ").lower().capitalize()
-                print(graph.greedy(origin, destination))
+                print(graph.greedy_search(origin, destination))
 
             case 10:
                 origin = input("Origin node -> ").lower().capitalize()
