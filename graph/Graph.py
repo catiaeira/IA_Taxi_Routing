@@ -95,6 +95,16 @@ class Graph:
         return total_cost
 
 
+    def get_arc_distance(self, node1: str, node2:str) -> int:
+        total_cost = -1
+        adj_list = self.adjacency_lists_dict[node1]
+        for (node, dist, _) in adj_list:
+            if node == node2:
+                total_cost = dist
+
+        return total_cost
+
+
     def calculate_cost(self, path: list[str]) -> float:
         cost = 0
         length = len(path)
@@ -103,6 +113,16 @@ class Graph:
             cost = cost + self.get_arc_cost(path[i], path[i + 1])
             i += 1
         return cost
+
+    
+    def calculate_distance(self, path: list[str]) -> int:
+        dist = 0
+        length = len(path)
+        i = 0
+        while i + 1 < length:
+            dist = dist + self.get_arc_distance(path[i], path[i + 1])
+            i += 1
+        return dist
 
 
     def calculate_heuristic(self, node1: str, node2: str) -> float:
@@ -177,7 +197,7 @@ class Graph:
         plt.show()
 
 
-    def BFS_search(self, origin: str, destination: str) -> tuple[list[str], float]|None:
+    def BFS_search(self, origin: str, destination: str) -> tuple[list[str], float, int]|None:
 
         queue: deque[str] = deque()
         queue.append(origin)
@@ -192,7 +212,7 @@ class Graph:
 
             if current == destination:
                 path: list[str] = self.build_path(parents, origin, destination)
-                return (path, self.calculate_cost(path))
+                return (path, self.calculate_cost(path), self.calculate_distance(path))
 
             for node, _, _ in self.get_neighbours(current):
                 if node not in visited:
@@ -205,7 +225,7 @@ class Graph:
         return None
 
 
-    def DFS_search(self, origin: str, destination: str) -> tuple[list[str], float]|None:
+    def DFS_search(self, origin: str, destination: str) -> tuple[list[str], float, int]|None:
         
         stack: list[str] = [origin]
 
@@ -218,7 +238,7 @@ class Graph:
 
             if current == destination:
                 path: list[str] = self.build_path(parents, origin, destination)
-                return (path, self.calculate_cost(path))
+                return (path, self.calculate_cost(path), self.calculate_distance(path))
 
             if current not in visited:
                 visited.add(current)
@@ -232,7 +252,7 @@ class Graph:
 
 
 
-    def find_closest_station(self, origin: str, station_type: Energy_Station):
+    def find_closest_station(self, origin: str, station_type: Energy_Station) -> tuple[list[str], float, int]|None:
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
         pqueue.put((0, origin))
@@ -257,7 +277,7 @@ class Graph:
             bn_type = self.get_node_by_name(best_node).getType()
             if bn_type == station_type or bn_type == Energy_Station.CHARGING_AND_FUEL_STATION:
                 path: list[str] = self.build_path(parents, origin, best_node)
-                return (path, bn_cost)
+                return (path, bn_cost, self.calculate_distance(path))
 
             for node, dist, speed in self.get_neighbours(best_node):
                 travel_time = utils.calculate_time(dist, speed)
@@ -274,7 +294,7 @@ class Graph:
         
 
 
-    def dijkstra_search(self, origin: str, destination: str) -> tuple[list[str], int|float] | None:
+    def dijkstra_search(self, origin: str, destination: str) -> tuple[list[str], float, int] | None:
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
         pqueue.put((0, origin))
@@ -296,7 +316,7 @@ class Graph:
 
             if best_node == destination:
                 path: list[str] = self.build_path(parents, origin, destination)
-                return (path, bn_cost)
+                return (path, bn_cost, self.calculate_distance(path))
 
             for node, dist, speed in self.get_neighbours(best_node):
                 travel_time = utils.calculate_time(dist, speed)
@@ -312,7 +332,7 @@ class Graph:
         return None
 
 
-    def a_star_search(self, origin: str, destination: str) -> tuple[list[str], int|float] | None:
+    def a_star_search(self, origin: str, destination: str) -> tuple[list[str], float, int] | None:
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
         pqueue.put((self.calculate_heuristic(origin, destination), origin))
@@ -336,7 +356,7 @@ class Graph:
             if best_node == destination:
                 path: list[str] = self.build_path(parents, origin, destination)
                 # here we can't return bn_cost because it has the heuristic value included
-                return (path, costs[destination])
+                return (path, costs[destination], self.calculate_distance(path))
 
             for node, dist, speed in self.get_neighbours(best_node):
                 travel_time = utils.calculate_time(dist, speed)
@@ -352,7 +372,7 @@ class Graph:
         return None
 
 
-    def greedy_search(self, origin: str, destination: str) -> tuple[list[str], int|float] | None:
+    def greedy_search(self, origin: str, destination: str) -> tuple[list[str], float, int] | None:
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
         pqueue.put((self.calculate_heuristic(origin, destination), origin))
@@ -369,7 +389,7 @@ class Graph:
 
             if best_node == destination:
                 path: list[str] = self.build_path(parents, origin, destination)
-                return (path, self.calculate_cost(path))
+                return (path, self.calculate_cost(path), self.calculate_distance(path))
 
             for node, _, _ in self.get_neighbours(best_node):
                 if node not in visited:
