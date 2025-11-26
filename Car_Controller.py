@@ -45,25 +45,27 @@ class Car_Controller:
         for sim_car in self.simulation_cars:     
             car = sim_car.car                       # todo currently not considering if its already in a trip, or the fuel
             if client.how_many > car.capacity - car.passengers_inside :
-                #print ("No capacity!") 
+                print ("No capacity!") 
                 continue
 
             car_copy = car.copy()
-
+            
             to_client = graph.a_star_search(car_copy.curr_node, client.start)
             if to_client == None:
-                #print ("Can't get to client!") # no way there or not enough fuel
+                print ("Can't get to client!") # no way there or not enough fuel
                 continue 
+
+            to_client_path, to_client_time, to_client_dist = to_client
             
-            # (path [], custo tempo, custo distancia) 
-            car_copy.update_car_after_trip (to_client[2], False) # start ride 
+            car_copy.update_car_after_trip (to_client_dist, False) # start ride 
 
-            to_client_goal = graph.procura_aStar(car_copy.curr_node, client.goal)
-            if to_client_goal == None:
-                #print ("Can't deliver client!") # no way there or not enough fuel
+            to_goal = graph.a_star_search(client.start, client.goal)
+            if to_goal == None:
+                print (f"Can't deliver {client}!") # no way there or not enough fuel
                 continue 
 
-            car_copy.update_car_after_trip (to_client_goal[2], False)
+            to_goal_path, to_goal_time, to_goal_dist = to_goal
+            car_copy.update_car_after_trip (to_goal_dist, False)
 
             dist_travelled = car_copy.kms_travelled - car.kms_travelled
             
@@ -72,8 +74,8 @@ class Car_Controller:
 
             if best_distance == None or dist_travelled < best_distance:
                 best_distance = dist_travelled
-                to_client_goal[0].pop(0) # remove head of list, since itll be the same as the last element of the first one
-                best_path = to_client[0] + to_client_goal[0]
+                to_goal_path.pop(0) # remove head of list, since itll be the same as the last element of the first one
+                best_path = to_client_path + to_goal_path
                 best_car = sim_car 
         
         if best_car == None:

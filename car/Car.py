@@ -20,14 +20,15 @@ class Car:
 
     # missing operational cost?
 
-    def consumption (self, kms: int) -> int:
+    def consumption (self, kms: float) -> float:
         return kms*self.consumption_per_km
 
     def assign_location (self, curr_node :str):
         self.curr_node = curr_node
 
-    def update_car_after_trip (self, distance, count_for_global_stats : bool): 
-        self.energy_level -= distance * self.consumption
+    def update_car_after_trip (self, distance_meters :int, count_for_global_stats : bool): 
+        distance = distance_meters / 1000.0
+        self.energy_level -= self.consumption(distance)
         if count_for_global_stats:
             Car.total_kms_travelled += distance
         self.kms_travelled += distance
@@ -42,12 +43,14 @@ class Car:
         if client is not None:
             if client.start == self.curr_node:
                 self.passengers_inside += client.how_many 
+                print ("added clients to car")
 
             if client.goal == self.curr_node:
                 self.trips_done += 1
                 if count_for_global_stats:
                     Car.total_trips_done += 1
                 self.passengers_inside -= client.how_many 
+                print ("removed clients from car")
         
     def copy(self):
         return copy.copy(self)
