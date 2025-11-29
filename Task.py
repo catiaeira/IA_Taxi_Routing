@@ -1,6 +1,7 @@
 from car import *
 from graph import Graph
 import math
+from utils import update_path, calc_time_between_nodes
 
 class Task:
     def __init__(self):
@@ -16,7 +17,7 @@ class Task_Move(Task):      # will only deal with neighboring nodes
         self.priority = 1
         self.curr_node = curr_node
         self.goal_node = goal_node
-        self.remaining_time = self.calc_time_between_nodes(self.curr_node, self.goal_node, graph)
+        self.remaining_time = calc_time_between_nodes(self.curr_node, self.goal_node, graph)
         #print (f"From {curr_node} to {goal_node} it should take {self.remaining_time}.")
 
 
@@ -25,7 +26,7 @@ class Task_Move(Task):      # will only deal with neighboring nodes
             self.time_started = curr_time
 
         # needs to recalculate the estimated time in case the traffic has worsened
-        new_total_time = self.calc_time_between_nodes(self.curr_node, self.goal_node, graph)
+        new_total_time = calc_time_between_nodes(self.curr_node, self.goal_node, graph)
         time_elapsed = curr_time - self.time_started
         self.remaining_time = max(0, new_total_time - time_elapsed)
 
@@ -38,15 +39,6 @@ class Task_Move(Task):      # will only deal with neighboring nodes
             car.update_car_after_trip(distance, True)
 
 
-    def calc_time_between_nodes(self, curr_node: str, goal_node : str, graph) -> float:
-        distance = graph.get_arc_distance(self.curr_node, self.goal_node) # in meters
-        speed = graph.get_arc_speed(self.curr_node, self.goal_node)       # in kms
-        if (distance == math.inf or speed == math.inf):
-            print (f"Path not found when calculating time: {curr_node} - {goal_node}")
-            return 0
-
-        time = distance / 1000 / speed * 60
-        return time
 
 # will handle the entire trip of one client
 class Task_Deliver_Client (Task):
@@ -66,10 +58,26 @@ class Task_Deliver_Client (Task):
         print(f"Estimated remaining time: {self.remaining_time} to client {client}.")
         self.client_controller = client_controller
         
-    
-    def update(self, curr_time, graph, car): # needs to be able to recalculate the path
+
+    def update(self, curr_time, graph, car, graph_changed :bool):
         if self.time_started == -1:
             self.time_started = curr_time
+
+        if graph_changed:                                   # graph changed, so we need to update the moves
+            curr_move = self.moves[self.current_move_index] 
+            path_tuple = update_path (graph, car, self.client, curr_move.goal_node)
+            if path_tuple == None:                          # can't deliver client now, wait in place for traffic to get better?
+                print ("No path found to client goal after change in traffic!")
+                return 
+
+            path, path_time, path_dist = path_tuple
+            self.current_move_index = 0
+            self.moves = [curr_move]            # insert the previous move
+
+            for i in range(len(path) - 1):
+                node_a = path[i]
+                node_b = path[i + 1]
+                self.moves.append(Task_Move(node_a, node_b, graph)) # create a task_move to each edge
             
         #loop to process moves until the current move is incomplete
         while self.current_move_index < len(self.moves):
@@ -83,7 +91,6 @@ class Task_Deliver_Client (Task):
             self.recalc_estimated_time()
 
             if current_move.completed:
-                print (f"car condition: {car}")
                 self.current_move_index += 1
                 
                 if self.current_move_index >= len(self.moves):  # has finished all the moves
@@ -93,13 +100,13 @@ class Task_Deliver_Client (Task):
                     car.update_car_clients(True, self.client)
                     self.client_controller.client_arrived_at_goal(self.client)
                     print ("client trip completed!")
+                    print (f"Car condition: {car}")
                     break
                 
                 # we keep looping bc of the cenario where multiple moves are possible in the same minute
             else:
                 # the current move isnt completed, so we are done for this time step
                 break 
-    # missing: recalculate route
 
     def recalc_estimated_time(self):
         total = 0
@@ -117,40 +124,39 @@ class Task_Refuel (Task):
         self.moves: List[Task_Move] = []
         self.current_move_index = 0
     
-    def update(self, curr_time, graph, car):
+    def update(self, curr_time, graph, car, graph_changed :bool):
         if self.time_started == -1:
             self.time_started = curr_time
 
         if self.refueling: # if already refueling
-            # setup refueling time
-            if self.time_left_refuel == -1:
-                self.time_left_refuel = car.time_to_refuel()
-                self.remaining_time = self.time_left_refuel
-                
-            elif self.time_left_refuel > 0:
-                self.time_left_refuel -= 1
-                self.remaining_time = self.time_left_refuel 
-            
-            # cleanup
-            elif self.time_left_refuel == 0:
-                self.completed = True
-                car.energy_level = 100 
-                print (f"Car {car} completed refueling at {curr_time}")
+            self.wait_refueling(car)
 
         else: # going to the fuel/charging station
 
-            if len(self.moves) == 0:                 # path hasnt been calculated yet
-                to_station = graph.find_closest_station(car.curr_node, car.charges_in())    # when to recalculate path???
+            if len(self.moves) == 0 or graph_changed:                 # path hasnt been calculated yet or needs updating
+
+                path_changed_midway = graph_changed and len(self.moves)>0
+                if path_changed_midway:
+                    curr_move = self.moves[self.current_move_index] # if the graph changed midways we need to store the previous move
+                    origin = curr_move.goal_node
+                else:
+                    origin = car.curr_node
+                to_station = graph.find_closest_station(origin, car.charges_in())   # find the closest station
                 if to_station == None:
                     print (f"{car} can't get to station!")  # rip?
-                    self.completed = True
                     return 
 
                 path = to_station[0]
+                self.current_move_index = 0     # start/reset the moves
+                self.moves = []
+
+                if path_changed_midway:
+                    self.moves.append(curr_move)            # save current move
+
                 for i in range(len(path) - 1):
                     node_a = path[i]
                     node_b = path[i + 1]
-                    self.moves.append(Task_Move(node_a, node_b, graph)) # create a task_move to each edge
+                    self.moves.append(Task_Move(node_a, node_b, graph)) # create a task_move to each edge                 
                 
             while self.current_move_index < len(self.moves):        # going to the station logic
                 current_move = self.moves[self.current_move_index]
@@ -159,7 +165,6 @@ class Task_Refuel (Task):
                 self.recalc_estimated_time(car)
 
                 if current_move.completed:
-                    print (f"car condition: {car}")
                     self.current_move_index += 1
                     
                     if self.current_move_index >= len(self.moves):  # has finished all the moves                        
@@ -172,12 +177,30 @@ class Task_Refuel (Task):
                     # the current move isnt completed, so we are done for this time step
                     break 
 
+    def wait_refueling (self, car):
+        # setup refueling time
+        if self.time_left_refuel == -1:
+            self.time_left_refuel = car.time_to_refuel()
+            self.remaining_time = self.time_left_refuel
+            print (f"Estimated time to fully refuel: {self.remaining_time}")
+            
+        elif self.time_left_refuel > 0:
+            self.time_left_refuel -= 1
+            self.remaining_time = self.time_left_refuel 
+        
+        # cleanup
+        elif self.time_left_refuel == 0:
+            self.completed = True
+            car.energy_level = 100 
+            print (f"Car {car} completed refueling")
+
+
     def recalc_estimated_time(self, car):
         total = 0
         for i in range(self.current_move_index, len(self.moves)):
             total += self.moves[i].remaining_time
         self.remaining_time = total + car.time_to_refuel()
-    
+
 
 class Task_Roam (Task):
     def __init__(self):

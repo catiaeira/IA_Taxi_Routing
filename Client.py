@@ -6,6 +6,7 @@ class Client:
         self.goal = goal
         self.is_in_car = False
         self.how_many = how_many
+        # missing: preference? time, electric car, premium client
 
     def enter_car (self):
         self.is_in_car = True

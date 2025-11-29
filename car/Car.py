@@ -19,14 +19,14 @@ class Car:
 
     # missing operational cost?
 
-    def consumption (self, kms: float) -> float:
+    def consumption (self, kms: int) -> float:
         return kms*self.consumption_per_km
 
     def assign_location (self, curr_node :str):
         self.curr_node = curr_node
 
     def update_car_after_trip (self, distance_meters :int, count_for_global_stats : bool): 
-        distance = distance_meters / 1000.0
+        distance = distance_meters / 1000
         self.energy_level -= self.consumption(distance)
         if count_for_global_stats:
             Car.total_kms_travelled += distance
