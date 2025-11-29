@@ -21,14 +21,14 @@ class Task_Move(Task):      # will only deal with neighboring nodes
         #print (f"From {curr_node} to {goal_node} it should take {self.remaining_time}.")
 
 
-    def update(self, curr_time, graph, car):  #todo is missing taking fuel into consideration
+    def update(self, curr_time, graph, car, graph_changed :bool):
         if self.time_started == -1:
             self.time_started = curr_time
 
-        # needs to recalculate the estimated time in case the traffic has worsened
-        new_total_time = calc_time_between_nodes(self.curr_node, self.goal_node, graph)
-        time_elapsed = curr_time - self.time_started
-        self.remaining_time = max(0, new_total_time - time_elapsed)
+        if graph_changed: # needs to recalculate the estimated time if the traffic has worsened
+            new_total_time = calc_time_between_nodes(self.curr_node, self.goal_node, graph)
+            time_elapsed = curr_time - self.time_started
+            self.remaining_time = max(0, new_total_time - time_elapsed)
 
         if self.remaining_time <= 0:
             #print (f"move {self.curr_node} to {self.goal_node} completed at {curr_time}")
@@ -37,6 +37,8 @@ class Task_Move(Task):      # will only deal with neighboring nodes
             distance = graph.get_arc_distance(self.curr_node, self.goal_node) # in meters
             car.curr_node = self.goal_node
             car.update_car_after_trip(distance, True)
+            if car.energy_level <= 0:
+                print (f"{car} ran out of energy!") # allowing it, for now
 
 
 
@@ -82,7 +84,7 @@ class Task_Deliver_Client (Task):
         #loop to process moves until the current move is incomplete
         while self.current_move_index < len(self.moves):
             current_move = self.moves[self.current_move_index]
-            current_move.update(curr_time, graph, car)
+            current_move.update(curr_time, graph, car, graph_changed)
 
             if current_move.curr_node == self.client.start and not self.client.is_in_car:
                 self.client.enter_car()
