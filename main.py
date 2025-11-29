@@ -59,6 +59,7 @@ def main():
         print("9  - Greedy")
         print("10 - A*")
         print("11 - Find closest station (Dijkstra)")
+        print("12 - Find closest available car (Dijkstra)")
         print("0  - Quit\n")
 
         user_input = int(input("Enter your option -> "))
@@ -112,6 +113,17 @@ def main():
                 origin = input("Origin node -> ").lower().capitalize()
                 station = input("Station type -> ").upper()
                 print(graph.find_closest_station(origin, Energy_Station.convert_from_str(station)))
+
+            case 12:
+                origin = input("Origin node -> ").lower().capitalize()
+                cars: set[str] = set()
+                print("Enter nodes with available cars (type 'end' when you're done)")
+                end = False
+                while not end:
+                    car = input("Available car -> ").lower().capitalize()
+                    cars.add(car)
+                    end = car == "End"
+                print(graph.find_closest_car(origin, cars))
 
             case _:
                 print("Enter a valid option")

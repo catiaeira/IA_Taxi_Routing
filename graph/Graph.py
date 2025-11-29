@@ -291,6 +291,46 @@ class Graph:
         # if we exit the cycle, it means no station was found
         print(f"Couldn't find any station from {origin}")
         return None
+
+
+    def find_closest_car(self, origin: str, cars: set[str]) -> tuple[list[str], float, int]|None:
+        # the entries are of the form (priority_number, data)
+        pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
+        pqueue.put((0, origin))
+
+        # the cost is in minutes (calculated based on distance (kms) and speed (kms/h))
+        costs: dict[str,float] = {origin: 0}
+
+        parents: dict[str, str] = {origin: origin}
+
+        while not pqueue.empty():
+
+            # get() will return the item with the lowest priority_number
+            # in our case, the lowest cost (most attractive node)
+            bn_cost, best_node = pqueue.get()
+
+            # skip stale entries
+            if bn_cost > costs[best_node]:
+                continue
+
+            # stop if the node has an available car
+            # for that, it's just necessary to check if the current node is in the provided set
+            if best_node in cars:
+                path: list[str] = self.build_path(parents, origin, best_node)
+                return (path, bn_cost, self.calculate_distance(path))
+
+            for node, dist, speed in self.get_neighbours(best_node):
+                travel_time = utils.calculate_time(dist, speed)
+                new_cost = costs[best_node] + travel_time
+
+                if node not in costs or new_cost < costs[node]:
+                    costs[node] = new_cost
+                    parents[node] = best_node
+                    pqueue.put((new_cost, node))
+
+        # if we exit the cycle, it means no available cars were found
+        print(f"Couldn't find any available car from {origin}")
+        return None
         
 
 
