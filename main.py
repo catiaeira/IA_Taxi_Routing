@@ -1,5 +1,6 @@
 from graph.Energy_Station import Energy_Station
 from parser.parse_json_graph import parse_graph
+from parser.get_osmnx_graph import get_graph
 from car.Car import ElectricCar
 from Client import Client
 
@@ -43,7 +44,13 @@ def do_trip (car, client): # basic trip logic, not dynamic
 
 
 def main():
-    graph = parse_graph()
+    osmnx = input("Load graph from OSMnx? [y/n]")
+
+    if osmnx == "y":
+        graph = get_graph()
+    else:
+        graph = parse_graph()
+
     user_input = -1
     eCar = ElectricCar()
 

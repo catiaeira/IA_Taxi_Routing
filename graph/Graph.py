@@ -19,6 +19,14 @@ class Graph:
         self.adjacency_lists_dict: dict[str, list[tuple[str, int, int]]] = {}  
         self.max_speed: int = 0
 
+    def numberOfNodes(self):
+        return len(self.node_dict)
+
+    def numberOfEdges(self):
+        total = 0
+        for list in self.adjacency_lists_dict.values():
+            total += len(list)
+        return total
 
     def setMaxSpeed(self, speed: int):
         self.max_speed = speed
