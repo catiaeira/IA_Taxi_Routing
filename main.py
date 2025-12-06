@@ -47,7 +47,7 @@ def main_menu(graph, car_controller, client_controller):
         print("4 - Skip to next time instance")
         print("5 - Specify the number of time instances skips")
         print("6 - Print the graph menu")
-        print("7 - Compare various algorithms")
+        print("7 - Change the algorithm used for pathing")
         print("0 - Quit\n")
 
         user_input = int(input("Enter your option -> "))
@@ -85,7 +85,7 @@ def main_menu(graph, car_controller, client_controller):
                 continue
 
             case 7:
-                algorithm_menu()
+                algorithm_menu(graph)
                 continue
 
             case _:
@@ -160,10 +160,9 @@ def client_menu (client_controller):    # not yet implemented
                 return 0
 
 
-# will then run the same simulation using all the different algorithms 
-def algorithm_menu ():      # not yet implemented
+def algorithm_menu (graph):
     user_input = -1
-    while user_input != 0:
+    while user_input == -1:
         print("\n1 - DFS")
         print("2 - BFS")
         print("3 - Dijkstra")
@@ -176,6 +175,21 @@ def algorithm_menu ():      # not yet implemented
         match user_input:
             case 0:
                 return 0
+            case 1:
+                graph.ALGORITHM = "DFS"
+            case 2:
+                graph.ALGORITHM = "BFS"
+            case 3: 
+                graph.ALGORITHM = "DIJKSTRA"
+            case 4:
+                graph.ALGORITHM = "GREEDY"
+            case 5: 
+                graph.ALGORITHM = "A_STAR"
+            case _:
+                print("Enter a valid option")
+                user_input = -1
+    return 0
+    
 
 
 if __name__ == "__main__":

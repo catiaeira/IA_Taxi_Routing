@@ -13,6 +13,7 @@ from car.Car import Car, ElectricCar, FuelCar
 import utils
 
 class Graph:
+    ALGORITHM = "A_STAR" # A star is default
 
     def __init__(self):
         self.node_dict: dict[str, Node] = {}  
@@ -107,16 +108,6 @@ class Graph:
 
     def get_arc_distance(self, node1: str, node2:str) -> int:
         total_cost = math.inf
-        adj_list = self.adjacency_lists_dict[node1]
-        for (node, dist, _) in adj_list:
-            if node == node2:
-                total_cost = dist
-
-        return total_cost
-
-
-    def get_arc_distance(self, node1: str, node2:str) -> int:
-        total_cost = -1
         adj_list = self.adjacency_lists_dict[node1]
         for (node, dist, _) in adj_list:
             if node == node2:
@@ -485,6 +476,22 @@ class Graph:
             time = distance / 1000 / speed * 60
             return time
 
+    def get_algorithm(self):
+        match (self.ALGORITHM):
+            case ("DFS"):
+                return self.DFS_search
+            case ("BFS"):
+                return self.BFS_search
+            case ("DIJKSTRA"):
+                return self.dijkstra_search
+            case ("GREEDY"):
+                return self.greedy_search
+            case ("A_STAR"):
+                return self.a_star_search
+            case (_):
+                print ("unknown algorithm") # shouldnt happen
+                return None
+
     # uses the car's current node as the starting point to create the path 
     def create_path_to_client(self, car, client) -> tuple[list[str], float, int] | None:
         return self.create_path_to_client_and_goal(car, client, car.curr_node)
@@ -504,8 +511,12 @@ class Graph:
             print("No capacity!") 
             return None
 
+        algorithm = self.get_algorithm()
+        if algorithm is None:
+            return None
+
         # Car to Client 
-        to_client = self.a_star_search(origin_node, client.start)
+        to_client = algorithm(origin_node, client.start)
         if to_client is None:
             print(f"Can't get from {origin_node} to client {client.start}!")
             return None
@@ -516,7 +527,7 @@ class Graph:
             return None
 
         # Client to Goal
-        to_goal = self.a_star_search(client.start, client.goal)
+        to_goal = algorithm(client.start, client.goal)
         if to_goal is None:
             print(f"Can't deliver client from {client.start} to goal {client.goal}!")
             return None
@@ -540,7 +551,11 @@ class Graph:
 
     # gives the path from the origin node to the client's goal
     def path_to_goal(self, car, client, origin_node: str) -> tuple[list[str], float, int] | None:
-        to_goal = self.a_star_search(origin_node, client.goal)
+        algorithm = self.get_algorithm()
+        if algorithm is None:
+            return None
+
+        to_goal = algorithm(origin_node, client.goal)
         if to_goal is None:
             print(f"Can't find a path from {origin_node} to goal {client.goal}!")
             return None
