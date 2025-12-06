@@ -1,6 +1,7 @@
 from typing_extensions import override
 from graph.Energy_Station import Energy_Station
 from Client import Client
+import copy
 
 class Car:
     total_trips_done:int = 0
@@ -18,38 +19,40 @@ class Car:
 
     # missing operational cost?
 
-    def consumption (self, kms: int) -> int:
+    def consumption (self, kms: int) -> float:
         return kms*self.consumption_per_km
 
     def assign_location (self, curr_node :str):
         self.curr_node = curr_node
 
-    def update_car_after_trip (self, trip: tuple[list[str], int, float], count_for_global_stats : bool, client : Client = None): 
-        nodes_visited = trip[0]
-        total_cost = trip[1]
-        new_fuel = trip[2]
-
-        self.energy_level = new_fuel
+    def update_car_after_trip (self, distance_meters :int, count_for_global_stats : bool): 
+        distance = distance_meters / 1000
+        self.energy_level -= self.consumption(distance)
         if count_for_global_stats:
-            Car.total_kms_travelled += total_cost
-        self.kms_travelled += total_cost
-        self.curr_node = nodes_visited[len(nodes_visited)-1]
+            Car.total_kms_travelled += distance
+        self.kms_travelled += distance
 
         if self.passengers_inside > 0:
             if count_for_global_stats:
-                Car.total_kms_travelled_w_passengers += total_cost
-            self.kms_travelled_w_passengers += total_cost
+                Car.total_kms_travelled_w_passengers += distance
+            self.kms_travelled_w_passengers += distance
 
+
+    def update_car_clients (self, count_for_global_stats : bool, client : Client): 
         if client is not None:
             if client.start == self.curr_node:
                 self.passengers_inside += client.how_many 
+                print ("added clients to car")
 
             if client.goal == self.curr_node:
                 self.trips_done += 1
                 if count_for_global_stats:
-                    Car.trips_done += 1
+                    Car.total_trips_done += 1
                 self.passengers_inside -= client.how_many 
+                print ("removed clients from car")
         
+    def copy(self):
+        return copy.copy(self)
 
     @override
     def __str__(self) -> str:
@@ -77,6 +80,13 @@ class ElectricCar (Car):
     def charges_in (self) -> Energy_Station:
         return Energy_Station.CHARGING_STATION
 
+    def time_to_refuel(self) -> int: 
+        return (100 - self.energy_level) / 4     # could change between cars. 25 mins to fully recharge
+
+    @override
+    def __str__(self) -> str:
+        return "Electric " + super().__str__()
+
 
 class FuelCar (Car):
     def __init__(self, energy_level=100, capacity=4):
@@ -88,3 +98,10 @@ class FuelCar (Car):
 
     def charges_in (self) -> Energy_Station:
         return Energy_Station.FUEL_STATION
+
+    def time_to_refuel (self) -> int:
+        return 5 # minutes
+
+    @override
+    def __str__(self) -> str:
+        return "Fuel " + super().__str__()
