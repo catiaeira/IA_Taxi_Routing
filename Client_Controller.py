@@ -26,4 +26,4 @@ class Client_Controller:
         c1 = Client ("Alandroal", "Monsaraz", 4)
         c2 = Client ("Palmela", "Lisboa", 3)
 
-        return [c1]
+        return [c1, c2]

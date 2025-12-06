@@ -135,6 +135,7 @@ def car_menu (car_controller):  # not yet implemented
         print("2 - Add car")
         print("3 - Delete car")
         print("4 - Change car")
+        print("5 - Change car priority")
         print("0 - Go back\n")
 
         user_input = int(input("Enter your option -> "))
@@ -142,6 +143,29 @@ def car_menu (car_controller):  # not yet implemented
         match user_input:
             case 0:
                 return 0
+            case 5:
+                car_priority_menu(car_controller)
+
+
+def car_priority_menu (car_controller):
+    user_input = -1
+    while user_input == -1:
+        print ("\n1 - Time")
+        print ("2 - Operational Cost")
+        print ("0 - Go back\n")
+        user_input = int(input("Enter your option -> "))
+
+        match user_input:
+            case 0:
+                return 0
+            case 1:
+                car_controller.CHOOSING_PREFERENCE = "TIME"
+            case 2:
+                car_controller.CHOOSING_PREFERENCE = "COST"
+            case _:
+                print("Enter a valid option")
+                user_input = -1
+    return 0
 
 
 def client_menu (client_controller):    # not yet implemented

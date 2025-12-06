@@ -14,6 +14,7 @@ class Car_Controller:
             sim_car = Simulation_Car(car)
             self.simulation_cars.append(sim_car)        
 
+    CHOOSING_PREFERENCE = "TIME"        # time taken is the default choice when a car is being chosen
 
     def get_cars (self) -> list[Car]: # default cars it starts with... maybe change to import from a file
         car1 = FuelCar(30)
@@ -22,7 +23,7 @@ class Car_Controller:
         car1.assign_location("Elvas")
         car2.assign_location("Elvas")
 
-        return [car1]
+        return [car1, car2]
 
     def update (self, curr_time, client_controller, graph, graph_changed : bool):
         waiting_clients : list [Client] = client_controller.waiting_clients
@@ -42,17 +43,16 @@ class Car_Controller:
         # if dynamic_car:
         #   remove/add cars with x chance
         
-
-        # todo
-        # smarter division when assigning clients (consider cars that are already in a trip)
-        #
     def assign_car_to_client (self, client, graph, client_controller): # returns 1 if sucessfull, 0 otherwise
-        best_path = []                              # probably can be better
-        best_distance = None
+        best_path = []
+        best_parameter = None
         best_car = None
 
-        for sim_car in self.simulation_cars:     
-            car = sim_car.car                       # todo currently not considering if its already in a trip
+        for sim_car in self.simulation_cars:
+            if sim_car.is_car_busy():       # if a car already has a trip assigned, dont consider it
+                continue    
+
+            car = sim_car.car                     
 
             trip_to_client = graph.create_path_to_client(car, client)
             if trip_to_client == None:
@@ -63,10 +63,16 @@ class Car_Controller:
             # here we need to choose which parameter we're focusing on (eg fastest time, least fuel spent). 
             # only distance for now
 
-            if best_distance == None or dist_travelled < best_distance:
-                best_distance = dist_travelled
-                best_path = path
-                best_car = sim_car 
+            if self.CHOOSING_PREFERENCE == "TIME":
+                if best_parameter == None or time_taken < best_parameter:
+                    best_parameter = time_taken
+                    best_path = path
+                    best_car = sim_car 
+            else:                           # todo will change to consider the cost instead of distance !!!!
+                if best_parameter == None or dist_travelled < best_parameter:
+                    best_parameter = dist_travelled
+                    best_path = path
+                    best_car = sim_car 
         
         if best_car == None:
             # couldnt find a suitable car, will wait
@@ -89,6 +95,17 @@ class Simulation_Car:
         self.car: Car = car
         self.tasks_list: list[Task] = []
         self.current_task: Task = None 
+
+    def is_car_busy(self):
+        has_to_deliver_client = False
+        for task in self.tasks_list:
+            if (isinstance(task, Task_Deliver_Client)):
+                has_to_deliver_client = True
+                break 
+
+        if self.current_task != None or has_to_deliver_client:
+            return True
+        return False
 
     def update(self, curr_time, graph, graph_changed :bool):
         if self.current_task is None :
