@@ -11,7 +11,7 @@ def dist(latOr: float, longOr: float, latDest: float, longDest: float) -> float:
     #straigth line distance in kms - Haversine Formula
     distance = 2 * 6371 * math.asin(math.sqrt(math.pow(math.sin((lat2 - lat1)/2), 2) + math.cos(lat1)*math.cos(lat2)*math.pow(math.sin((long2 - long1)/2),2)))
 
-    return distance
+    return distance * 1000
 
 
 # returns the travel time in seconds
