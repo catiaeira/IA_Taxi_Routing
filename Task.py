@@ -1,7 +1,6 @@
 from car import *
 from graph import Graph
 import math
-from utils import update_path, calc_time_between_nodes
 
 class Task:
     def __init__(self):
@@ -17,7 +16,7 @@ class Task_Move(Task):      # will only deal with neighboring nodes
         self.priority = 1
         self.curr_node = curr_node
         self.goal_node = goal_node
-        self.remaining_time = calc_time_between_nodes(self.curr_node, self.goal_node, graph)
+        self.remaining_time = graph.calc_time_between_nodes(self.curr_node, self.goal_node)
         #print (f"From {curr_node} to {goal_node} it should take {self.remaining_time}.")
 
 
@@ -26,7 +25,7 @@ class Task_Move(Task):      # will only deal with neighboring nodes
             self.time_started = curr_time
 
         if graph_changed: # needs to recalculate the estimated time if the traffic has worsened
-            new_total_time = calc_time_between_nodes(self.curr_node, self.goal_node, graph)
+            new_total_time = graph.calc_time_between_nodes(self.curr_node, self.goal_node)
             time_elapsed = curr_time - self.time_started
             self.remaining_time = max(0, new_total_time - time_elapsed)
 
@@ -67,7 +66,7 @@ class Task_Deliver_Client (Task):
 
         if graph_changed:                                   # graph changed, so we need to update the moves
             curr_move = self.moves[self.current_move_index] 
-            path_tuple = update_path (graph, car, self.client, curr_move.goal_node)
+            path_tuple = graph.update_path (car, self.client, curr_move.goal_node)
             if path_tuple == None:                          # can't deliver client now, wait in place for traffic to get better?
                 print ("No path found to client goal after change in traffic!")
                 return 

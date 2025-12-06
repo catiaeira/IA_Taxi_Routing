@@ -2,7 +2,7 @@ from car.Car import *
 from Client import Client
 from Client_Controller import Client_Controller
 from Task import *
-from utils import create_path_to_client
+from graph import Graph
 
 class Car_Controller: 
     def __init__(self, dynamic_car: bool):
@@ -54,7 +54,7 @@ class Car_Controller:
         for sim_car in self.simulation_cars:     
             car = sim_car.car                       # todo currently not considering if its already in a trip
 
-            trip_to_client = create_path_to_client(graph, car, client)
+            trip_to_client = graph.create_path_to_client(car, client)
             if trip_to_client == None:
                 continue
 
