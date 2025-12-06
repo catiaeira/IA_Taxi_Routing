@@ -254,8 +254,9 @@ class Graph:
             if current not in visited:
                 visited.add(current)
                 for node, _, _ in self.get_neighbours(current):
-                    stack.append(node)
-                    parents[node] = current
+                    if node not in visited:
+                        stack.append(node)
+                        parents[node] = current
 
         # if we exit the cycle, it means the destination wasn't found
         print(f"Path not found for origin {origin} and destination {destination}")
