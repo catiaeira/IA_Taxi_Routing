@@ -3,6 +3,7 @@ from typing_extensions import override
 import math
 from queue import PriorityQueue
 from collections import deque
+from functools import lru_cache
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -19,20 +20,20 @@ class Graph:
         self.adjacency_lists_dict: dict[str, list[tuple[str, int, int]]] = {}  
         self.max_speed: int = 0
 
-    def numberOfNodes(self):
+    def number_of_nodes(self):
         return len(self.node_dict)
 
-    def numberOfEdges(self):
+    def number_of_edges(self):
         total = 0
         for list in self.adjacency_lists_dict.values():
             total += len(list)
         return total
 
-    def setMaxSpeed(self, speed: int):
+    def set_max_speed(self, speed: int):
         self.max_speed = speed
 
 
-    def getMaxSpeed(self):
+    def get_max_speed(self):
         return self.max_speed
 
 
@@ -133,6 +134,7 @@ class Graph:
         return dist
 
 
+    @lru_cache(maxsize=10000)
     def calculate_heuristic(self, node1: str, node2: str) -> float:
         origin = self.get_node_by_name(node1)
         destination = self.get_node_by_name(node2)
@@ -141,7 +143,7 @@ class Graph:
         # it shouldn't be a problem, since the result is in meters, so the decimal part is irrelevant
         straight_line_dist = int(utils.dist(origin.getLatitude(), origin.getLongitude(), destination.getLatitude(), destination.getLongitude()))
 
-        return utils.calculate_time(straight_line_dist, self.getMaxSpeed())
+        return utils.calculate_time(straight_line_dist, self.get_max_speed())
 
 
     def get_neighbours(self, node: str) -> list[tuple[str, int, int]]:
@@ -251,8 +253,9 @@ class Graph:
             if current not in visited:
                 visited.add(current)
                 for node, _, _ in self.get_neighbours(current):
-                    stack.append(node)
-                    parents[node] = current
+                    if node not in visited:
+                        stack.append(node)
+                        parents[node] = current
 
         # if we exit the cycle, it means the destination wasn't found
         print(f"Path not found for origin {origin} and destination {destination}")
