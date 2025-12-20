@@ -17,13 +17,40 @@ class Car_Controller:
     CHOOSING_PREFERENCE = "TIME"        # time taken is the default choice when a car is being chosen
 
     def get_cars (self) -> list[Car]: # default cars it starts with... maybe change to import from a file
-        car1 = FuelCar(30)
+        car1 = FuelCar(energy_level=30)
         car2 = ElectricCar()
 
         car1.assign_location("Elvas")
         car2.assign_location("Elvas")
 
         return [car1, car2]
+    
+    def get_number_of_cars (self):
+        return len(self.simulation_cars)
+
+    def see_cars (self):
+        i = 0
+        for sim_car in self.simulation_cars:
+            print("Car", i, ":", end=" ")
+            print(sim_car.car)
+            i += 1
+
+    def add_car (self, car_type: int, car_capacity: int, car_energy_level: float, car_curr_node: str): #make car_type a str ?
+        if(car_type == 1):
+            car = FuelCar(energy_level=car_energy_level, capacity=car_capacity, curr_node=car_curr_node)
+        elif(car_type == 2):
+            car = ElectricCar(energy_level=car_energy_level, capacity=car_capacity, curr_node=car_curr_node)
+
+        sim_car = Simulation_Car(car)
+        self.simulation_cars.append(sim_car)
+
+    def delete_car(self, index: int):
+        self.simulation_cars.pop(index)
+
+    def change_car(self, index: int, car_type: int, car_capacity: int, car_energy_level: int, car_curr_node: str):
+        sim_car = self.simulation_cars[index]
+        new_car = sim_car.car.change_characteristics(car_type, car_capacity, car_energy_level, car_curr_node)
+        sim_car.car = new_car
 
     def update (self, curr_time, client_controller, graph, graph_changed : bool):
         waiting_clients : list [Client] = client_controller.waiting_clients

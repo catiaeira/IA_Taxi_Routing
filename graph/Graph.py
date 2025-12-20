@@ -44,7 +44,11 @@ class Graph:
         else:
             return node
 
-
+    def node_exists(self, name: str) -> bool:
+        if self.node_dict.get(name) is None:
+            return 0
+        return 1
+    
     def str_edges(self) -> str:
         edge: str = ""
         for node in self.node_dict.keys():
