@@ -1,4 +1,5 @@
 import time
+from car.Car import Car
 from graph.Energy_Station import Energy_Station
 from parser.parse_json_graph import parse_graph
 from parser.get_osmnx_graph import get_graph
@@ -9,7 +10,9 @@ def main():
 
     if osmnx == "y":
         graph = get_graph()
+        print("OSMnx graph successfully loaded")
     else:
+        print("JSON graph successfully loaded")
         graph = parse_graph()
 
     user_input = -1
@@ -27,6 +30,7 @@ def main():
         print("10 - A*")
         print("11 - Find closest station (Dijkstra)")
         print("12 - Find closest available car (Dijkstra)")
+        print("13 - Find route with the most nodes (A*)")
         print("0  - Quit\n")
 
         user_input = int(input("Enter your option -> "))
@@ -107,16 +111,24 @@ def main():
 
             case 12:
                 origin = input("Origin node -> ").lower().capitalize()
-                cars: set[str] = set()
+                cars: set[Car] = set()
                 print("Enter nodes with available cars (type 'end' when you're done)")
-                end = False
-                while not end:
-                    car = input("Available car -> ").lower().capitalize()
+                while True:
+                    node = input("Available car -> ").lower().capitalize()
+                    if node == "End":
+                        break
+                    car = Car()
+                    car.assign_location(node)
                     cars.add(car)
-                    end = car == "End"
 
                 start = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
                 print(graph.find_closest_car(origin, cars))
+                end = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
+                print(f"Time elapsed: {(end-start)/1_000_000}ms")
+
+            case 13:
+                start = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
+                print(graph.find_longest_route())
                 end = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
                 print(f"Time elapsed: {(end-start)/1_000_000}ms")
 

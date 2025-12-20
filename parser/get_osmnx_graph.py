@@ -4,7 +4,8 @@ import osmnx.plot as oxplot
 
 import os.path as osp
 
-from graph.Graph import Graph, Energy_Station
+from graph.Graph import Graph
+from graph.Energy_Station import Energy_Station
 
 def match_single_type(road_type: str) -> int:
     match road_type:
@@ -82,4 +83,4 @@ def get_graph() -> Graph:
 
 
 if __name__ == "__main__":
-    get_graph()
+    _ = get_graph()

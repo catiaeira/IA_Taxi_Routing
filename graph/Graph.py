@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from .Node import Node
 from graph.Energy_Station import Energy_Station
-from car.Car import Car, ElectricCar, FuelCar
+from car.Car import Car
 import utils
 
 class Graph:
@@ -304,7 +304,12 @@ class Graph:
         return None
 
 
-    def find_closest_car(self, origin: str, cars: set[str]) -> tuple[list[str], float, int]|None:
+    def find_closest_car(self, origin: str, cars: set[Car]) -> tuple[list[str], float, int]|None:
+        # extract only the current nodes
+        car_nodes: set[str] = set()
+        for car in cars:
+            car_nodes.add(car.curr_node)
+
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
         pqueue.put((0, origin))
@@ -325,8 +330,8 @@ class Graph:
                 continue
 
             # stop if the node has an available car
-            # for that, it's just necessary to check if the current node is in the provided set
-            if best_node in cars:
+            # for that, it's just necessary to check if the current node is the same as any car's current node
+            if best_node in car_nodes:
                 path: list[str] = self.build_path(parents, origin, best_node)
                 return (path, bn_cost, self.calculate_distance(path))
 
@@ -342,9 +347,11 @@ class Graph:
         # if we exit the cycle, it means no available cars were found
         print(f"Couldn't find any available car from {origin}")
         return None
+
+
+    #def find_closest_car_by_op_cost(self, origin: str, cars: set[str]) -> tuple[list[str], float, int]|None:
+
         
-
-
     def dijkstra_search(self, origin: str, destination: str) -> tuple[list[str], float, int] | None:
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
@@ -463,3 +470,22 @@ class Graph:
         path.insert(0, origin)
 
         return path
+
+    
+    def find_longest_route(self) -> tuple[str, str]:
+        longest_route: tuple[str, str] = ("","")
+        max_path_len = 0
+
+        for origin in self.node_dict.keys():
+            for destination in self.node_dict.keys():
+                search_result = self.a_star_search(origin, destination)
+                if search_result is not None:
+                    path_len = len(search_result[0])
+                    if path_len > max_path_len:
+                        max_path_len = path_len
+                        longest_route = (origin, destination)
+                        print(f"New max found ({max_path_len}) for nodes {origin} and {destination}")
+
+        return longest_route
+
+
