@@ -19,6 +19,8 @@ class Graph:
         self.node_dict: dict[str, Node] = {}  
         self.adjacency_lists_dict: dict[str, list[tuple[str, int, int]]] = {}  
         self.max_speed: int = 0
+        # this dict stores heuristics as they're calculated in order to save time
+        self.heuristics: dict[tuple[str,str], float] = {}
 
     def number_of_nodes(self):
         return len(self.node_dict)
@@ -134,8 +136,12 @@ class Graph:
         return dist
 
 
-    @lru_cache(maxsize=10000)
     def calculate_heuristic(self, node1: str, node2: str) -> float:
+        # check if this heuristic was already calculated
+        stored = self.heuristics.get((node1, node2))
+        if stored is not None:
+            return stored
+
         origin = self.get_node_by_name(node1)
         destination = self.get_node_by_name(node2)
 
@@ -143,7 +149,10 @@ class Graph:
         # it shouldn't be a problem, since the result is in meters, so the decimal part is irrelevant
         straight_line_dist = int(utils.dist(origin.getLatitude(), origin.getLongitude(), destination.getLatitude(), destination.getLongitude()))
 
-        return utils.calculate_time(straight_line_dist, self.get_max_speed())
+        dist = utils.calculate_time(straight_line_dist, self.get_max_speed())
+        # save the heuristic for future use
+        self.heuristics[(node1, node2)] = dist
+        return dist
 
 
     def get_neighbours(self, node: str) -> list[tuple[str, int, int]]:
@@ -472,19 +481,18 @@ class Graph:
         return path
 
     
-    def find_longest_route(self) -> tuple[str, str]:
+    def find_longest_route(self, origin: str) -> tuple[str, str]:
         longest_route: tuple[str, str] = ("","")
         max_path_len = 0
 
-        for origin in self.node_dict.keys():
-            for destination in self.node_dict.keys():
-                search_result = self.a_star_search(origin, destination)
-                if search_result is not None:
-                    path_len = len(search_result[0])
-                    if path_len > max_path_len:
-                        max_path_len = path_len
-                        longest_route = (origin, destination)
-                        print(f"New max found ({max_path_len}) for nodes {origin} and {destination}")
+        for destination in self.node_dict.keys():
+            search_result = self.a_star_search(origin, destination)
+            if search_result is not None:
+                path_len = len(search_result[0])
+                if path_len > max_path_len:
+                    max_path_len = path_len
+                    longest_route = (origin, destination)
+                    print(f"New max found ({max_path_len}) for nodes {origin} and {destination}")
 
         return longest_route
 

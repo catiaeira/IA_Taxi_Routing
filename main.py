@@ -127,8 +127,9 @@ def main():
                 print(f"Time elapsed: {(end-start)/1_000_000}ms")
 
             case 13:
+                origin = input("Origin node -> ").lower().capitalize()
                 start = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
-                print(graph.find_longest_route())
+                print(graph.find_longest_route(origin))
                 end = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
                 print(f"Time elapsed: {(end-start)/1_000_000}ms")
 
