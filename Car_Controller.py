@@ -1,3 +1,5 @@
+import random
+
 from car.Car import *
 from Client import Client
 from Client_Controller import Client_Controller
@@ -67,8 +69,32 @@ class Car_Controller:
         for s_car in self.simulation_cars: # update all cars
             s_car.update(curr_time, graph, graph_changed)
         
-        # if dynamic_car:
-        #   remove/add cars with x chance
+        if self.dynamic_car is True:
+            action = random.choice(["create", "delete"])
+            new_spawn_chance = 0.2 # 20% chance of spawning a new car
+            delete_chance = 0.1 # 10% chance to delete a car
+
+            if action is "create":
+                if random.random() < new_spawn_chance:
+                    car_type = random.choice([FuelCar, ElectricCar])
+                    car_capacity = random.randint(3,9)
+                    car_energy = random.randint(50,100)
+
+                    nodes = list(graph.node_dict.keys())
+                    curr_node = random.choice(nodes)
+
+                    new_car = car_type(capacity=car_capacity, energy_level=car_energy, curr_node=curr_node)
+
+                    self.simulation_cars.append(Simulation_Car(new_car))
+
+                    print(f"\n[NEW CAR] {new_car}\n")
+                    
+            elif action is "delete":
+                if self.simulation_cars and random.random() < delete_chance:
+                    to_delete = random.choice(self.simulation_cars)
+                    if to_delete.current_task is None:
+                        self.simulation_cars.remove(to_delete)
+                        print(f"\n[CAR DELETED] {to_delete.car}\n")
         
     def assign_car_to_client (self, client, graph, client_controller): # returns 1 if sucessfull, 0 otherwise
         best_path = []

@@ -3,6 +3,7 @@ from typing_extensions import override
 import math
 from queue import PriorityQueue
 from collections import deque
+import random
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -43,6 +44,11 @@ class Graph:
             raise KeyError(f"Node {name} doesn't exist")
         else:
             return node
+
+    def get_random_node_name(self) -> str:
+        if not self.node_dict:
+            raise ValueError("The graph is empty; no nodes to select.")
+        return random.choice(list(self.node_dict.keys()))
 
     def node_exists(self, name: str) -> bool:
         if self.node_dict.get(name) is None:
