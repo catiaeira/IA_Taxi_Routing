@@ -25,3 +25,11 @@ def is_trip_feasible(car, total_distance_meters, initial_energy_level) -> bool:
     final_energy = initial_energy_level - energy_needed
     
     return final_energy >= 0
+
+
+def is_int(input: str) -> bool:
+    try:
+        i = int(input)
+        return True
+    except ValueError:
+        return False
