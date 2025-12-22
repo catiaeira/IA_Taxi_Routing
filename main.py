@@ -28,9 +28,11 @@ def main():
         print("8  - Dijkstra")
         print("9  - Greedy")
         print("10 - A*")
-        print("11 - Find closest station (Dijkstra)")
-        print("12 - Find closest available car (Dijkstra)")
-        print("13 - Find route with the most nodes (A*)")
+        print("11 - A* by distance")
+        print("12 - Find closest station (Dijkstra)")
+        print("13 - Find closest available car (Dijkstra)")
+        print("14 - Find closest available car by operational cost")
+        print("15 - Find route with the most nodes (A*)")
         print("0  - Quit\n")
 
         user_input = int(input("Enter your option -> "))
@@ -99,8 +101,17 @@ def main():
                 print(graph.a_star_search(origin, destination))
                 end = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
                 print(f"Time elapsed: {(end-start)/1_000_000}ms")
-
+            
             case 11:
+                origin = input("Origin node -> ").lower().capitalize()
+                destination = input("Destination node -> ").lower().capitalize()
+
+                start = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
+                print(graph.a_star_search_distance(origin, destination))
+                end = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
+                print(f"Time elapsed: {(end-start)/1_000_000}ms")
+
+            case 12:
                 origin = input("Origin node -> ").lower().capitalize()
                 station = input("Station type -> ").upper()
 
@@ -109,7 +120,7 @@ def main():
                 end = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
                 print(f"Time elapsed: {(end-start)/1_000_000}ms")
 
-            case 12:
+            case 13:
                 origin = input("Origin node -> ").lower().capitalize()
                 cars: set[Car] = set()
                 print("Enter nodes with available cars (type 'end' when you're done)")
@@ -126,7 +137,25 @@ def main():
                 end = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
                 print(f"Time elapsed: {(end-start)/1_000_000}ms")
 
-            case 13:
+            case 14:
+                origin = input("Origin node -> ").lower().capitalize()
+                cars: set[Car] = set()
+                print("Enter nodes with available cars (type 'end' when you're done)")
+                while True:
+                    node = input("Available car -> ").lower().capitalize()
+                    if node == "End":
+                        break
+                    car = Car()
+                    car.assign_location(node)
+                    cars.add(car)
+
+                start = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
+                print(graph.find_closest_car_by_op_cost(origin, cars))
+                end = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
+                print(f"Time elapsed: {(end-start)/1_000_000}ms")
+
+
+            case 15:
                 origin = input("Origin node -> ").lower().capitalize()
                 start = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
                 print(graph.find_longest_route(origin))
