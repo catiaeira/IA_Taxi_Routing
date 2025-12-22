@@ -381,18 +381,57 @@ class Graph:
 
 
     def find_closest_car_by_op_cost(self, origin: str, cars: set[Car]) -> tuple[list[str], int]|None:
-        best: tuple[list[str], int] = ([], 1000000000)
-
+        car_nodes_opcosts: dict[str, int] = {}
         for car in cars:
-            node = car.curr_node
-            search_result = self.a_star_search_distance(origin, node)
-            if search_result is not None:
-                if search_result[1] < best[1]:
-                    best = search_result
+            # fixed op cost of 40 cents for now
+            car_nodes_opcosts[car.curr_node] =  40
 
-        return best
+        # the entries are of the form (priority_number, data)
+        pqueue: PriorityQueue[tuple[int,str]] = PriorityQueue()
+        pqueue.put((0, origin))
 
+        # meters
+        dists: dict[str,int] = {origin: 0}
 
+        parents: dict[str, str] = {origin: origin}
+
+        # op cost, car node
+        best_result: tuple[list[str], int] = ([], 10000000000000)
+
+        while not pqueue.empty():
+
+            # get() will return the item with the lowest priority_number
+            # in our case, the lowest cost (most attractive node)
+            bn_cost, best_node = pqueue.get()
+
+            # skip stale entries
+            if bn_cost > dists[best_node]:
+                continue
+
+            if best_node in car_nodes_opcosts.keys():
+                car_op_cost = car_nodes_opcosts.pop(best_node)
+                op_cost: int = dists[best_node] * car_op_cost
+                if op_cost < best_result[1]:
+                    path: list[str] = self.build_path(parents, origin, best_node)
+                    best_result = (path, op_cost)
+                # already found every car, so break the cicle
+                if not car_nodes_opcosts:
+                    break
+
+            for node, dist, _ in self.get_neighbours(best_node):
+                new_dist = dists[best_node] + dist
+
+                if node not in dists or new_dist < dists[node]:
+                    dists[node] = new_dist
+                    parents[node] = best_node
+                    pqueue.put((new_dist, node))
+
+        if best_result[0]:
+            return best_result
+        else:
+            # if we reach here, it means no available cars were found
+            print(f"Couldn't find any available car from {origin}")
+            return None
 
         
     def dijkstra_search(self, origin: str, destination: str) -> tuple[list[str], float, int] | None:
