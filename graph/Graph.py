@@ -395,8 +395,8 @@ class Graph:
 
         parents: dict[str, str] = {origin: origin}
 
-        # op cost, car node
-        best_result: tuple[list[str], int] = ([], 10000000000000)
+        # [op cost, car node]
+        results: list[tuple[list[str], int]] = []
 
         while not pqueue.empty():
 
@@ -405,15 +405,20 @@ class Graph:
             bn_cost, best_node = pqueue.get()
 
             # skip stale entries
-            if bn_cost > dists[best_node]:
+            # calculate heuristic, which is the minimum for every car node
+            min_heuristic = 10000000000
+            for car_node in car_nodes_opcosts.keys():
+                heuristic = self.calculate_heuristic_dist(best_node, car_node)
+                if heuristic < min_heuristic:
+                    min_heuristic = heuristic
+            if bn_cost > dists[best_node] + min_heuristic:
                 continue
 
             if best_node in car_nodes_opcosts.keys():
                 car_op_cost = car_nodes_opcosts.pop(best_node)
                 op_cost: int = dists[best_node] * car_op_cost
-                if op_cost < best_result[1]:
-                    path: list[str] = self.build_path(parents, origin, best_node)
-                    best_result = (path, op_cost)
+                path: list[str] = self.build_path(parents, origin, best_node)
+                results.append((path, op_cost))
                 # already found every car, so break the cicle
                 if not car_nodes_opcosts:
                     break
@@ -424,9 +429,19 @@ class Graph:
                 if node not in dists or new_dist < dists[node]:
                     dists[node] = new_dist
                     parents[node] = best_node
-                    pqueue.put((new_dist, node))
+                    # calculate heuristic, which is the minimum for every car node
+                    min_heuristic = 10000000000
+                    for car_node in car_nodes_opcosts.keys():
+                        heuristic = self.calculate_heuristic_dist(node, car_node)
+                        if heuristic < min_heuristic:
+                            min_heuristic = heuristic
+                    pqueue.put((new_dist + min_heuristic, node))
 
-        if best_result[0]:
+        if results:
+            best_result: tuple[list[str], int] = ([], 100000000000)
+            for result in results:
+                if result[1] < best_result[1]:
+                    best_result = result
             return best_result
         else:
             # if we reach here, it means no available cars were found
