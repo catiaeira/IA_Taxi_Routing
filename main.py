@@ -1,0 +1,374 @@
+from graph.Energy_Station import Energy_Station
+from parser.parse_json_graph import parse_graph
+from car.Car import ElectricCar
+from Client import Client
+from Car_Controller import Car_Controller
+from Client_Controller import Client_Controller
+
+def main():
+    dynamic_traffic = False
+    dynamic_car = False  
+    dynamic_client = False  
+
+    graph = parse_graph()
+    car_controller = Car_Controller(dynamic_car)
+    client_controller = Client_Controller(dynamic_client)
+
+    currTime = 0
+    skipping = 0
+    while (True):
+        if skipping == 0: # if skipping forward, dont show the menu
+            print ("Current time: " + str(currTime))
+            option = main_menu(graph, car_controller, client_controller)
+            if option == -1:
+                break 
+            elif option > 0:
+                skipping = option 
+
+        # print (randomEvents(graph, car_controller, client_controller))
+
+        # function to update the traffic if dynamic
+        # graph, graph_changed = update_traffic(graph)
+        graph_changed = True # << for now
+        
+        client_controller.update(currTime, graph)
+        car_controller.update(currTime, client_controller, graph, graph_changed)
+        currTime += 1 
+        if skipping > 0: 
+            skipping -=1
+
+
+def main_menu(graph, car_controller, client_controller):
+    user_input = -1
+    while user_input != 0:
+        print("\n1 - Change cars")
+        print("2 - Change clients")
+        print("3 - Change traffic")
+        print("4 - Skip to next time instance")
+        print("5 - Specify the number of time instances skips")
+        print("6 - Print the graph menu")
+        print("7 - Change the algorithm used for pathing")
+        print("0 - Quit\n")
+
+        user_input = int(input("Enter your option -> "))
+        #user_input = 1
+
+        match user_input:
+            case 0:
+                print("\nShutting down...")
+                return -1
+
+            case 1:
+                car_menu (graph, car_controller)
+                continue
+
+            case 2:
+                client_menu (graph, client_controller)
+                continue
+
+            case 3:
+                print ("traffic")
+                continue
+
+            case 4:
+                # next time instance
+                return 0
+
+            case 5:
+                # specific time instance
+                skip_time = int (input ("Skip how many times? -> "))
+                # needs validation ^^^
+                return skip_time
+                
+            case 6:
+                print_menu(graph)
+                continue
+
+            case 7:
+                algorithm_menu(graph)
+                continue
+
+            case _:
+                print("Enter a valid option")
+
+        _ = input("\nPress any key to continue")
+
+
+def print_menu (graph):
+    user_input = -1
+    while user_input != 0:
+        print("\n1 - Print graph")
+        print("2 - Draw graph")
+        print("3 - Draw directed graph")
+        print("4 - Print nodes")
+        print("5 - Print edges")
+        print("0 - Go back\n")
+
+        user_input = int(input("Enter your option -> "))
+
+        match user_input:
+            case 0:
+                return 0
+
+            case 1:
+                print(graph.adjacency_lists_dict)
+
+            case 2:
+                graph.draw()
+
+            case 3:
+                graph.draw_directed()
+
+            case 4:
+                print(graph.str_nodes())
+
+            case 5:
+                print(graph.str_edges())
+            case _:
+                print("Enter a valid option")
+                
+
+def car_menu (graph, car_controller):
+    user_input = -1
+    while user_input != 0:
+        print("\n1 - See cars")
+        print("2 - Add car")
+        print("3 - Delete car")
+        print("4 - Change car")
+        print("5 - Change car priority")
+        print("0 - Go back\n")
+
+        number_cars = car_controller.get_number_of_cars()
+
+        try:
+            user_input = int(input("Enter your option -> "))
+        except ValueError:
+            print("Invalid input! Please enter a number.")
+            continue
+
+        match user_input:
+            case 0:
+                return
+            
+            case 1:
+                car_controller.see_cars()
+
+            case 2:
+                print("1 - Fuel Car\n2 - Electric Car")
+                
+                car_type = int(input("Enter your option -> "))
+                if car_type not in (1, 2):
+                    print("Invalid input! Cancelling operation.")
+                    continue
+
+                car_capacity = int(input("Enter the car's capacity [1, 10] -> "))
+                if not(1 <= car_capacity <= 10):
+                    print("Invalid input! Cancelling operation.")
+                    continue
+
+                car_energy_level = float(input("Enter the car's energy level -> "))
+                if not(0 <= car_energy_level <= 100):
+                    print("Invalid input! Cancelling operation.")
+                    continue
+
+                car_curr_node = str(input("Enter the car's current location -> "))
+                if not graph.node_exists(car_curr_node):
+                    print("Node doesn't exist, cancelling operation.")
+                    continue
+
+                car_controller.add_car(car_type, car_capacity, car_energy_level, car_curr_node)
+                car_controller.see_cars()
+            
+            case 3:
+                car_controller.see_cars()
+                print("Note that the numbering on the cars will change after a successful removal (unless the removed car is the last).")
+                index = int(input("\nEnter the number of the car you wish to delete -> "))
+                
+                if not(0 <= index < number_cars):
+                    print("Invalid index, cancelling operation.")
+                    continue
+
+                car_controller.delete_car(index)
+                car_controller.see_cars()
+            
+            case 4:
+                car_controller.see_cars()
+                index = int(input("\nEnter the number of the car you wish to change -> "))
+
+                if not(0 <= index < number_cars):
+                    print("Invalid index, cancelling operation.")
+                    continue
+            
+                print("1 - Fuel Car\n2 - Electric Car")
+                
+                car_type = int(input("Enter your option -> "))
+                if car_type not in (1, 2):
+                    print("Invalid input! Cancelling operation.")
+                    continue
+
+                car_capacity = int(input("Enter the car's capacity [1, 10] -> "))
+                if not(1 <= car_capacity <= 10):
+                    print("Invalid input! Cancelling operation.")
+                    continue
+
+                car_energy_level = float(input("Enter the car's energy level -> "))
+                if not(0 <= car_energy_level <= 100):
+                    print("Invalid input! Cancelling operation.")
+                    continue
+
+                car_curr_node = str(input("Enter the car's current location -> "))
+                if not graph.node_exists(car_curr_node):
+                    print("Node doesn't exist, cancelling operation.")
+                    continue
+                
+                car_controller.change_car(index, car_type, car_capacity, car_energy_level, car_curr_node)
+                car_controller.see_cars()
+
+            case 5:
+                car_priority_menu(car_controller)   
+
+            case _:
+                print("Invalid option, please try again.")
+
+def car_priority_menu (car_controller):
+    user_input = -1
+    while user_input == -1:
+        print ("\n1 - Time")
+        print ("2 - Operational Cost")
+        print ("0 - Go back\n")
+        user_input = int(input("Enter your option -> "))
+
+        match user_input:
+            case 0:
+                return 0
+            case 1:
+                car_controller.CHOOSING_PREFERENCE = "TIME"
+            case 2:
+                car_controller.CHOOSING_PREFERENCE = "COST"
+            case _:
+                print("Enter a valid option")
+                user_input = -1
+    return 0
+
+
+def client_menu (graph, client_controller):
+    user_input = -1
+    while user_input != 0:
+        print("\n1 - See clients")
+        print("2 - Add client")
+        print("3 - Delete client")
+        print("4 - Change client")
+        print("0 - Go back\n")
+
+        number_waiting_clients = client_controller.get_n_waiting_clients()
+
+        try:
+            user_input = int(input("Enter your option -> "))
+        except ValueError:
+            print("Invalid input! Please enter a number.")
+            continue
+
+        match user_input:
+            case 0:
+                return
+            
+            case 1:
+                print("\nWaiting Clients:")
+                client_controller.see_waiting_clients()
+                print("\nClients On Route:")
+                client_controller.see_clients_on_route()
+
+            case 2:
+                client_start = str(input("\nEnter the starting node -> "))
+                if not graph.node_exists(client_start):
+                    print("Node doesn't exist, cancelling operation.")
+                    continue
+
+                client_goal = str(input("Enter the destination node -> "))
+                if not graph.node_exists(client_goal):
+                    print("Node doesn't exist, cancelling operation.")
+                    continue
+
+                client_how_many = int(input("Enter the number of people taking the trip -> "))
+
+                client_controller.add_client(client_start, client_goal, client_how_many)
+                
+                print("\nWaiting Clients:")
+                client_controller.see_waiting_clients()
+            
+            case 3:
+                print("\nWaiting Clients:")
+                client_controller.see_waiting_clients()
+                print("\nNote that the numbering on the clients will change after a successful removal (unless the removed client is the last).")
+                index = int(input("\nEnter the number of the client you wish to delete -> "))
+                
+                if not(0 <= index < number_waiting_clients):
+                    print("Invalid index, cancelling operation.")
+                    continue
+
+                client_controller.delete_client(index)
+                client_controller.see_waiting_clients()
+            
+            case 4:
+                print("\nWaiting Clients:")
+                client_controller.see_waiting_clients()
+                index = int(input("\nEnter the number of the client you wish to change -> "))
+
+                if not(0 <= index < number_waiting_clients):
+                    print("Invalid index, cancelling operation.")
+                    continue
+            
+                client_start = str(input("\nEnter the starting node -> "))
+                if not graph.node_exists(client_start):
+                    print("Node doesn't exist, cancelling operation.")
+                    continue
+
+                client_goal = str(input("Enter the destination node -> "))
+                if not graph.node_exists(client_goal):
+                    print("Node doesn't exist, cancelling operation.")
+                    continue
+
+                client_how_many = int(input("Enter the number of people taking the trip -> "))
+                
+                client_controller.change_client(index, client_start, client_goal, client_how_many)
+                print("\nWaiting Clients:")
+                client_controller.see_waiting_clients()
+            
+            case _:
+                print("Invalid option, please try again.")
+
+
+def algorithm_menu (graph):
+    user_input = -1
+    while user_input == -1:
+        print("\n1 - DFS")
+        print("2 - BFS")
+        print("3 - Dijkstra")
+        print("4 - Greedy")
+        print("5 - A*")
+        print("0 - Quit\n")
+
+        user_input = int(input("Enter your option -> "))
+
+        match user_input:
+            case 0:
+                return 0
+            case 1:
+                graph.ALGORITHM = "DFS"
+            case 2:
+                graph.ALGORITHM = "BFS"
+            case 3: 
+                graph.ALGORITHM = "DIJKSTRA"
+            case 4:
+                graph.ALGORITHM = "GREEDY"
+            case 5: 
+                graph.ALGORITHM = "A_STAR"
+            case _:
+                print("Enter a valid option")
+                user_input = -1
+    return 0
+    
+
+
+if __name__ == "__main__":
+    main()
