@@ -23,5 +23,5 @@ def parse_graph() -> Graph:
 
         g.add_edge(edge["origin"], edge["destination"], edge["dist"], speed)
 
-    g.setMaxSpeed(max_speed)
+    g.set_max_speed(max_speed)
     return g

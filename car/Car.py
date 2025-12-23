@@ -8,7 +8,8 @@ class Car:
     total_kms_travelled:int = 0
     total_kms_travelled_w_passengers:int = 0
 
-    def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str =""):
+    # op cost is in cents per km
+    def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str ="", op_cost_km: int = 40):
         self.trips_done: int = trips_done
         self.kms_travelled: int = kms_travelled
         self.kms_travelled_w_passengers: int = kms_travelled_w_passengers
@@ -16,8 +17,8 @@ class Car:
         self.capacity: int = capacity
         self.passengers_inside : int = passengers_inside
         self.curr_node : str = curr_node
+        self.op_cost_km: int = op_cost_km
 
-    # missing operational cost?
 
     def change_characteristics(self, car_type: int, car_capacity: int, car_energy_level: int, car_curr_node: str):
         if car_type == 1:

@@ -1,3 +1,4 @@
+from pandas.core.nanops import bn
 from typing_extensions import override
 
 import math
@@ -9,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from .Node import Node
 from graph.Energy_Station import Energy_Station
-from car.Car import Car, ElectricCar, FuelCar
+from car.Car import Car
 import utils
 
 class Graph:
@@ -19,13 +20,24 @@ class Graph:
         self.node_dict: dict[str, Node] = {}  
         self.adjacency_lists_dict: dict[str, list[tuple[str, int, int]]] = {}  
         self.max_speed: int = 0
+        # this dict stores heuristics as they're calculated in order to save time
+        self.heuristics_time: dict[tuple[str,str], float] = {}
+        self.heuristics_dist: dict[tuple[str,str], int] = {}
 
+    def number_of_nodes(self):
+        return len(self.node_dict)
 
-    def setMaxSpeed(self, speed: int):
+    def number_of_edges(self):
+        total = 0
+        for list in self.adjacency_lists_dict.values():
+            total += len(list)
+        return total
+
+    def set_max_speed(self, speed: int):
         self.max_speed = speed
 
 
-    def getMaxSpeed(self):
+    def get_max_speed(self):
         return self.max_speed
 
 
@@ -90,7 +102,7 @@ class Graph:
         return list
 
 
-    def get_arc_cost(self, node1: str, node2: str) -> float:
+    def get_arc_time(self, node1: str, node2: str) -> float:
         total_cost = math.inf
         adj_list = self.adjacency_lists_dict[node1]
         for (node, dist, speed) in adj_list:
@@ -120,12 +132,12 @@ class Graph:
         return total_cost
 
 
-    def calculate_cost(self, path: list[str]) -> float:
+    def calculate_path_time(self, path: list[str]) -> float:
         cost = 0
         length = len(path)
         i = 0
         while i + 1 < length:
-            cost = cost + self.get_arc_cost(path[i], path[i + 1])
+            cost = cost + self.get_arc_time(path[i], path[i + 1])
             i += 1
         return cost
 
@@ -140,7 +152,13 @@ class Graph:
         return dist
 
 
-    def calculate_heuristic(self, node1: str, node2: str) -> float:
+    def calculate_heuristic_time(self, node1: str, node2: str) -> float:
+        # check if this heuristic was already calculated
+        stored = self.heuristics_time.get((node1, node2))
+
+        if stored is not None:
+            return stored
+
         origin = self.get_node_by_name(node1)
         destination = self.get_node_by_name(node2)
 
@@ -148,7 +166,31 @@ class Graph:
         # it shouldn't be a problem, since the result is in meters, so the decimal part is irrelevant
         straight_line_dist = int(utils.dist(origin.getLatitude(), origin.getLongitude(), destination.getLatitude(), destination.getLongitude()))
 
-        return utils.calculate_time(straight_line_dist, self.getMaxSpeed())
+        time = utils.calculate_time(straight_line_dist, self.get_max_speed())
+        # save the value for future use
+        self.heuristics_time[(node1, node2)] = time
+
+        return time
+
+    def calculate_heuristic_dist(self, node1: str, node2: str) -> int:
+        # check if this heuristic was already calculated
+        stored = self.heuristics_dist.get((node1, node2))
+
+        if stored is not None:
+            return stored
+
+        origin = self.get_node_by_name(node1)
+        destination = self.get_node_by_name(node2)
+
+        # this cast ensures types match
+        # it shouldn't be a problem, since the result is in meters, so the decimal part is irrelevant
+        straight_line_dist = int(utils.dist(origin.getLatitude(), origin.getLongitude(), destination.getLatitude(), destination.getLongitude()))
+
+        # save the value for future use
+        self.heuristics_dist[(node1, node2)] = straight_line_dist
+
+        return straight_line_dist
+    
 
 
     def get_neighbours(self, node: str) -> list[tuple[str, int, int]]:
@@ -227,7 +269,7 @@ class Graph:
 
             if current == destination:
                 path: list[str] = self.build_path(parents, origin, destination)
-                return (path, self.calculate_cost(path), self.calculate_distance(path))
+                return (path, self.calculate_path_time(path), self.calculate_distance(path))
 
             for node, _, _ in self.get_neighbours(current):
                 if node not in visited:
@@ -253,7 +295,7 @@ class Graph:
 
             if current == destination:
                 path: list[str] = self.build_path(parents, origin, destination)
-                return (path, self.calculate_cost(path), self.calculate_distance(path))
+                return (path, self.calculate_path_time(path), self.calculate_distance(path))
 
             if current not in visited:
                 visited.add(current)
@@ -266,6 +308,154 @@ class Graph:
         print(f"Path not found for origin {origin} and destination {destination}")
         return None
 
+        
+    def dijkstra_search(self, origin: str, destination: str) -> tuple[list[str], float, int] | None:
+        # the entries are of the form (priority_number, data)
+        pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
+        pqueue.put((0, origin))
+
+        # the cost is in minutes (calculated based on distance (ms) and speed (kms/h))
+        costs: dict[str,float] = {origin: 0}
+
+        parents: dict[str, str] = {origin: origin}
+
+        while not pqueue.empty():
+
+            # get() will return the item with the lowest priority_number
+            # in our case, the lowest cost (most attractive node)
+            bn_cost, best_node = pqueue.get()
+
+            # skip stale entries
+            if bn_cost > costs[best_node]:
+                continue
+
+            if best_node == destination:
+                path: list[str] = self.build_path(parents, origin, destination)
+                return (path, bn_cost, self.calculate_distance(path))
+
+            for node, dist, speed in self.get_neighbours(best_node):
+                travel_time = utils.calculate_time(dist, speed)
+                new_cost = costs[best_node] + travel_time
+
+                if node not in costs or new_cost < costs[node]:
+                    costs[node] = new_cost
+                    parents[node] = best_node
+                    pqueue.put((new_cost, node))
+
+        # if we exit the cycle, it means the destination wasn't found
+        print(f"Path not found for origin {origin} and destination {destination}")
+        return None
+
+
+    def a_star_search(self, origin: str, destination: str) -> tuple[list[str], float, int] | None:
+        # the entries are of the form (priority_number, data)
+        pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
+        pqueue.put((self.calculate_heuristic_time(origin, destination), origin))
+
+        # the cost is in minutes (calculated based on distance (ms) and speed (kms/h))
+        # heuristics must not be considered here
+        costs: dict[str,float] = {origin: 0}
+
+        parents: dict[str, str] = {origin: origin}
+
+        while not pqueue.empty():
+
+            # get() will return the item with the lowest priority_number
+            # in our case, the lowest cost (most attractive node)
+            bn_cost, best_node = pqueue.get()
+
+            # skip stale entries
+            if bn_cost > costs[best_node] + self.calculate_heuristic_time(best_node, destination):
+                continue
+
+            if best_node == destination:
+                path: list[str] = self.build_path(parents, origin, destination)
+                # here we can't return bn_cost because it has the heuristic value included
+                # use costs[destination] instead
+                return (path, costs[destination], self.calculate_distance(path))
+
+            for node, dist, speed in self.get_neighbours(best_node):
+                travel_time = utils.calculate_time(dist, speed)
+                new_cost = costs[best_node] + travel_time
+
+                if node not in costs or new_cost < costs[node]:
+                    costs[node] = new_cost
+                    parents[node] = best_node
+                    pqueue.put((new_cost + self.calculate_heuristic_time(node, destination), node))
+
+        # if we exit the cycle, it means the destination wasn't found
+        print(f"Path not found for origin {origin} and destination {destination}")
+        return None
+
+
+    def a_star_search_by_distance(self, origin: str, destination: str) -> tuple[list[str], int] | None:
+        # the entries are of the form (priority_number, data)
+        pqueue: PriorityQueue[tuple[int,str]] = PriorityQueue()
+        pqueue.put((self.calculate_heuristic_dist(origin, destination), origin))
+
+        # the cost is in meters
+        # heuristics must not be considered here
+        costs: dict[str,int] = {origin: 0}
+
+        parents: dict[str, str] = {origin: origin}
+
+        while not pqueue.empty():
+
+            # get() will return the item with the lowest priority_number
+            # in our case, the lowest cost (most attractive node)
+            bn_cost, best_node = pqueue.get()
+
+            # skip stale entries
+            if bn_cost > costs[best_node] + self.calculate_heuristic_dist(best_node, destination):
+                continue
+
+            if best_node == destination:
+                path: list[str] = self.build_path(parents, origin, destination)
+                # here we can't return bn_cost because it has the heuristic value included
+                # use costs[destination] instead
+                return (path, costs[destination])
+
+            for node, dist, _ in self.get_neighbours(best_node):
+                new_cost = costs[best_node] + dist
+
+                if node not in costs or new_cost < costs[node]:
+                    costs[node] = new_cost
+                    parents[node] = best_node
+                    pqueue.put((new_cost + self.calculate_heuristic_dist(node, destination), node))
+
+        # if we exit the cycle, it means the destination wasn't found
+        print(f"Path not found for origin {origin} and destination {destination}")
+        return None
+
+
+    def greedy_search(self, origin: str, destination: str) -> tuple[list[str], float, int] | None:
+        # the entries are of the form (priority_number, data)
+        pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
+        pqueue.put((self.calculate_heuristic_time(origin, destination), origin))
+
+        parents: dict[str, str] = {origin: origin}
+
+        visited: set[str] = {origin}
+
+        while not pqueue.empty():
+
+            # get() will return the item with the lowest priority_number
+            # in our case, the lowest cost (most attractive node)
+            _, best_node = pqueue.get()
+
+            if best_node == destination:
+                path: list[str] = self.build_path(parents, origin, destination)
+                return (path, self.calculate_path_time(path), self.calculate_distance(path))
+
+            for node, _, _ in self.get_neighbours(best_node):
+                if node not in visited:
+                    visited.add(node)
+                    pqueue.put((self.calculate_heuristic_time(node, destination), node))
+                    parents[node] = best_node
+
+        # if we exit the cycle, it means the destination wasn't found
+        print(f"Path not found for origin {origin} and destination {destination}")
+        return None
 
 
     def find_closest_station(self, origin: str, station_type: Energy_Station) -> tuple[list[str], float, int]|None:
@@ -309,13 +499,14 @@ class Graph:
         return None
 
 
-    def find_closest_car(self, origin: str, cars: set[str]) -> tuple[list[str], float, int]|None:
+    # this is used to find the closest station by op cost; just need to multiply the distance returned by this by a car's op cost 
+    def find_closest_station_by_distance(self, origin: str, station_type: Energy_Station) -> tuple[list[str], float, int]|None:
         # the entries are of the form (priority_number, data)
-        pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
+        pqueue: PriorityQueue[tuple[int,str]] = PriorityQueue()
         pqueue.put((0, origin))
 
-        # the cost is in minutes (calculated based on distance (ms) and speed (kms/h))
-        costs: dict[str,float] = {origin: 0}
+        # the cost is in minutes (calculated based on distance (kms) and speed (kms/h))
+        dists: dict[str,int] = {origin: 0}
 
         parents: dict[str, str] = {origin: origin}
 
@@ -326,39 +517,111 @@ class Graph:
             bn_cost, best_node = pqueue.get()
 
             # skip stale entries
-            if bn_cost > costs[best_node]:
+            if bn_cost > dists[best_node]:
                 continue
 
-            # stop if the node has an available car
-            # for that, it's just necessary to check if the current node is in the provided set
-            if best_node in cars:
+            # stop if the node has the same type as the requested one
+            # if the node is CHARGING_AND_FUEL_STATION it satisfies both types, so we can also stop
+            bn_type = self.get_node_by_name(best_node).getType()
+            if bn_type == station_type or bn_type == Energy_Station.CHARGING_AND_FUEL_STATION:
                 path: list[str] = self.build_path(parents, origin, best_node)
-                return (path, bn_cost, self.calculate_distance(path))
+                return (path, self.calculate_path_time(path), bn_cost)
+
+            for node, dist, _ in self.get_neighbours(best_node):
+                new_dist = dists[best_node] + dist
+
+                if node not in dists or new_dist < dists[node]:
+                    dists[node] = new_dist
+                    parents[node] = best_node
+                    pqueue.put((new_dist, node))
+
+        # if we exit the cycle, it means no station was found
+        print(f"Couldn't find any station from {origin}")
+        return None
+
+    def find_closest_car(self, origin: str, cars: set[Car]) -> tuple[list[str], float, int]|None:
+        car_nodes: set[str] = set()
+        for car in cars:
+            car_nodes.add(car.curr_node)
+
+        # the entries are of the form (priority_number, data)
+        pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
+        # calculate heuristic for the first node
+        min_heuristic = 10000000000
+        for car_node in car_nodes:
+            heuristic = self.calculate_heuristic_time(origin, car_node)
+            if heuristic < min_heuristic:
+                min_heuristic = heuristic
+        pqueue.put((min_heuristic, origin))
+
+        # seconds
+        times: dict[str, float] = {origin: 0}
+
+        parents: dict[str, str] = {origin: origin}
+
+        while not pqueue.empty():
+
+            # get() will return the item with the lowest priority_number
+            # in our case, the lowest cost (most attractive node)
+            bn_cost, best_node = pqueue.get()
+
+            # skip stale entries
+            # calculate heuristic, which is the minimum for every car node
+            min_heuristic = 10000000000
+            for car_node in car_nodes:
+                heuristic = self.calculate_heuristic_time(best_node, car_node)
+                if heuristic < min_heuristic:
+                    min_heuristic = heuristic
+            if bn_cost > times[best_node] + min_heuristic:
+                continue
+
+            if best_node in car_nodes:
+                path: list[str] = self.build_path(parents, origin, best_node)
+                return (path, times[best_node], self.calculate_distance(path))
 
             for node, dist, speed in self.get_neighbours(best_node):
                 travel_time = utils.calculate_time(dist, speed)
-                new_cost = costs[best_node] + travel_time
+                new_time = times[best_node] + travel_time
 
-                if node not in costs or new_cost < costs[node]:
-                    costs[node] = new_cost
+                if node not in times or new_time < times[node]:
+                    times[node] = new_time
                     parents[node] = best_node
-                    pqueue.put((new_cost, node))
+                    # calculate heuristic, which is the minimum for every car node
+                    min_heuristic = 10000000000
+                    for car_node in car_nodes:
+                        heuristic = self.calculate_heuristic_time(node, car_node)
+                        if heuristic < min_heuristic:
+                            min_heuristic = heuristic
+                    pqueue.put((new_time + min_heuristic, node))
 
         # if we exit the cycle, it means no available cars were found
         print(f"Couldn't find any available car from {origin}")
         return None
-        
 
 
-    def dijkstra_search(self, origin: str, destination: str) -> tuple[list[str], float, int] | None:
+    # result[2] is the operational cost; must be divided by the chosen car's operational cost per km to get the distance
+    def find_closest_car_by_op_cost(self, origin: str, cars: set[Car]) -> tuple[list[str], float, int]|None:
+        car_nodes_opcosts: dict[str, int] = {}
+        for car in cars:
+            car_nodes_opcosts[car.curr_node] = car.op_cost_km
+
         # the entries are of the form (priority_number, data)
-        pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
-        pqueue.put((0, origin))
+        pqueue: PriorityQueue[tuple[int,str]] = PriorityQueue()
+        # calculate heuristic for the first node
+        min_heuristic = 10000000000
+        for car_node in car_nodes_opcosts.keys():
+            heuristic = self.calculate_heuristic_dist(origin, car_node)
+            if heuristic < min_heuristic:
+                min_heuristic = heuristic
+        pqueue.put((min_heuristic, origin))
 
-        # the cost is in minutes (calculated based on distance (ms) and speed (kms/h))
-        costs: dict[str,float] = {origin: 0}
+        # meters
+        dists: dict[str,int] = {origin: 0}
 
         parents: dict[str, str] = {origin: origin}
+
+        # [(path, op cost)]
+        results: list[tuple[list[str], int]] = []
 
         while not pqueue.empty():
 
@@ -367,95 +630,48 @@ class Graph:
             bn_cost, best_node = pqueue.get()
 
             # skip stale entries
-            if bn_cost > costs[best_node]:
+            # calculate heuristic, which is the minimum for every car node
+            min_heuristic = 10000000000
+            for car_node in car_nodes_opcosts.keys():
+                heuristic = self.calculate_heuristic_dist(best_node, car_node)
+                if heuristic < min_heuristic:
+                    min_heuristic = heuristic
+            if bn_cost > dists[best_node] + min_heuristic:
                 continue
 
-            if best_node == destination:
-                path: list[str] = self.build_path(parents, origin, destination)
-                return (path, bn_cost, self.calculate_distance(path))
+            if best_node in car_nodes_opcosts.keys():
+                car_op_cost = car_nodes_opcosts.pop(best_node)
+                op_cost: int = dists[best_node] * car_op_cost // 1000
+                path: list[str] = self.build_path(parents, origin, best_node)
+                results.append((path, op_cost))
+                # already found every car, so break the cicle
+                if not car_nodes_opcosts:
+                    break
 
-            for node, dist, speed in self.get_neighbours(best_node):
-                travel_time = utils.calculate_time(dist, speed)
-                new_cost = costs[best_node] + travel_time
+            for node, dist, _ in self.get_neighbours(best_node):
+                new_dist = dists[best_node] + dist
 
-                if node not in costs or new_cost < costs[node]:
-                    costs[node] = new_cost
+                if node not in dists or new_dist < dists[node]:
+                    dists[node] = new_dist
                     parents[node] = best_node
-                    pqueue.put((new_cost, node))
+                    # calculate heuristic, which is the minimum for every car node
+                    min_heuristic = 10000000000
+                    for car_node in car_nodes_opcosts.keys():
+                        heuristic = self.calculate_heuristic_dist(node, car_node)
+                        if heuristic < min_heuristic:
+                            min_heuristic = heuristic
+                    pqueue.put((new_dist + min_heuristic, node))
 
-        # if we exit the cycle, it means the destination wasn't found
-        print(f"Path not found for origin {origin} and destination {destination}")
-        return None
-
-
-    def a_star_search(self, origin: str, destination: str) -> tuple[list[str], float, int] | None:
-        # the entries are of the form (priority_number, data)
-        pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
-        pqueue.put((self.calculate_heuristic(origin, destination), origin))
-
-        # the cost is in minutes (calculated based on distance (kms) and speed (kms/h))
-        # heuristics must not be considered here
-        costs: dict[str,float] = {origin: 0}
-
-        parents: dict[str, str] = {origin: origin}
-
-        while not pqueue.empty():
-
-            # get() will return the item with the lowest priority_number
-            # in our case, the lowest cost (most attractive node)
-            bn_cost, best_node = pqueue.get()
-
-            # skip stale entries
-            if bn_cost > costs[best_node] + self.calculate_heuristic(best_node, destination):
-                continue
-
-            if best_node == destination:
-                path: list[str] = self.build_path(parents, origin, destination)
-                # here we can't return bn_cost because it has the heuristic value included
-                return (path, costs[destination], self.calculate_distance(path))
-
-            for node, dist, speed in self.get_neighbours(best_node):
-                travel_time = utils.calculate_time(dist, speed)
-                new_cost = costs[best_node] + travel_time
-
-                if node not in costs or new_cost < costs[node]:
-                    costs[node] = new_cost
-                    parents[node] = best_node
-                    pqueue.put((new_cost + self.calculate_heuristic(node, destination), node))
-
-        # if we exit the cycle, it means the destination wasn't found
-        print(f"Path not found for origin {origin} and destination {destination}")
-        return None
-
-
-    def greedy_search(self, origin: str, destination: str) -> tuple[list[str], float, int] | None:
-        # the entries are of the form (priority_number, data)
-        pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
-        pqueue.put((self.calculate_heuristic(origin, destination), origin))
-
-        parents: dict[str, str] = {origin: origin}
-
-        visited: set[str] = {origin}
-
-        while not pqueue.empty():
-
-            # get() will return the item with the lowest priority_number
-            # in our case, the lowest cost (most attractive node)
-            _, best_node = pqueue.get()
-
-            if best_node == destination:
-                path: list[str] = self.build_path(parents, origin, destination)
-                return (path, self.calculate_cost(path), self.calculate_distance(path))
-
-            for node, _, _ in self.get_neighbours(best_node):
-                if node not in visited:
-                    visited.add(node)
-                    pqueue.put((self.calculate_heuristic(node, destination), node))
-                    parents[node] = best_node
-
-        # if we exit the cycle, it means the destination wasn't found
-        print(f"Path not found for origin {origin} and destination {destination}")
-        return None
+        if results:
+            best_result: tuple[list[str], int] = ([], 100000000000)
+            for result in results:
+                if result[1] < best_result[1]:
+                    best_result = result
+            return (best_result[0], self.calculate_path_time(best_result[0]), best_result[1])
+        else:
+            # if we reach here, it means no available cars were found
+            print(f"Couldn't find any available car from {origin}")
+            return None
 
 
     def build_path(self, parents: dict[str, str], origin: str, destination: str) -> list[str]:
@@ -468,6 +684,22 @@ class Graph:
         path.insert(0, origin)
 
         return path
+
+    
+    def find_longest_route(self, origin: str) -> tuple[str, str]:
+        longest_route: tuple[str, str] = ("","")
+        max_path_len = 0
+
+        for destination in self.node_dict.keys():
+            search_result = self.a_star_search(origin, destination)
+            if search_result is not None:
+                path_len = len(search_result[0])
+                if path_len > max_path_len:
+                    max_path_len = path_len
+                    longest_route = (origin, destination)
+                    print(f"New max found ({max_path_len}) for nodes {origin} and {destination}")
+
+        return longest_route
 
 
     # returns in minutes
