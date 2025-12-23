@@ -7,7 +7,8 @@ class Car:
     total_kms_travelled:int = 0
     total_kms_travelled_w_passengers:int = 0
 
-    def __init__(self, energy_level : int =100, capacity: int =4):
+    # op cost is in cents per km
+    def __init__(self, energy_level : int =100, capacity: int =4, op_cost_km: int = 40):
         self.trips_done: int = 0
         self.kms_travelled: int = 0
         self.kms_travelled_w_passengers: int = 0
@@ -15,6 +16,7 @@ class Car:
         self.capacity: int = capacity
         self.passengers_inside : int = 0
         self.curr_node : str = ""
+        self.op_cost_km: int = op_cost_km
 
     # missing operational cost?
 
