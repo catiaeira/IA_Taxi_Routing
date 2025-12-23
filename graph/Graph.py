@@ -14,6 +14,7 @@ from car.Car import Car
 import utils
 
 class Graph:
+    ALGORITHM = "A_STAR" # A star is default
 
     def __init__(self):
         self.node_dict: dict[str, Node] = {}  
@@ -55,7 +56,11 @@ class Graph:
         else:
             return node
 
-
+    def node_exists(self, name: str) -> bool:
+        if self.node_dict.get(name) is None:
+            return 0
+        return 1
+    
     def str_edges(self) -> str:
         edge: str = ""
         for node in self.node_dict.keys():
@@ -106,9 +111,19 @@ class Graph:
 
         return total_cost
 
+    def get_arc_speed (self, node1: str, node2: str) -> int:
+        total_speed = math.inf
+        adj_list = self.adjacency_lists_dict[node1]
+        for (node, _, speed) in adj_list:
+            if node == node2:
+                total_speed = speed
+                break
+
+        return total_speed
+
 
     def get_arc_distance(self, node1: str, node2:str) -> int:
-        total_cost = -1
+        total_cost = math.inf
         adj_list = self.adjacency_lists_dict[node1]
         for (node, dist, _) in adj_list:
             if node == node2:
@@ -686,3 +701,109 @@ class Graph:
 
         return longest_route
 
+
+    # returns in minutes
+    def calc_time_between_nodes(self, curr_node: str, goal_node : str) -> float:
+            distance = self.get_arc_distance(curr_node, goal_node) # in meters
+            speed = self.get_arc_speed(curr_node, goal_node)       # in km/h
+            if (distance == math.inf or speed == math.inf):
+                print (f"Path not found when calculating time: {curr_node} - {goal_node}")
+                return 0
+
+            time = distance / 1000 / speed * 60
+            return time
+
+    def get_algorithm(self):
+        match (self.ALGORITHM):
+            case ("DFS"):
+                return self.DFS_search
+            case ("BFS"):
+                return self.BFS_search
+            case ("DIJKSTRA"):
+                return self.dijkstra_search
+            case ("GREEDY"):
+                return self.greedy_search
+            case ("A_STAR"):
+                return self.a_star_search
+            case (_):
+                print ("unknown algorithm") # shouldnt happen
+                return None
+
+    # uses the car's current node as the starting point to create the path 
+    def create_path_to_client(self, car, client) -> tuple[list[str], float, int] | None:
+        return self.create_path_to_client_and_goal(car, client, car.curr_node)
+
+
+    # updates a path that already started
+    def update_path(self, car, client, last_completed_node: str) -> tuple[list[str], float, int] | None:    
+        if not client.is_in_car:
+            return self.create_path_to_client_and_goal(car, client, last_completed_node)
+        else:
+            return self.path_to_goal(car, client, last_completed_node)
+
+        
+    # creates the entire path from the given origin node to the client and then to the goal
+    def create_path_to_client_and_goal(self, car, client, origin_node: str) -> tuple[list[str], float, int] | None:
+        if client.how_many > car.capacity - car.passengers_inside:
+            print("No capacity!") 
+            return None
+
+        algorithm = self.get_algorithm()
+        if algorithm is None:
+            return None
+
+        # Car to Client 
+        to_client = algorithm(origin_node, client.start)
+        if to_client is None:
+            print(f"Can't get from {origin_node} to client {client.start}!")
+            return None
+        to_client_path, to_client_time, to_client_dist = to_client
+
+        if not utils.is_trip_feasible(car, to_client_dist, car.energy_level):
+            print("Runs out of fuel going to client!")
+            return None
+
+        # Client to Goal
+        to_goal = algorithm(client.start, client.goal)
+        if to_goal is None:
+            print(f"Can't deliver client from {client.start} to goal {client.goal}!")
+            return None
+        to_goal_path, to_goal_time, to_goal_dist = to_goal
+        
+
+        total_dist_meters = to_client_dist + to_goal_dist
+        if not utils.is_trip_feasible(car, total_dist_meters, car.energy_level):
+            print("Runs out of fuel delivering client!")
+            return None
+
+        total_time = to_client_time + to_goal_time
+        
+        if to_goal_path and to_goal_path[0] == client.start and len(to_goal_path[0])>2: 
+            to_goal_path.pop(0) # remove head of list, since itll be redundant 
+            
+        total_path = to_client_path + to_goal_path
+
+        return total_path, total_time, total_dist_meters
+
+
+    # gives the path from the origin node to the client's goal
+    def path_to_goal(self, car, client, origin_node: str) -> tuple[list[str], float, int] | None:
+        algorithm = self.get_algorithm()
+        if algorithm is None:
+            return None
+
+        to_goal = algorithm(origin_node, client.goal)
+        if to_goal is None:
+            print(f"Can't find a path from {origin_node} to goal {client.goal}!")
+            return None
+        
+        path, time, dist = to_goal
+        
+        if not utils.is_trip_feasible(car, dist, car.energy_level):
+            print("Runs out of fuel on the way to the goal!")
+            return None
+            
+        if path and path[0] == origin_node and len(path)>2: 
+            path.pop(0)                     # remove head of list, since itll be redundant 
+
+        return path, time, dist

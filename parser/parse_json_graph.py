@@ -3,8 +3,8 @@ from graph.Energy_Station import Energy_Station
 import json
 
 def parse_graph() -> Graph:
-    file_path = input("File path: ")
-    #file_path = "parser/test.json"
+    #file_path = input("File path: ")
+    file_path = "parser/graph.json"
     
     with open(file_path, "r") as graph_file:
         json_graph = json.load(graph_file)

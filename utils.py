@@ -18,3 +18,10 @@ def dist(latOr: float, longOr: float, latDest: float, longDest: float) -> float:
 def calculate_time(dist: int, speed: int) -> float:
     return (dist/speed) * 3.6
 
+def is_trip_feasible(car, total_distance_meters, initial_energy_level) -> bool:
+    distance_km = total_distance_meters / 1000
+    energy_needed = car.consumption(distance_km)
+    
+    final_energy = initial_energy_level - energy_needed
+    
+    return final_energy >= 0
