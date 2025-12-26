@@ -1,4 +1,3 @@
-from pandas.core.nanops import bn
 from typing_extensions import override
 
 import math
@@ -19,7 +18,7 @@ class Graph:
 
     def __init__(self):
         self.node_dict: dict[str, Node] = {}  
-        self.adjacency_lists_dict: dict[str, list[tuple[str, int, int]]] = {}  
+        self.adjacency_lists_dict: dict[str, list[tuple[str, int, int, int, float]]] = {}  # tuple[node2, dist, max_speed, curr_speed, multiplier]
         self.max_speed: int = 0
         # this dict stores heuristics as they're calculated in order to save time
         self.heuristics_time: dict[tuple[str,str], float] = {}
@@ -70,8 +69,8 @@ class Graph:
     def str_edges(self) -> str:
         edge: str = ""
         for node in self.node_dict.keys():
-            for (node2, dist, speed) in self.adjacency_lists_dict[node]:
-                edge = edge + f"{node} -> {node2} | dist: {dist} | speed: {speed}\n"
+            for (node2, dist, speed, cur_speed, _) in self.adjacency_lists_dict[node]:
+                edge = edge + f"{node} -> {node2} | dist: {dist} | max speed: {speed} | current speed: {cur_speed}\n"
         return edge
 
 
@@ -97,7 +96,8 @@ class Graph:
         except KeyError:
             print(f"Couldn't add edge from {origin} to {destination}")
 
-        self.adjacency_lists_dict[origin].append((destination, dist, speed)) 
+        mult = random.uniform(0.1,1)
+        self.adjacency_lists_dict[origin].append((destination, dist, speed, round(speed*mult), mult)) 
 
 
     def get_nodes(self) -> list[Node]:
@@ -111,7 +111,7 @@ class Graph:
     def get_arc_time(self, node1: str, node2: str) -> float:
         total_cost = math.inf
         adj_list = self.adjacency_lists_dict[node1]
-        for (node, dist, speed) in adj_list:
+        for (node, dist, speed, _, _) in adj_list:
             if node == node2:
                 total_cost = utils.calculate_time(dist, speed)
 
@@ -120,18 +120,27 @@ class Graph:
     def get_arc_speed (self, node1: str, node2: str) -> int:
         total_speed = math.inf
         adj_list = self.adjacency_lists_dict[node1]
-        for (node, _, speed) in adj_list:
+        for (node, _, speed, _, _) in adj_list:
             if node == node2:
                 total_speed = speed
                 break
 
         return total_speed
 
+    def get_arc_current_speed (self, node1: str, node2: str) -> int:
+        total_speed = math.inf
+        adj_list = self.adjacency_lists_dict[node1]
+        for (node, _, _, curr_speed, _) in adj_list:
+            if node == node2:
+                total_speed = curr_speed
+                break
+
+        return total_speed
 
     def get_arc_distance(self, node1: str, node2:str) -> int:
         total_cost = math.inf
         adj_list = self.adjacency_lists_dict[node1]
-        for (node, dist, _) in adj_list:
+        for (node, dist, _, _, _) in adj_list:
             if node == node2:
                 total_cost = dist
 
@@ -202,6 +211,30 @@ class Graph:
     def get_neighbours(self, node: str) -> list[tuple[str, int, int]]:
         return self.adjacency_lists_dict[node]
 
+    def change_traffic(self, option: str):
+        if option == "up": # more traffic, less speed -> lower multiplier
+            for edges in self.adjacency_lists_dict.values():  # list of tuples
+                for i, (node2, dist, max_speed, _, multiplier) in enumerate(edges):
+                    new_mult = random.uniform(0.1, multiplier)
+                    new_curr_speed = round(max_speed * new_mult)
+
+                    edges[i] = (node2, dist, max_speed, new_curr_speed, new_mult)
+
+        elif option == "down": # less traffic, more speed -> higher multiplier
+            for edges in self.adjacency_lists_dict.values():  # list of tuples
+                for i, (node2, dist, max_speed, _, multiplier) in enumerate(edges):
+                    new_mult = random.uniform(multiplier, 1)
+                    new_curr_speed = round(max_speed * new_mult)
+
+                    edges[i] = (node2, dist, max_speed, new_curr_speed, new_mult)
+
+        elif option == "random":
+            for edges in self.adjacency_lists_dict.values():  # list of tuples
+                for i, (node2, dist, max_speed, _, multiplier) in enumerate(edges):
+                    new_mult = random.uniform(0.1, 1)
+                    new_curr_speed = round(max_speed * new_mult)
+
+                    edges[i] = (node2, dist, max_speed, new_curr_speed, new_mult)
 
     # draws the graph with arrows to indicate edge direction
     def draw_directed(self):
@@ -212,7 +245,7 @@ class Graph:
         for nodo in self.node_dict.values():
             n = nodo.getName()
             g.add_node(n)
-            for (adjacent, weight, _) in self.adjacency_lists_dict[n]:
+            for (adjacent, weight, _, _, _) in self.adjacency_lists_dict[n]:
                 g.add_edge(n, adjacent, weight=weight)
 
         # layout and drawing
@@ -246,7 +279,7 @@ class Graph:
         for nodo in list_v:
             n = nodo.getName()
             g.add_node(n)
-            for (adjacent, weight, _) in self.adjacency_lists_dict[n]:
+            for (adjacent, weight, _, _, _) in self.adjacency_lists_dict[n]:
                 list = (n, adjacent)
                 # lista_a.append(lista)
                 g.add_edge(n, adjacent, weight=weight)
