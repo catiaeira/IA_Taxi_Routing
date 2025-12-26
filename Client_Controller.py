@@ -1,3 +1,5 @@
+import random
+
 from Client import Client
 
 class Client_Controller:
@@ -8,12 +10,24 @@ class Client_Controller:
 
         self.waiting_clients.extend (self.get_clients())
 
-    def update(self, currTime, graph): #todo dynamic client
-        #if dynamic_client:
-        #   add clients with x chance
-        # add them to waiting_clients
-        # print if any change happened
-        return
+    def update(self, curr_time, graph):
+        if self.dynamic_client is True:
+            spawn_chance = 0.2 # 20% chance of spawning a new client
+
+            if random.random() < spawn_chance:
+                nodes = list(graph.node_dict.keys())
+                start_node = random.choice(nodes)
+
+                nodes.remove(start_node) # ensures the goal node won't be the same as the start
+                goal_node = random.choice(nodes)
+
+                num_passengers = random.randint(1, 4)
+
+                new_client = Client(start_node, goal_node, num_passengers)
+
+                self.waiting_clients.append(new_client)
+
+                print(f"\n[NEW CLIENT] {new_client}\n")
 
     def client_got_in_car (self, client: Client):
         self.waiting_clients.remove(client)
