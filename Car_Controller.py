@@ -74,7 +74,7 @@ class Car_Controller:
             new_spawn_chance = 0.2 # 20% chance of spawning a new car
             delete_chance = 0.1 # 10% chance to delete a car
 
-            if action is "create":
+            if action == "create":
                 if random.random() < new_spawn_chance:
                     car_type = random.choice([FuelCar, ElectricCar])
                     car_capacity = random.randint(3,9)
@@ -89,10 +89,12 @@ class Car_Controller:
 
                     print(f"\n[NEW CAR] {new_car}\n")
                     
-            elif action is "delete":
+            elif action == "delete":
                 if self.simulation_cars and random.random() < delete_chance:
-                    to_delete = random.choice(self.simulation_cars)
-                    if to_delete.current_task is None:
+                    idle_cars = list(filter(lambda c : c.current_task != Task_Deliver_Client, self.simulation_cars)) #filters and keeps the cars that aren't transporting clients
+                    if len(idle_cars) > 0:
+                        to_delete = random.choice(idle_cars)
+
                         self.simulation_cars.remove(to_delete)
                         print(f"\n[CAR DELETED] {to_delete.car}\n")
         

@@ -83,6 +83,9 @@ def main_menu(graph, car_controller, client_controller):
                 if not is_int(skip_time):
                     print("Invalid input, cancelling operation.")
                     continue
+                if int(skip_time) <= 0:
+                    print("Invalid value, cancelling operation.")
+                    continue
 
                 return int(skip_time)
                 
