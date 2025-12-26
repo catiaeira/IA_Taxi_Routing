@@ -65,14 +65,14 @@ class Car:
     @override
     def __str__(self) -> str:
         return (
-            f"Car ("
-            f"trips_done = {self.trips_done}, "
-            f"kms_travelled = {self.kms_travelled}, "
-            f"kms_travelled_w_passengers = {self.kms_travelled_w_passengers}, "
-            f"energy_level = {self.energy_level}%, "
-            f"capacity = {self.capacity}, "
-            f"number of passengers = {self.passengers_inside}, "
-            f"curr_node = '{self.curr_node}')"
+            f"Car\n"
+            f"  trips_done = {self.trips_done}\n"
+            f"  kms_travelled = {self.kms_travelled}\n"
+            f"  kms_travelled_w_passengers = {self.kms_travelled_w_passengers}\n"
+            f"  energy_level = {self.energy_level}%\n"
+            f"  capacity = {self.capacity}\n"
+            f"  number of passengers = {self.passengers_inside}\n"
+            f"  curr_node = '{self.curr_node}'\n"
         )
 
 
@@ -93,8 +93,7 @@ class ElectricCar (Car):
 
     @override
     def __str__(self) -> str:
-        return "Electric " + super().__str__()
-
+        return "\n- Electric " + super().__str__()
 
 class FuelCar (Car):
     def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str =""):
@@ -112,4 +111,4 @@ class FuelCar (Car):
 
     @override
     def __str__(self) -> str:
-        return "Fuel " + super().__str__()
+        return "\n- Fuel " + super().__str__()
