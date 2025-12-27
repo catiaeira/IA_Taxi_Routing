@@ -111,7 +111,7 @@ class Graph:
     def get_arc_time(self, node1: str, node2: str) -> float:
         total_cost = math.inf
         adj_list = self.adjacency_lists_dict[node1]
-        for (node, dist, speed, _, _) in adj_list:
+        for (node, dist, _, speed, _) in adj_list:
             if node == node2:
                 total_cost = utils.calculate_time(dist, speed)
 
@@ -120,7 +120,7 @@ class Graph:
     def get_arc_speed (self, node1: str, node2: str) -> int:
         total_speed = math.inf
         adj_list = self.adjacency_lists_dict[node1]
-        for (node, _, speed, _, _) in adj_list:
+        for (node, _, _, speed, _) in adj_list:
             if node == node2:
                 total_speed = speed
                 break
