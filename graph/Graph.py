@@ -393,7 +393,7 @@ class Graph:
         return None
 
 
-    def a_star_search_by_distance(self, origin: str, destination: str) -> tuple[list[str], int] | None:
+    def a_star_search_by_distance(self, origin: str, destination: str) -> tuple[list[str], float, int] | None:
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[int,str]] = PriorityQueue()
         pqueue.put((self.calculate_heuristic_dist(origin, destination), origin))
@@ -418,7 +418,7 @@ class Graph:
                 path: list[str] = self.build_path(parents, origin, destination)
                 # here we can't return bn_cost because it has the heuristic value included
                 # use costs[destination] instead
-                return (path, costs[destination])
+                return (path, self.calculate_path_time(path), costs[destination])
 
             for node, dist, _ in self.get_neighbours(best_node):
                 new_cost = costs[best_node] + dist
@@ -718,7 +718,7 @@ class Graph:
             time = distance / 1000 / speed * 60
             return time
 
-    def get_algorithm(self):
+    def get_algorithm(self, choosing_preference):
         match (self.ALGORITHM):
             case ("DFS"):
                 return self.DFS_search
@@ -729,31 +729,36 @@ class Graph:
             case ("GREEDY"):
                 return self.greedy_search
             case ("A_STAR"):
-                return self.a_star_search
+                if (choosing_preference == 'TIME'):
+                    print ("prefering time!")
+                    return self.a_star_search
+                elif (choosing_preference == 'COST'):
+                    print ("prefering cost!")
+                    return self.a_star_search_by_distance
             case (_):
                 print ("unknown algorithm") # shouldnt happen
                 return None
 
     # uses the car's current node as the starting point to create the path 
-    def create_path_to_client(self, car, client) -> tuple[list[str], float, int] | None:
-        return self.create_path_to_client_and_goal(car, client, car.curr_node)
+    def create_path_to_client(self, car, client, choosing_preference) -> tuple[list[str], float, int] | None:
+        return self.create_path_to_client_and_goal(car, client, car.curr_node, choosing_preference)
 
 
     # updates a path that already started
-    def update_path(self, car, client, last_completed_node: str) -> tuple[list[str], float, int] | None:    
+    def update_path(self, car, client, last_completed_node: str, choosing_preference) -> tuple[list[str], float, int] | None:    
         if not client.is_in_car:
-            return self.create_path_to_client_and_goal(car, client, last_completed_node)
+            return self.create_path_to_client_and_goal(car, client, last_completed_node, choosing_preference)
         else:
-            return self.path_to_goal(car, client, last_completed_node)
+            return self.path_to_goal(car, client, last_completed_node, choosing_preference)
 
         
     # creates the entire path from the given origin node to the client and then to the goal
-    def create_path_to_client_and_goal(self, car, client, origin_node: str) -> tuple[list[str], float, int] | None:
+    def create_path_to_client_and_goal(self, car, client, origin_node: str, choosing_preference) -> tuple[list[str], float, int] | None:
         if client.how_many > car.capacity - car.passengers_inside:
             print("No capacity!") 
             return None
 
-        algorithm = self.get_algorithm()
+        algorithm = self.get_algorithm(choosing_preference)
         if algorithm is None:
             return None
 
@@ -792,8 +797,8 @@ class Graph:
 
 
     # gives the path from the origin node to the client's goal
-    def path_to_goal(self, car, client, origin_node: str) -> tuple[list[str], float, int] | None:
-        algorithm = self.get_algorithm()
+    def path_to_goal(self, car, client, origin_node: str, choosing_preference) -> tuple[list[str], float, int] | None:
+        algorithm = self.get_algorithm(choosing_preference)
         if algorithm is None:
             return None
 

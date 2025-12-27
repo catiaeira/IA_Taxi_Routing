@@ -5,12 +5,13 @@ from tasks.Task_Move import Task_Move
 
 # will handle the entire trip of one client
 class Task_Deliver_Client (Task):
-    def __init__(self, path, graph, client, client_controller): # path needs to include the trip to the client 
+    def __init__(self, path, graph, client, client_controller, choosing_preference): # path needs to include the trip to the client 
         super().__init__()
         self.priority = 3
         self.moves: List[Task_Move] = []
         self.current_move_index = 0
         self.client = client
+        self.CHOOSING_PREFERENCE = choosing_preference
 
         for i in range(len(path) - 1):
             node_a = path[i]
@@ -39,7 +40,7 @@ class Task_Deliver_Client (Task):
 
         if graph_changed:                                   # graph changed, so we need to update the moves
             curr_move = self.moves[self.current_move_index] 
-            path_tuple = graph.update_path (car, self.client, curr_move.goal_node)
+            path_tuple = graph.update_path (car, self.client, curr_move.goal_node, self.CHOOSING_PREFERENCE)
             if path_tuple == None:                          # can't deliver client now, wait in place for traffic to get better?
                 print ("No path found to client goal after change in traffic!")
                 return 

@@ -56,7 +56,7 @@ class Car_Controller:
         sim_car.car = new_car
 
     def update (self, curr_time, client_controller, graph, graph_changed : bool):
-        waiting_clients : list [Client] = client_controller.waiting_clients
+        waiting_clients  : list[Client] = client_controller.waiting_clients
         clients_on_route : list[Client] = client_controller.clients_on_route
 
         i = 0
@@ -110,25 +110,28 @@ class Car_Controller:
 
             car = sim_car.car                     
 
-            trip_to_client = graph.create_path_to_client(car, client)
+            trip_to_client = graph.create_path_to_client(car, client, self.CHOOSING_PREFERENCE)
             if trip_to_client == None:
                 continue
 
+
+            print (trip_to_client)
             path, time_taken, dist_travelled = trip_to_client
             
-            # here we need to choose which parameter we're focusing on (eg fastest time, least fuel spent). 
-            # only distance for now
+            # here we need to choose which parameter we're focusing on (eg fastest time, less cost). 
 
             if self.CHOOSING_PREFERENCE == "TIME":
                 if best_parameter == None or time_taken < best_parameter:
                     best_parameter = time_taken
                     best_path = path
                     best_car = sim_car 
-            else:                           # todo will change to consider the cost instead of distance !!!!
+            elif self.CHOOSING_PREFERENCE == "COST":
                 if best_parameter == None or dist_travelled < best_parameter:
                     best_parameter = dist_travelled
                     best_path = path
                     best_car = sim_car 
+            else:
+                print ("unknown preference assigning client!") # shouldnt happen
         
         if best_car == None:
             # couldnt find a suitable car, will wait
@@ -136,6 +139,6 @@ class Car_Controller:
             return 0
         
         print (f"{client} assigned to {best_car.car}")
-        task = Task_Deliver_Client (best_path, graph, client, client_controller)
+        task = Task_Deliver_Client (best_path, graph, client, client_controller, self.CHOOSING_PREFERENCE)
         best_car.tasks_list.append (task)
         return 1

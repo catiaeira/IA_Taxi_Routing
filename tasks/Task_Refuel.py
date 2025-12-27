@@ -9,7 +9,7 @@ class Task_Refuel (Task):
         self.priority = 1
         self.refueling = False
         self.time_left_refuel = -1
-        self.moves: List[Task_Move] = []
+        self.moves: list[Task_Move] = []
         self.current_move_index = 0
     
     def __str__(self) -> str:
@@ -39,7 +39,7 @@ class Task_Refuel (Task):
                     origin = curr_move.goal_node
                 else:
                     origin = car.curr_node
-                to_station = graph.find_closest_station(origin, car.charges_in())   # find the closest station
+                to_station = graph.find_closest_station_by_distance(origin, car.charges_in())   # find the closest station, prioritizing shortest path
                 if to_station == None:
                     print (f"{car} can't get to station!")  # rip?
                     return 
