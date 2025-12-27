@@ -208,8 +208,18 @@ class Graph:
     
 
 
-    def get_neighbours(self, node: str) -> list[tuple[str, int, int]]:
+    def get_neighbours(self, node: str) -> list[tuple[str, int, int, int, float]]:
         return self.adjacency_lists_dict[node]
+
+    def update_traffic(self, dynamic_traffic: bool) -> bool:
+        if dynamic_traffic:
+            change_chance = 0.2
+            if random.random() < change_chance:
+                self.change_traffic("random")
+                print("\n[TRAFFIC RANDOMIZED]\n")
+                return True
+            
+        return False
 
     def change_traffic(self, option: str):
         if option == "up": # more traffic, less speed -> lower multiplier
@@ -219,6 +229,7 @@ class Graph:
                     new_curr_speed = round(max_speed * new_mult)
 
                     edges[i] = (node2, dist, max_speed, new_curr_speed, new_mult)
+            print("\nIncreased traffic.\n")
 
         elif option == "down": # less traffic, more speed -> higher multiplier
             for edges in self.adjacency_lists_dict.values():  # list of tuples
@@ -227,6 +238,7 @@ class Graph:
                     new_curr_speed = round(max_speed * new_mult)
 
                     edges[i] = (node2, dist, max_speed, new_curr_speed, new_mult)
+            print("\nReduced traffic.\n")
 
         elif option == "random":
             for edges in self.adjacency_lists_dict.values():  # list of tuples
@@ -235,6 +247,7 @@ class Graph:
                     new_curr_speed = round(max_speed * new_mult)
 
                     edges[i] = (node2, dist, max_speed, new_curr_speed, new_mult)
+            print("\nRandomized traffic.\n")
 
     # draws the graph with arrows to indicate edge direction
     def draw_directed(self):
@@ -310,7 +323,7 @@ class Graph:
                 path: list[str] = self.build_path(parents, origin, destination)
                 return (path, self.calculate_path_time(path), self.calculate_distance(path))
 
-            for node, _, _ in self.get_neighbours(current):
+            for node, _, _, _, _ in self.get_neighbours(current):
                 if node not in visited:
                     visited.add(node)
                     queue.append(node)
@@ -338,7 +351,7 @@ class Graph:
 
             if current not in visited:
                 visited.add(current)
-                for node, _, _ in self.get_neighbours(current):
+                for node, _, _, _, _ in self.get_neighbours(current):
                     if node not in visited:
                         stack.append(node)
                         parents[node] = current
@@ -372,7 +385,7 @@ class Graph:
                 path: list[str] = self.build_path(parents, origin, destination)
                 return (path, bn_cost, self.calculate_distance(path))
 
-            for node, dist, speed in self.get_neighbours(best_node):
+            for node, dist, _, speed, _ in self.get_neighbours(best_node):
                 travel_time = utils.calculate_time(dist, speed)
                 new_cost = costs[best_node] + travel_time
 
@@ -413,7 +426,7 @@ class Graph:
                 # use costs[destination] instead
                 return (path, costs[destination], self.calculate_distance(path))
 
-            for node, dist, speed in self.get_neighbours(best_node):
+            for node, dist, _, speed, _ in self.get_neighbours(best_node):
                 travel_time = utils.calculate_time(dist, speed)
                 new_cost = costs[best_node] + travel_time
 
@@ -454,7 +467,7 @@ class Graph:
                 # use costs[destination] instead
                 return (path, costs[destination])
 
-            for node, dist, _ in self.get_neighbours(best_node):
+            for node, dist, _, _, _ in self.get_neighbours(best_node):
                 new_cost = costs[best_node] + dist
 
                 if node not in costs or new_cost < costs[node]:
@@ -486,7 +499,7 @@ class Graph:
                 path: list[str] = self.build_path(parents, origin, destination)
                 return (path, self.calculate_path_time(path), self.calculate_distance(path))
 
-            for node, _, _ in self.get_neighbours(best_node):
+            for node, _, _, _, _ in self.get_neighbours(best_node):
                 if node not in visited:
                     visited.add(node)
                     pqueue.put((self.calculate_heuristic_time(node, destination), node))
@@ -524,7 +537,7 @@ class Graph:
                 path: list[str] = self.build_path(parents, origin, best_node)
                 return (path, bn_cost, self.calculate_distance(path))
 
-            for node, dist, speed in self.get_neighbours(best_node):
+            for node, dist, _, speed, _ in self.get_neighbours(best_node):
                 travel_time = utils.calculate_time(dist, speed)
                 new_cost = costs[best_node] + travel_time
 
@@ -566,7 +579,7 @@ class Graph:
                 path: list[str] = self.build_path(parents, origin, best_node)
                 return (path, self.calculate_path_time(path), bn_cost)
 
-            for node, dist, _ in self.get_neighbours(best_node):
+            for node, dist, _, _, _ in self.get_neighbours(best_node):
                 new_dist = dists[best_node] + dist
 
                 if node not in dists or new_dist < dists[node]:
@@ -618,7 +631,7 @@ class Graph:
                 path: list[str] = self.build_path(parents, origin, best_node)
                 return (path, times[best_node], self.calculate_distance(path))
 
-            for node, dist, speed in self.get_neighbours(best_node):
+            for node, dist, _, speed, _ in self.get_neighbours(best_node):
                 travel_time = utils.calculate_time(dist, speed)
                 new_time = times[best_node] + travel_time
 
@@ -687,7 +700,7 @@ class Graph:
                 if not car_nodes_opcosts:
                     break
 
-            for node, dist, _ in self.get_neighbours(best_node):
+            for node, dist, _, _, _ in self.get_neighbours(best_node):
                 new_dist = dists[best_node] + dist
 
                 if node not in dists or new_dist < dists[node]:

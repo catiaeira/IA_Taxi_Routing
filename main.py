@@ -7,7 +7,7 @@ from Client_Controller import Client_Controller
 from utils import is_int
 
 def main():
-    dynamic_traffic = False
+    dynamic_traffic = True
     dynamic_car = True  
     dynamic_client = True  
 
@@ -29,8 +29,8 @@ def main():
         # print (randomEvents(graph, car_controller, client_controller))
 
         # function to update the traffic if dynamic
-        # graph, graph_changed = update_traffic(graph)
-        graph_changed = True # << for now
+        graph_changed = graph.update_traffic(dynamic_traffic)
+        # graph_changed = True # << for now
         
         client_controller.update(currTime, graph)
         car_controller.update(currTime, client_controller, graph, graph_changed)
