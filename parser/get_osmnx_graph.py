@@ -58,8 +58,15 @@ def get_graph() -> Graph:
 
     graph = Graph()
 
+    counter = 0
+    stations = (Energy_Station.CHARGING_AND_FUEL_STATION, Energy_Station.CHARGING_STATION, Energy_Station.FUEL_STATION)
     for node, data in graph_osmnx.nodes(data=True):
-        graph.add_node(str(node), data['y'], data['x'], Energy_Station.NONE)
+        if counter % 100 == 0:
+            station = stations[(counter // 100) % 3]
+        else:
+            station = Energy_Station.NONE
+        graph.add_node(str(node), data['y'], data['x'], station)
+        counter += 1
 
     max_speed = 0
     speed = 0
