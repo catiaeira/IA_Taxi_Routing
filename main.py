@@ -7,7 +7,7 @@ from Client_Controller import Client_Controller
 from utils import is_int
 
 def main():
-    dynamic_traffic = False
+    dynamic_traffic = True
     dynamic_car = True  
     dynamic_client = True  
 
@@ -29,8 +29,8 @@ def main():
         # print (randomEvents(graph, car_controller, client_controller))
 
         # function to update the traffic if dynamic
-        # graph, graph_changed = update_traffic(graph)
-        graph_changed = True # << for now
+        graph_changed = graph.update_traffic(dynamic_traffic)
+        # graph_changed = True # << for now
         
         client_controller.update(currTime, graph)
         car_controller.update(currTime, client_controller, graph, graph_changed)
@@ -70,7 +70,7 @@ def main_menu(graph, car_controller, client_controller):
                 continue
 
             case 3:
-                print ("traffic")
+                traffic_menu(graph)
                 continue
 
             case 4:
@@ -417,6 +417,38 @@ def client_menu (graph, client_controller):
             
             case _:
                 print("Invalid option, please try again.")
+
+def traffic_menu(graph):
+    user_input = -1
+    while user_input != 0:
+        print("1 - Increase traffic")
+        print("2 - Reduce traffic")
+        print("3 - Randomize traffic")
+        print("0 - Go back\n")
+
+        user_input = input ("Enter your option -> ")
+        if not is_int(user_input):
+            print("Invalid input, please enter a number.")
+
+        match int(user_input):
+            case 0:
+                return
+            
+            case 1:
+                graph.change_traffic("up")
+                continue
+
+            case 2:
+                graph.change_traffic("down")
+                continue
+
+            case 3:
+                graph.change_traffic("random")
+                continue
+
+            case _:
+                print("Invalid option, please try again.")
+                continue
 
 
 def algorithm_menu (graph):
