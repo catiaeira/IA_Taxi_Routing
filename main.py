@@ -7,13 +7,13 @@ from Client_Controller import Client_Controller
 from utils import is_int
 
 def main():
-    dynamic_traffic = True
-    dynamic_car = True  
-    dynamic_client = True  
+    dynamic_traffic = False
+    dynamic_car = False  
+    dynamic_client = False  
 
     graph = parse_graph()
     car_controller = Car_Controller(dynamic_car)
-    client_controller = Client_Controller(dynamic_client)
+    client_controller = Client_Controller(dynamic_client, graph)
 
     currTime = 0
     skipping = 0
@@ -148,6 +148,7 @@ def car_menu (graph, car_controller):
         print("3 - Delete car")
         print("4 - Change car")
         print("5 - Change car priority")
+        print("6 - See simulation stats")
         print("0 - Go back\n")
 
         number_cars = car_controller.get_number_of_cars()
@@ -283,6 +284,8 @@ def car_menu (graph, car_controller):
             case 5:
                 car_priority_menu(car_controller)   
 
+            case 6:
+                car_controller.see_sim_cars()
             case _:
                 print("Invalid option, please try again.")
 

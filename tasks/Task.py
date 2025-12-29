@@ -13,8 +13,3 @@ class Task:
             f"  Time started = {self.time_started}\n"
             f"  Completed = {self.completed}\n"
         )
-
-
-class Task_Roam (Task):
-    def __init__(self):
-        super().__init__()

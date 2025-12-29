@@ -80,8 +80,8 @@ class ElectricCar (Car):
     def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str =""):
         super().__init__(trips_done, kms_travelled, kms_travelled_w_passengers, energy_level, capacity, passengers_inside, curr_node)
         self.consumption_per_km = 0.25 # 400km
-        #self.consumption_per_km = 0.5 # 200km <- for testing
- 
+        self.recharge_per_min = 4      # 25 mins to fully recharge
+
     def CO2_emissions (self):
         return 0
 
@@ -89,7 +89,7 @@ class ElectricCar (Car):
         return Energy_Station.CHARGING_STATION
 
     def time_to_refuel(self) -> int: 
-        return (100 - self.energy_level) / 4     # could change between cars. 25 mins to fully recharge
+        return (100 - self.energy_level) / self.recharge_per_min
 
     @override
     def __str__(self) -> str:
@@ -99,6 +99,7 @@ class FuelCar (Car):
     def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str =""):
         super().__init__(trips_done, kms_travelled, kms_travelled_w_passengers, energy_level, capacity, passengers_inside, curr_node)
         self.consumption_per_km = 0.1 # 1000 km
+        self.recharge_per_min = 20    # 5 minutes
 
     def CO2_emissions (self):
         return 100 * self.kms_travelled
@@ -107,7 +108,7 @@ class FuelCar (Car):
         return Energy_Station.FUEL_STATION
 
     def time_to_refuel (self) -> int:
-        return 5 # minutes
+        return 5 
 
     @override
     def __str__(self) -> str:

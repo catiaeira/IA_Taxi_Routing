@@ -777,10 +777,8 @@ class Graph:
                 return self.greedy_search
             case ("A_STAR"):
                 if (choosing_preference == 'TIME'):
-                    print ("prefering time!")
                     return self.a_star_search
                 elif (choosing_preference == 'COST'):
-                    print ("prefering cost!")
                     return self.a_star_search_by_distance
             case (_):
                 print ("unknown algorithm") # shouldnt happen

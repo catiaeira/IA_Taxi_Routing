@@ -38,6 +38,13 @@ class Car_Controller:
             print(sim_car.car)
             i += 1
 
+    def see_sim_cars (self):
+        i = 0
+        for sim_car in self.simulation_cars:
+            print("Car", i, ":", end=" ")
+            print(sim_car)
+            i += 1
+
     def add_car (self, car_type: int, car_capacity: int, car_energy_level: float, car_curr_node: str): #make car_type a str ?
         if(car_type == 1):
             car = FuelCar(energy_level=car_energy_level, capacity=car_capacity, curr_node=car_curr_node)
@@ -58,17 +65,18 @@ class Car_Controller:
     def update (self, curr_time, client_controller, graph, graph_changed : bool):
         waiting_clients  : list[Client] = client_controller.waiting_clients
         clients_on_route : list[Client] = client_controller.clients_on_route
-
+        most_central_node : dict[str, int] = client_controller.central_popular_node
+        
         i = 0
         while i < len(waiting_clients):
             client = waiting_clients[i]
             if self.assign_car_to_client(client, graph, client_controller):
-                client_controller.client_got_in_car(client)
+                client_controller.client_got_car_assigned(client)
             else:
                 i += 1
             
         for s_car in self.simulation_cars: # update all cars
-            s_car.update(curr_time, graph, graph_changed)
+            s_car.update(curr_time, graph, graph_changed, most_central_node)
         
         if self.dynamic_car is True:
             action = random.choice(["create", "delete"])
@@ -114,8 +122,6 @@ class Car_Controller:
             if trip_to_client == None:
                 continue
 
-
-            print (trip_to_client)
             path, time_taken, dist_travelled = trip_to_client
             
             # here we need to choose which parameter we're focusing on (eg fastest time, less cost). 

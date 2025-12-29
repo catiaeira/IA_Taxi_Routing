@@ -23,15 +23,15 @@ class Simulation_Car:
         else:
             curr_task_str = "    None"
 
-        tasks = ""
-        for t in self.tasks_list:
-            tasks += "    " + str(t).replace("\n", "\n    ") + "\n"
+        #tasks = ""
+        #for t in self.tasks_list:
+        #    tasks += "    " + str(t).replace("\n", "\n    ") + "\n"
 
         return (
             f"\n--- Simulation Car Status ---\n"
             f"Details:\n{car_info}\n"
             f"Current Task:\n{curr_task_str}\n"
-            f"Tasks Queue:\n{tasks if tasks else '    (Empty)'}"
+            #f"Tasks Queue:\n{tasks if tasks else '    (Empty)'}" # bloats printing
         )
 
     def is_car_busy(self):
@@ -45,9 +45,10 @@ class Simulation_Car:
             return True
         return False
 
-    def update(self, curr_time, graph, graph_changed :bool):
+    def update(self, curr_time, graph, graph_changed :bool, most_central_node : str):
         if self.current_task is None :
             self.check_energy_level()
+            self.check_roam(most_central_node)
             if self.tasks_list:
                 self.current_task = max(self.tasks_list, key=lambda t: t.priority)
 
@@ -66,19 +67,34 @@ class Simulation_Car:
             average_km_per_trip = 50                    # best to change this after we know an actual average
         else: average_km_per_trip = self.car.total_kms_travelled_w_passengers / self.car.total_trips_done
 
-        if kms_left < 2 * average_km_per_trip:
-            refuel_task = self.get_refuel_task(self.tasks_list)
+        if kms_left < 2.5 * average_km_per_trip:
+            refuel_task = self.get_refuel_task()
             
             if kms_left < average_km_per_trip:  # very low energy
                 print ("increasing refuel task priority to max")
                 refuel_task.priority = 5
-            else :                              # low energy
+            elif kms_left < 2 * average_km_per_trip:  # low energy:
                 print ("increasing refuel task priority")
-                refuel_task.priority = 3        # same priority as delivering normal clients
+                refuel_task.priority = 3        # same priority as delivering normal clients       
 
         
-    def get_refuel_task (self, tasks_list: list[Task]) -> Task_Refuel:    # creates it if there isnt any
-        for task in tasks_list:
+    def check_roam(self, most_central_node):
+        if most_central_node == None or self.car.curr_node == most_central_node:
+            return 
+
+        roam_task = Task_Roam(most_central_node)
+        for task in self.tasks_list:
+            if isinstance(task, Task_Roam):
+                if task.node == most_central_node:
+                    return
+                self.tasks_list.remove(task)    # remove outdated roam task
+                break 
+
+        self.tasks_list.append(roam_task)
+
+
+    def get_refuel_task (self) -> Task_Refuel:    # creates it if there isnt any
+        for task in self.tasks_list:
             if isinstance(task, Task_Refuel):
                 return task 
 
