@@ -236,6 +236,29 @@
 		"destination": "Lisboa",
 		"dist": 20000,
 		"speed": 50
-	}
+	},
+	{ "origin": "Borba", "destination": "Elvas", "dist": 15000, "speed": 50 },
+	{ "origin": "Estremoz", "destination": "Borba", "dist": 15000, "speed": 50 },
+	{ "origin": "Evora", "destination": "Estremoz", "dist": 40000, "speed": 20 },
+	{ "origin": "Montemor", "destination": "Evora", "dist": 20000, "speed": 50 },
+	{ "origin": "Vendas Novas", "destination": "Montemor", "dist": 15000, "speed": 50 },
+	{ "origin": "Lisboa", "destination": "Vendas Novas", "dist": 50000, "speed": 70 },
+
+	{ "origin": "Arraiolos", "destination": "Elvas", "dist": 50000, "speed": 100 },
+	{ "origin": "Alcacer", "destination": "Arraiolos", "dist": 90000, "speed": 120 },
+	{ "origin": "Palmela", "destination": "Alcacer", "dist": 35000, "speed": 50 },
+	{ "origin": "Almada", "destination": "Palmela", "dist": 25000, "speed": 50 },
+
+	{ "origin": "Lisboa", "destination": "Almada", "dist": 15000, "speed": 50 },
+
+	{ "origin": "Alandroal", "destination": "Elvas", "dist": 40000, "speed": 50 },
+	{ "origin": "Redondo", "destination": "Alandroal", "dist": 25000, "speed": 50 },
+	{ "origin": "Monsaraz", "destination": "Redondo", "dist": 30000, "speed": 50 },
+	{ "origin": "Barreiro", "destination": "Monsaraz", "dist": 120000, "speed": 50 },
+
+	{ "origin": "Baixa da banheira", "destination": "Barreiro", "dist": 5000, "speed": 50 },
+	{ "origin": "Moita", "destination": "Baixa da banheira", "dist": 7000, "speed": 50 },
+	{ "origin": "Alcochete", "destination": "Moita", "dist": 20000, "speed": 50 },
+	{ "origin": "Lisboa", "destination": "Alcochete", "dist": 20000, "speed": 50 }
 	]
 }

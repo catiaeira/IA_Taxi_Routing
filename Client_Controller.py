@@ -1,14 +1,20 @@
 import random
-
+import utils
 from Client import Client
 
 class Client_Controller:
-    def __init__(self, dynamic_client: bool):
+    central_popular_node : str = None           # the closest node to the most visited nodes averages
+
+    sum_starting_coordinates = [0.0, 0.0] # lat, lng; sum of coords the clients started in
+    how_many_clients : int = 0                     # counter of how many clients have requested a ride
+
+    def __init__(self, dynamic_client: bool, graph):
         self.waiting_clients : list [Client] = [] # swap for a priority queue?
         self.clients_on_route : list [Client] = []
         self.dynamic_client = dynamic_client
 
-        self.waiting_clients.extend (self.get_clients())
+        self.waiting_clients.extend (self.get_clients(graph))
+        self.calculate_central_node(graph)
 
     def update(self, curr_time, graph):
         if self.dynamic_client is True:
@@ -27,20 +33,33 @@ class Client_Controller:
 
                 self.waiting_clients.append(new_client)
 
+                self.how_many_clients += 1
+                node_start = graph.get_node_by_name (new_client.start)
+                self.sum_starting_coordinates[0] += node_start.getLatitude()
+                self.sum_starting_coordinates[1] += node_start.getLongitude()
+
+                self.calculate_central_node(graph)
+
                 print(f"\n[NEW CLIENT] {new_client}\n")
 
-    def client_got_in_car (self, client: Client):
+    def client_got_car_assigned (self, client: Client):
         self.waiting_clients.remove(client)
         self.clients_on_route.append(client)
 
     def client_arrived_at_goal (self, client: Client):
         self.clients_on_route.remove(client)
 
-    def get_clients(self) -> list [Client]: # manual method to add clients, for testing
+    def get_clients(self, graph) -> list [Client]: # manual method to add clients, for testing
         c1 = Client ("Alandroal", "Monsaraz", 4)
         c2 = Client ("Palmela", "Lisboa", 3)
 
-        return [c1, c2]
+        clients = [c1, c2]
+        for c in clients:
+            node_start = graph.get_node_by_name (c.start)
+            self.sum_starting_coordinates[0] += node_start.getLatitude()
+            self.sum_starting_coordinates[1] += node_start.getLongitude()
+        self.how_many_clients += len(clients)
+        return clients
 
     def get_n_waiting_clients (self):
         return len(self.waiting_clients)
@@ -69,3 +88,21 @@ class Client_Controller:
     def change_client(self, index: int, client_start: str, client_goal: str, client_how_many: int):
         new_client = Client(client_start, client_goal, client_how_many)
         self.waiting_clients[index] = new_client
+
+    def calculate_central_node (self, graph):
+        if self.how_many_clients == 0:
+            return None
+        lat, lng = self.sum_starting_coordinates
+        lat_avg = lat / self.how_many_clients
+        lng_avg = lng / self.how_many_clients
+
+        closest_node = "" 
+        closest_dist = float("inf")
+        for node in graph.node_dict.values():
+            dist = utils.dist(node.getLatitude(), node.getLongitude(), lat_avg, lng_avg)
+            if dist < closest_dist:
+                closest_node = node.name
+                closest_dist = dist
+
+        print ("central node ", closest_node)
+        self.central_popular_node = closest_node
