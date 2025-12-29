@@ -547,7 +547,13 @@ class Graph:
                     pqueue.put((new_cost, node))
 
         # if we exit the cycle, it means no station was found
-        print(f"Couldn't find any station from {origin}")
+        if station_type is Energy_Station.CHARGING_STATION:
+            station_type_str = "charging"
+        elif station_type is Energy_Station.FUEL_STATION:
+            station_type_str = "fuel"
+        else:
+            station_type_str = "charging and fuel"
+        print(f"Couldn't find any {station_type_str} station from {origin}")
         return None
 
 
@@ -588,7 +594,13 @@ class Graph:
                     pqueue.put((new_dist, node))
 
         # if we exit the cycle, it means no station was found
-        print(f"Couldn't find any station from {origin}")
+        if station_type is Energy_Station.CHARGING_STATION:
+            station_type_str = "charging"
+        elif station_type is Energy_Station.FUEL_STATION:
+            station_type_str = "fuel"
+        else:
+            station_type_str = "charging and fuel"
+        print(f"Couldn't find any {station_type_str} station from {origin}")
         return None
 
     def find_closest_car(self, origin: str, cars: set[Car], destination: str) -> tuple[Car, list[str], float, int]|None:

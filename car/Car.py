@@ -77,8 +77,8 @@ class Car:
 
 
 class ElectricCar (Car):
-    def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str =""):
-        super().__init__(trips_done, kms_travelled, kms_travelled_w_passengers, energy_level, capacity, passengers_inside, curr_node)
+    def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str ="", op_cost_km: int = 40):
+        super().__init__(trips_done, kms_travelled, kms_travelled_w_passengers, energy_level, capacity, passengers_inside, curr_node, op_cost_km)
         self.consumption_per_km = 0.25 # 400km
         #self.consumption_per_km = 0.5 # 200km <- for testing
  
@@ -97,8 +97,8 @@ class ElectricCar (Car):
 
 
 class FuelCar (Car):
-    def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str =""):
-        super().__init__(trips_done, kms_travelled, kms_travelled_w_passengers, energy_level, capacity, passengers_inside, curr_node)
+    def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str ="", op_cost_km: int = 40):
+        super().__init__(trips_done, kms_travelled, kms_travelled_w_passengers, energy_level, capacity, passengers_inside, curr_node, op_cost_km)
         self.consumption_per_km = 0.1 # 1000 km
 
     def CO2_emissions (self):
