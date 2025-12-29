@@ -45,14 +45,21 @@ class Simulation_Car:
             return True
         return False
 
-    def update(self, curr_time, graph, graph_changed :bool, most_central_node : str):
-        if self.current_task is None :
-            self.check_energy_level()
-            self.check_roam(most_central_node)
-            if self.tasks_list:
-                self.current_task = max(self.tasks_list, key=lambda t: t.priority)
+    def update(self, curr_time, graph, graph_changed: bool, most_central_node: str):
+        self.check_energy_level()
+        self.check_roam(most_central_node)
 
-        if self.current_task is not None:
+        if self.tasks_list:
+            best_task = max(self.tasks_list, key=lambda t: t.priority)
+
+            if self.current_task is None or \
+                (best_task.priority > self.current_task.priority and not isinstance(curr_task, Task_Deliver_Client)): # dont choose a new task if currently delivering a client
+
+                if (self.current_task):
+                     self.tasks_list.remove(self.current_task)  # destroy curr task if its less important 
+                self.current_task = best_task
+
+        if self.current_task:
             self.current_task.update(curr_time, graph, self.car, graph_changed)
 
             if self.current_task.completed:
@@ -60,7 +67,7 @@ class Simulation_Car:
                 self.current_task = None
                 print(str(self))
 
-    
+
     def check_energy_level(self): 
         kms_left = self.car.energy_level / self.car.consumption_per_km
         if self.car.total_trips_done == 0:
