@@ -440,7 +440,7 @@ class Graph:
         return None
 
 
-    def a_star_search_by_distance(self, origin: str, destination: str) -> tuple[list[str], int] | None:
+    def a_star_search_by_distance(self, origin: str, destination: str) -> tuple[list[str], float, int] | None:
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[int,str]] = PriorityQueue()
         pqueue.put((self.calculate_heuristic_dist(origin, destination), origin))
@@ -465,7 +465,7 @@ class Graph:
                 path: list[str] = self.build_path(parents, origin, destination)
                 # here we can't return bn_cost because it has the heuristic value included
                 # use costs[destination] instead
-                return (path, costs[destination])
+                return (path, self.calculate_path_time(path), costs[destination])
 
             for node, dist, _, _, _ in self.get_neighbours(best_node):
                 new_cost = costs[best_node] + dist
@@ -681,17 +681,17 @@ class Graph:
         return None
 
 
-    # result[2] is the operational cost; must be divided by the chosen car's operational cost per km to get the distance
-    def find_closest_car_by_op_cost(self, origin: str, cars: set[Car]) -> tuple[list[str], float, int]|None:
-        car_nodes_opcosts: dict[str, int] = {}
+    # this is used to find the closest car by op cost; just need to multiply the distance returned by this by a car's op cost 
+    def find_closest_car_by_op_cost(self, origin: str, cars: set[Car], destination: str) -> tuple[Car, list[str], float, int]|None:
+        car_nodes: dict[str, Car] = {}
         for car in cars:
-            car_nodes_opcosts[car.curr_node] = car.op_cost_km
+            car_nodes[car.curr_node] = car
 
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[int,str]] = PriorityQueue()
         # calculate heuristic for the first node
         min_heuristic = 10000000000
-        for car_node in car_nodes_opcosts.keys():
+        for car_node in car_nodes:
             heuristic = self.calculate_heuristic_dist(origin, car_node)
             if heuristic < min_heuristic:
                 min_heuristic = heuristic
@@ -702,8 +702,8 @@ class Graph:
 
         parents: dict[str, str] = {origin: origin}
 
-        # [(path, op cost)]
-        results: list[tuple[list[str], int]] = []
+        # [(car, path, op cost)]
+        results: list[tuple[Car, list[str], int]] = []
 
         while not pqueue.empty():
 
@@ -714,20 +714,20 @@ class Graph:
             # skip stale entries
             # calculate heuristic, which is the minimum for every car node
             min_heuristic = 10000000000
-            for car_node in car_nodes_opcosts.keys():
+            for car_node in car_nodes:
                 heuristic = self.calculate_heuristic_dist(best_node, car_node)
                 if heuristic < min_heuristic:
                     min_heuristic = heuristic
             if bn_cost > dists[best_node] + min_heuristic:
                 continue
 
-            if best_node in car_nodes_opcosts:
-                car_op_cost = car_nodes_opcosts.pop(best_node)
-                op_cost: int = dists[best_node] * car_op_cost // 1000
+            if best_node in car_nodes:
+                car = car_nodes.pop(best_node)
+                op_cost: int = dists[best_node] * car.op_cost_km // 1000
                 path: list[str] = self.build_path(parents, origin, best_node)
-                results.append((path, op_cost))
+                results.append((car, path, op_cost))
                 # already found every car, so break the cicle
-                if not car_nodes_opcosts:
+                if not car_nodes:
                     break
 
             for node, dist, _, _, _ in self.get_neighbours(best_node):
@@ -738,18 +738,43 @@ class Graph:
                     parents[node] = best_node
                     # calculate heuristic, which is the minimum for every car node
                     min_heuristic = 10000000000
-                    for car_node in car_nodes_opcosts.keys():
+                    for car_node in car_nodes:
                         heuristic = self.calculate_heuristic_dist(node, car_node)
                         if heuristic < min_heuristic:
                             min_heuristic = heuristic
                     pqueue.put((new_dist + min_heuristic, node))
 
         if results:
-            best_result: tuple[list[str], int] = ([], 100000000000)
-            for result in results:
-                if result[1] < best_result[1]:
-                    best_result = result
-            return (best_result[0], self.calculate_path_time(best_result[0]), best_result[1])
+            # these are the costs of taking the client to their destination
+            client = self.a_star_search_by_distance(origin, destination)
+            if client is None:
+                return None
+            client_path, client_time, client_dist = client
+
+            # these are the costs of refueling from the client's destination
+            refuel = self.find_closest_station_by_distance(destination, Energy_Station.FUEL_STATION)
+            if refuel is None:
+                return None
+
+            # these are the costs of recharging from the client's destination
+            recharge = self.find_closest_station_by_distance(destination, Energy_Station.CHARGING_STATION)
+            if recharge is None:
+                return None
+
+            refill_dists = {Energy_Station.FUEL_STATION: refuel[2],
+                            Energy_Station.CHARGING_STATION: recharge[2]}
+
+            best_result: tuple[Car|None, list[str], int] = (None, [], 100000000000)
+            for car, path, op_cost in results:
+                if op_cost < best_result[2] and utils.is_trip_feasible(car, (op_cost // car.op_cost_km) + client_dist + refill_dists[car.charges_in()]):
+                    best_result = (car, path, op_cost)
+            if best_result[0] is not None:
+                # remove duplicate path node and build final result
+                _ = best_result[1].pop()
+                return (best_result[0], best_result[1] + client_path, self.calculate_path_time(best_result[1]) + client_time, (best_result[2] // best_result[0].op_cost_km) + client_dist)
+            else:
+                print(f"Couldn't find any available car from {origin}")
+                return None
         else:
             # if we reach here, it means no available cars were found
             print(f"Couldn't find any available car from {origin}")
