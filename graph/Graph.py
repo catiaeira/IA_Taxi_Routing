@@ -591,10 +591,10 @@ class Graph:
         print(f"Couldn't find any station from {origin}")
         return None
 
-    def find_closest_car(self, origin: str, cars: set[Car]) -> tuple[list[str], float, int]|None:
-        car_nodes: set[str] = set()
+    def find_closest_car(self, origin: str, cars: set[Car], destination: str) -> tuple[Car, list[str], float, int]|None:
+        car_nodes: dict[str, Car] = {}
         for car in cars:
-            car_nodes.add(car.curr_node)
+            car_nodes[car.curr_node] = car
 
         # the entries are of the form (priority_number, data)
         pqueue: PriorityQueue[tuple[float,str]] = PriorityQueue()
@@ -609,7 +609,29 @@ class Graph:
         # seconds
         times: dict[str, float] = {origin: 0}
 
+        # meters
+        dists: dict[str, int] = {origin: 0}
+
         parents: dict[str, str] = {origin: origin}
+
+        # these are the costs of taking the client to their destination
+        client = self.a_star_search(origin, destination)
+        if client is None:
+            return None
+        client_path, client_time, client_dist = client
+
+        # these are the costs of refueling from the client's destination
+        refuel = self.find_closest_station_by_distance(destination, Energy_Station.FUEL_STATION)
+        if refuel is None:
+            return None
+
+        # these are the costs of recharging from the client's destination
+        recharge = self.find_closest_station_by_distance(destination, Energy_Station.CHARGING_STATION)
+        if recharge is None:
+            return None
+
+        refill_dists = {Energy_Station.FUEL_STATION: refuel[2],
+                        Energy_Station.CHARGING_STATION: recharge[2]}
 
         while not pqueue.empty():
 
@@ -628,8 +650,15 @@ class Graph:
                 continue
 
             if best_node in car_nodes:
-                path: list[str] = self.build_path(parents, origin, best_node)
-                return (path, times[best_node], self.calculate_distance(path))
+                car = car_nodes.pop(best_node)
+                if utils.is_trip_feasible(car, dists[best_node] + client_dist + refill_dists[car.charges_in()]):
+                    path: list[str] = self.build_path(parents, origin, best_node)
+                    # remove duplicate path node and build final result
+                    _ = path.pop()
+                    return (car, path + client_path, times[best_node] + client_time, dists[best_node] + client_dist)
+                # already found every car, so break the cicle
+                if not car_nodes:
+                    break
 
             for node, dist, _, speed, _ in self.get_neighbours(best_node):
                 travel_time = utils.calculate_time(dist, speed)
@@ -637,6 +666,7 @@ class Graph:
 
                 if node not in times or new_time < times[node]:
                     times[node] = new_time
+                    dists[node] = dists[best_node] + dist
                     parents[node] = best_node
                     # calculate heuristic, which is the minimum for every car node
                     min_heuristic = 10000000000
@@ -646,7 +676,7 @@ class Graph:
                             min_heuristic = heuristic
                     pqueue.put((new_time + min_heuristic, node))
 
-        # if we exit the cycle, it means no available cars were found
+        # if we reach here, it means no available cars were found
         print(f"Couldn't find any available car from {origin}")
         return None
 
@@ -691,7 +721,7 @@ class Graph:
             if bn_cost > dists[best_node] + min_heuristic:
                 continue
 
-            if best_node in car_nodes_opcosts.keys():
+            if best_node in car_nodes_opcosts:
                 car_op_cost = car_nodes_opcosts.pop(best_node)
                 op_cost: int = dists[best_node] * car_op_cost // 1000
                 path: list[str] = self.build_path(parents, origin, best_node)
