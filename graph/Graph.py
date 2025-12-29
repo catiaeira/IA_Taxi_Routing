@@ -869,7 +869,7 @@ class Graph:
             return None
         to_client_path, to_client_time, to_client_dist = to_client
 
-        if not utils.is_trip_feasible(car, to_client_dist, car.energy_level):
+        if not utils.is_trip_feasible(car, to_client_dist):
             print("Runs out of fuel going to client!")
             return None
 
@@ -882,7 +882,7 @@ class Graph:
         
 
         total_dist_meters = to_client_dist + to_goal_dist
-        if not utils.is_trip_feasible(car, total_dist_meters, car.energy_level):
+        if not utils.is_trip_feasible(car, total_dist_meters):
             print("Runs out of fuel delivering client!")
             return None
 

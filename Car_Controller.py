@@ -62,11 +62,12 @@ class Car_Controller:
         new_car = sim_car.car.change_characteristics(car_type, car_capacity, car_energy_level, car_curr_node)
         sim_car.car = new_car
 
-    def update (self, curr_time, client_controller, graph, graph_changed : bool):
+    def update (self, curr_time, client_controller, graph, graph_changed : bool, roam : bool):
         waiting_clients  : list[Client] = client_controller.waiting_clients
         clients_on_route : list[Client] = client_controller.clients_on_route
         most_central_node : dict[str, int] = client_controller.central_popular_node
-        
+        if not roam: 
+            most_central_node = None
         i = 0
         while i < len(waiting_clients):
             client = waiting_clients[i]

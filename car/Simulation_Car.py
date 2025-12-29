@@ -53,7 +53,7 @@ class Simulation_Car:
             best_task = max(self.tasks_list, key=lambda t: t.priority)
 
             if self.current_task is None or \
-                (best_task.priority > self.current_task.priority and not isinstance(curr_task, Task_Deliver_Client)): # dont choose a new task if currently delivering a client
+                (best_task.priority > self.current_task.priority and not isinstance(self.current_task, Task_Deliver_Client)): # dont choose a new task if currently delivering a client
 
                 if (self.current_task):
                      self.tasks_list.remove(self.current_task)  # destroy curr task if its less important 

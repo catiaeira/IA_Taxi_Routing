@@ -9,11 +9,12 @@ from utils import is_int
 def main():
     dynamic_traffic = False
     dynamic_car = False  
-    dynamic_client = False  
+    dynamic_client = False
+    roam = True
 
     graph = parse_graph()
     car_controller = Car_Controller(dynamic_car)
-    client_controller = Client_Controller(dynamic_client, graph)
+    client_controller = Client_Controller(dynamic_client, roam, graph)
 
     currTime = 0
     skipping = 0
@@ -32,8 +33,8 @@ def main():
         graph_changed = graph.update_traffic(dynamic_traffic)
         # graph_changed = True # << for now
         
-        client_controller.update(currTime, graph)
-        car_controller.update(currTime, client_controller, graph, graph_changed)
+        client_controller.update(currTime, graph, roam)
+        car_controller.update(currTime, client_controller, graph, graph_changed, roam)
         currTime += 1 
         if skipping > 0: 
             skipping -=1

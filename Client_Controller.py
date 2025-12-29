@@ -8,15 +8,16 @@ class Client_Controller:
     sum_starting_coordinates = [0.0, 0.0] # lat, lng; sum of coords the clients started in
     how_many_clients : int = 0                     # counter of how many clients have requested a ride
 
-    def __init__(self, dynamic_client: bool, graph):
+    def __init__(self, dynamic_client: bool, roam : bool, graph):
         self.waiting_clients : list [Client] = [] # swap for a priority queue?
         self.clients_on_route : list [Client] = []
         self.dynamic_client = dynamic_client
 
         self.waiting_clients.extend (self.get_clients(graph))
-        self.calculate_central_node(graph)
+        if roam:
+            self.calculate_central_node(graph)
 
-    def update(self, curr_time, graph):
+    def update(self, curr_time, graph, roam : bool):
         if self.dynamic_client is True:
             spawn_chance = 0.2 # 20% chance of spawning a new client
 
@@ -34,11 +35,13 @@ class Client_Controller:
                 self.waiting_clients.append(new_client)
 
                 self.how_many_clients += 1
-                node_start = graph.get_node_by_name (new_client.start)
-                self.sum_starting_coordinates[0] += node_start.getLatitude()
-                self.sum_starting_coordinates[1] += node_start.getLongitude()
 
-                self.calculate_central_node(graph)
+                if roam: 
+                    node_start = graph.get_node_by_name (new_client.start)
+                    self.sum_starting_coordinates[0] += node_start.getLatitude()
+                    self.sum_starting_coordinates[1] += node_start.getLongitude()
+
+                    self.calculate_central_node(graph)
 
                 print(f"\n[NEW CLIENT] {new_client}\n")
 
