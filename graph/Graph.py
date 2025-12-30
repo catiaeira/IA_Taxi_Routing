@@ -8,6 +8,7 @@ import random
 import networkx as nx
 import matplotlib.pyplot as plt
 
+from .EdgeData import EdgeData
 from .Node import Node
 from graph.Energy_Station import Energy_Station
 from car.Car import Car
@@ -18,7 +19,8 @@ class Graph:
 
     def __init__(self):
         self.node_dict: dict[str, Node] = {}  
-        self.adjacency_lists_dict: dict[str, list[tuple[str, int, int, int, float]]] = {}  # tuple[node2, dist, max_speed, curr_speed, multiplier]
+        self.adjacency_lists_dict: dict[str, list[tuple[str, EdgeData]]] = {}
+        self.reversed_adjacency_lists_dict: dict[str, list[tuple[str, EdgeData]]] = {}
         self.max_speed: int = 0
         # this dict stores heuristics as they're calculated in order to save time
         self.heuristics_time: dict[tuple[str,str], float] = {}
@@ -63,8 +65,8 @@ class Graph:
 
     def node_exists(self, name: str) -> bool:
         if self.node_dict.get(name) is None:
-            return 0
-        return 1
+            return False
+        return True
     
     def str_edges(self) -> str:
         edge: str = ""
@@ -86,6 +88,7 @@ class Graph:
         node = Node(name, type_node, latitude, longitude)
         self.node_dict[name] = node
         self.adjacency_lists_dict[name] = []
+        self.reversed_adjacency_lists_dict[name] = []
 
         
     def add_edge(self, origin: str, destination: str, dist: int, speed: int) -> None:
@@ -96,8 +99,9 @@ class Graph:
         except KeyError:
             print(f"Couldn't add edge from {origin} to {destination}")
 
-        mult = random.uniform(0.1,1)
-        self.adjacency_lists_dict[origin].append((destination, dist, speed, round(speed*mult), mult)) 
+        edge_data = EdgeData(dist, speed, speed, 1)
+        self.adjacency_lists_dict[origin].append((destination, edge_data)) 
+        self.reversed_adjacency_lists_dict[destination].append((origin, edge_data))
 
 
     def get_nodes(self) -> list[Node]:
@@ -111,18 +115,18 @@ class Graph:
     def get_arc_time(self, node1: str, node2: str) -> float:
         total_cost = math.inf
         adj_list = self.adjacency_lists_dict[node1]
-        for (node, dist, _, speed, _) in adj_list:
+        for node, edge in adj_list:
             if node == node2:
-                total_cost = utils.calculate_time(dist, speed)
+                total_cost = utils.calculate_time(edge.dist, edge.curr_speed)
 
         return total_cost
 
     def get_arc_speed (self, node1: str, node2: str) -> int:
         total_speed = math.inf
         adj_list = self.adjacency_lists_dict[node1]
-        for (node, _, _, speed, _) in adj_list:
+        for node, edge in adj_list:
             if node == node2:
-                total_speed = speed
+                total_speed = edge.max_speed
                 break
 
         return total_speed
@@ -130,9 +134,9 @@ class Graph:
     def get_arc_current_speed (self, node1: str, node2: str) -> int:
         total_speed = math.inf
         adj_list = self.adjacency_lists_dict[node1]
-        for (node, _, _, curr_speed, _) in adj_list:
+        for node, edge in adj_list:
             if node == node2:
-                total_speed = curr_speed
+                total_speed = edge.curr_speed
                 break
 
         return total_speed
@@ -140,9 +144,9 @@ class Graph:
     def get_arc_distance(self, node1: str, node2:str) -> int:
         total_cost = math.inf
         adj_list = self.adjacency_lists_dict[node1]
-        for (node, dist, _, _, _) in adj_list:
+        for node, edge in adj_list:
             if node == node2:
-                total_cost = dist
+                total_cost = edge.dist
 
         return total_cost
 
@@ -168,8 +172,14 @@ class Graph:
 
 
     def calculate_heuristic_time(self, node1: str, node2: str) -> float:
+        # build the key using a fixed order to ensure there are no cached duplicates 
+        if node1 < node2:
+            key = (node1, node2)
+        else:
+            key = (node2, node1)
+
         # check if this heuristic was already calculated
-        stored = self.heuristics_time.get((node1, node2))
+        stored = self.heuristics_time.get(key)
 
         if stored is not None:
             return stored
@@ -183,13 +193,19 @@ class Graph:
 
         time = utils.calculate_time(straight_line_dist, self.get_max_speed())
         # save the value for future use
-        self.heuristics_time[(node1, node2)] = time
+        self.heuristics_time[key] = time
 
         return time
 
     def calculate_heuristic_dist(self, node1: str, node2: str) -> int:
+        # build the key using a fixed order to ensure there are no cached duplicates 
+        if node1 < node2:
+            key = (node1, node2)
+        else:
+            key = (node2, node1)
+
         # check if this heuristic was already calculated
-        stored = self.heuristics_dist.get((node1, node2))
+        stored = self.heuristics_dist.get(key)
 
         if stored is not None:
             return stored
@@ -202,14 +218,17 @@ class Graph:
         straight_line_dist = int(utils.dist(origin.getLatitude(), origin.getLongitude(), destination.getLatitude(), destination.getLongitude()))
 
         # save the value for future use
-        self.heuristics_dist[(node1, node2)] = straight_line_dist
+        self.heuristics_dist[key] = straight_line_dist
 
         return straight_line_dist
     
 
 
-    def get_neighbours(self, node: str) -> list[tuple[str, int, int, int, float]]:
+    def get_neighbours(self, node: str) -> list[tuple[str, EdgeData]]:
         return self.adjacency_lists_dict[node]
+
+    def get_reversed_neighbours(self, node: str) -> list[tuple[str, EdgeData]]:
+        return self.reversed_adjacency_lists_dict[node]
 
     def update_traffic(self, dynamic_traffic: bool) -> bool:
         if dynamic_traffic:
@@ -224,29 +243,23 @@ class Graph:
     def change_traffic(self, option: str):
         if option == "up": # more traffic, less speed -> lower multiplier
             for edges in self.adjacency_lists_dict.values():  # list of tuples
-                for i, (node2, dist, max_speed, _, multiplier) in enumerate(edges):
-                    new_mult = random.uniform(0.1, multiplier)
-                    new_curr_speed = round(max_speed * new_mult)
-
-                    edges[i] = (node2, dist, max_speed, new_curr_speed, new_mult)
+                for _, edge in edges:
+                    edge.multiplier = random.uniform(0.1, edge.multiplier)
+                    edge.curr_speed = round(edge.max_speed * edge.multiplier)
             print("\nIncreased traffic.\n")
 
         elif option == "down": # less traffic, more speed -> higher multiplier
             for edges in self.adjacency_lists_dict.values():  # list of tuples
-                for i, (node2, dist, max_speed, _, multiplier) in enumerate(edges):
-                    new_mult = random.uniform(multiplier, 1)
-                    new_curr_speed = round(max_speed * new_mult)
-
-                    edges[i] = (node2, dist, max_speed, new_curr_speed, new_mult)
+                for _, edge in edges:
+                    edge.multiplier = random.uniform(edge.multiplier, 1)
+                    edge.curr_speed = round(edge.max_speed * edge.multiplier)
             print("\nReduced traffic.\n")
 
         elif option == "random":
             for edges in self.adjacency_lists_dict.values():  # list of tuples
-                for i, (node2, dist, max_speed, _, multiplier) in enumerate(edges):
-                    new_mult = random.uniform(0.1, 1)
-                    new_curr_speed = round(max_speed * new_mult)
-
-                    edges[i] = (node2, dist, max_speed, new_curr_speed, new_mult)
+                for _, edge in edges:
+                    edge.multiplier = random.uniform(0.1, 1)
+                    edge.curr_speed = round(edge.max_speed * edge.multiplier)
             print("\nRandomized traffic.\n")
 
     # draws the graph with arrows to indicate edge direction
@@ -258,8 +271,8 @@ class Graph:
         for nodo in self.node_dict.values():
             n = nodo.getName()
             g.add_node(n)
-            for (adjacent, weight, _, _, _) in self.adjacency_lists_dict[n]:
-                g.add_edge(n, adjacent, weight=weight)
+            for node, edge in self.adjacency_lists_dict[n]:
+                g.add_edge(n, node, weight=utils.calculate_time(edge.dist, edge.curr_speed))
 
         # layout and drawing
         pos = nx.spring_layout(g, seed=42)  # deterministic layout
@@ -292,10 +305,10 @@ class Graph:
         for nodo in list_v:
             n = nodo.getName()
             g.add_node(n)
-            for (adjacent, weight, _, _, _) in self.adjacency_lists_dict[n]:
-                list = (n, adjacent)
+            for node, edge in self.adjacency_lists_dict[n]:
+                list = (n, node)
                 # lista_a.append(lista)
-                g.add_edge(n, adjacent, weight=weight)
+                g.add_edge(n, node, weight=utils.calculate_time(edge.dist, edge.curr_speed))
 
         pos = nx.spring_layout(g)
         nx.draw_networkx(g, pos, with_labels=True, font_weight='bold')
@@ -323,7 +336,7 @@ class Graph:
                 path: list[str] = self.build_path(parents, origin, destination)
                 return (path, self.calculate_path_time(path), self.calculate_distance(path))
 
-            for node, _, _, _, _ in self.get_neighbours(current):
+            for node, _ in self.get_neighbours(current):
                 if node not in visited:
                     visited.add(node)
                     queue.append(node)
@@ -351,7 +364,7 @@ class Graph:
 
             if current not in visited:
                 visited.add(current)
-                for node, _, _, _, _ in self.get_neighbours(current):
+                for node, _ in self.get_neighbours(current):
                     if node not in visited:
                         stack.append(node)
                         parents[node] = current
@@ -385,8 +398,8 @@ class Graph:
                 path: list[str] = self.build_path(parents, origin, destination)
                 return (path, bn_cost, self.calculate_distance(path))
 
-            for node, dist, _, speed, _ in self.get_neighbours(best_node):
-                travel_time = utils.calculate_time(dist, speed)
+            for node, edge in self.get_neighbours(best_node):
+                travel_time = utils.calculate_time(edge.dist, edge.curr_speed)
                 new_cost = costs[best_node] + travel_time
 
                 if node not in costs or new_cost < costs[node]:
@@ -426,8 +439,8 @@ class Graph:
                 # use costs[destination] instead
                 return (path, costs[destination], self.calculate_distance(path))
 
-            for node, dist, _, speed, _ in self.get_neighbours(best_node):
-                travel_time = utils.calculate_time(dist, speed)
+            for node, edge in self.get_neighbours(best_node):
+                travel_time = utils.calculate_time(edge.dist, edge.curr_speed)
                 new_cost = costs[best_node] + travel_time
 
                 if node not in costs or new_cost < costs[node]:
@@ -467,8 +480,8 @@ class Graph:
                 # use costs[destination] instead
                 return (path, self.calculate_path_time(path), costs[destination])
 
-            for node, dist, _, _, _ in self.get_neighbours(best_node):
-                new_cost = costs[best_node] + dist
+            for node, edge in self.get_neighbours(best_node):
+                new_cost = costs[best_node] + edge.dist
 
                 if node not in costs or new_cost < costs[node]:
                     costs[node] = new_cost
@@ -499,7 +512,7 @@ class Graph:
                 path: list[str] = self.build_path(parents, origin, destination)
                 return (path, self.calculate_path_time(path), self.calculate_distance(path))
 
-            for node, _, _, _, _ in self.get_neighbours(best_node):
+            for node, _ in self.get_neighbours(best_node):
                 if node not in visited:
                     visited.add(node)
                     pqueue.put((self.calculate_heuristic_time(node, destination), node))
@@ -537,8 +550,8 @@ class Graph:
                 path: list[str] = self.build_path(parents, origin, best_node)
                 return (path, bn_cost, self.calculate_distance(path))
 
-            for node, dist, _, speed, _ in self.get_neighbours(best_node):
-                travel_time = utils.calculate_time(dist, speed)
+            for node, edge in self.get_neighbours(best_node):
+                travel_time = utils.calculate_time(edge.dist, edge.curr_speed)
                 new_cost = costs[best_node] + travel_time
 
                 if node not in costs or new_cost < costs[node]:
@@ -585,8 +598,8 @@ class Graph:
                 path: list[str] = self.build_path(parents, origin, best_node)
                 return (path, self.calculate_path_time(path), bn_cost)
 
-            for node, dist, _, _, _ in self.get_neighbours(best_node):
-                new_dist = dists[best_node] + dist
+            for node, edge in self.get_neighbours(best_node):
+                new_dist = dists[best_node] + edge.dist
 
                 if node not in dists or new_dist < dists[node]:
                     dists[node] = new_dist
@@ -602,6 +615,7 @@ class Graph:
             station_type_str = "charging and fuel"
         print(f"Couldn't find any {station_type_str} station from {origin}")
         return None
+
 
     def find_closest_car(self, origin: str, cars: set[Car], destination: str) -> tuple[Car, list[str], float, int]|None:
         car_nodes: dict[str, Car] = {}
@@ -632,18 +646,16 @@ class Graph:
             return None
         client_path, client_time, client_dist = client
 
-        # these are the costs of refueling from the client's destination
+        # these are the costs of refueling and recharging from the client's destination
         refuel = self.find_closest_station_by_distance(destination, Energy_Station.FUEL_STATION)
-        if refuel is None:
-            return None
-
-        # these are the costs of recharging from the client's destination
         recharge = self.find_closest_station_by_distance(destination, Energy_Station.CHARGING_STATION)
-        if recharge is None:
+
+        if refuel is None and recharge is None:
+            print(f"Couldn't find any station from {destination}")
             return None
 
-        refill_dists = {Energy_Station.FUEL_STATION: refuel[2],
-                        Energy_Station.CHARGING_STATION: recharge[2]}
+        refill_dists = {Energy_Station.FUEL_STATION: refuel[2] if refuel is not None else -1,
+                        Energy_Station.CHARGING_STATION: recharge[2] if recharge is not None else -1}
 
         while not pqueue.empty():
 
@@ -663,8 +675,11 @@ class Graph:
 
             if best_node in car_nodes:
                 car = car_nodes.pop(best_node)
-                if utils.is_trip_feasible(car, dists[best_node] + client_dist + refill_dists[car.charges_in()]):
+                refill_dist = refill_dists[car.charges_in()]
+
+                if refill_dist > -1 and utils.is_trip_feasible(car, dists[best_node] + client_dist + refill_dist):
                     path: list[str] = self.build_path(parents, origin, best_node)
+                    path.reverse()
                     # remove duplicate path node and build final result
                     _ = path.pop()
                     return (car, path + client_path, times[best_node] + client_time, dists[best_node] + client_dist)
@@ -672,13 +687,13 @@ class Graph:
                 if not car_nodes:
                     break
 
-            for node, dist, _, speed, _ in self.get_neighbours(best_node):
-                travel_time = utils.calculate_time(dist, speed)
+            for node, edge in self.get_reversed_neighbours(best_node):
+                travel_time = utils.calculate_time(edge.dist, edge.curr_speed)
                 new_time = times[best_node] + travel_time
 
                 if node not in times or new_time < times[node]:
                     times[node] = new_time
-                    dists[node] = dists[best_node] + dist
+                    dists[node] = dists[best_node] + edge.dist
                     parents[node] = best_node
                     # calculate heuristic, which is the minimum for every car node
                     min_heuristic = 10000000000
@@ -737,13 +752,14 @@ class Graph:
                 car = car_nodes.pop(best_node)
                 op_cost: int = dists[best_node] * car.op_cost_km // 1000
                 path: list[str] = self.build_path(parents, origin, best_node)
+                path.reverse()
                 results.append((car, path, op_cost))
                 # already found every car, so break the cicle
                 if not car_nodes:
                     break
 
-            for node, dist, _, _, _ in self.get_neighbours(best_node):
-                new_dist = dists[best_node] + dist
+            for node, edge in self.get_reversed_neighbours(best_node):
+                new_dist = dists[best_node] + edge.dist
 
                 if node not in dists or new_dist < dists[node]:
                     dists[node] = new_dist
@@ -758,27 +774,26 @@ class Graph:
 
         if results:
             # these are the costs of taking the client to their destination
-            client = self.a_star_search_by_distance(origin, destination)
+            client = self.a_star_search(origin, destination)
             if client is None:
                 return None
             client_path, client_time, client_dist = client
 
-            # these are the costs of refueling from the client's destination
+            # these are the costs of refueling and recharging from the client's destination
             refuel = self.find_closest_station_by_distance(destination, Energy_Station.FUEL_STATION)
-            if refuel is None:
-                return None
-
-            # these are the costs of recharging from the client's destination
             recharge = self.find_closest_station_by_distance(destination, Energy_Station.CHARGING_STATION)
-            if recharge is None:
+
+            if refuel is None and recharge is None:
+                print(f"Couldn't find any station from {destination}")
                 return None
 
-            refill_dists = {Energy_Station.FUEL_STATION: refuel[2],
-                            Energy_Station.CHARGING_STATION: recharge[2]}
+            refill_dists = {Energy_Station.FUEL_STATION: refuel[2] if refuel is not None else -1,
+                            Energy_Station.CHARGING_STATION: recharge[2] if recharge is not None else -1}
 
             best_result: tuple[Car|None, list[str], int] = (None, [], 100000000000)
             for car, path, op_cost in results:
-                if op_cost < best_result[2] and utils.is_trip_feasible(car, (op_cost // car.op_cost_km) + client_dist + refill_dists[car.charges_in()]):
+                refill_dist = refill_dists[car.charges_in()]
+                if op_cost < best_result[2] and refill_dist > -1 and utils.is_trip_feasible(car, (op_cost // car.op_cost_km) + client_dist + refill_dist):
                     best_result = (car, path, op_cost)
             if best_result[0] is not None:
                 # remove duplicate path node and build final result
