@@ -39,11 +39,9 @@ class Simulation_Car:
         for task in self.tasks_list:
             if (isinstance(task, Task_Deliver_Client)):
                 has_to_deliver_client = True
-                break 
+                break
 
-        if self.current_task != None or has_to_deliver_client:
-            return True
-        return False
+        return has_to_deliver_client
 
     def update(self, curr_time, graph, graph_changed: bool, most_central_node: str):
         self.check_energy_level()
@@ -53,10 +51,10 @@ class Simulation_Car:
             best_task = max(self.tasks_list, key=lambda t: t.priority)
 
             if self.current_task is None or \
-                (best_task.priority > self.current_task.priority and not isinstance(curr_task, Task_Deliver_Client)): # dont choose a new task if currently delivering a client
+                (best_task.priority > self.current_task.priority and not isinstance(self.current_task, Task_Deliver_Client)): # dont choose a new task if currently delivering a client
 
                 if (self.current_task):
-                     self.tasks_list.remove(self.current_task)  # destroy curr task if its less important 
+                    self.tasks_list.remove(self.current_task)  # destroy curr task if its less important 
                 self.current_task = best_task
 
         if self.current_task:
@@ -78,11 +76,13 @@ class Simulation_Car:
             refuel_task = self.get_refuel_task()
             
             if kms_left < average_km_per_trip:  # very low energy
-                print ("increasing refuel task priority to max")
-                refuel_task.priority = 5
+                if refuel_task.priority != 5:
+                    print ("Increasing refuel task priority to max")
+                    refuel_task.priority = 5
             elif kms_left < 2 * average_km_per_trip:  # low energy:
-                print ("increasing refuel task priority")
-                refuel_task.priority = 3        # same priority as delivering normal clients       
+                if refuel_task.priority != 3:
+                    print ("Increasing refuel task priority")
+                    refuel_task.priority = 3        # same priority as delivering normal clients       
 
         
     def check_roam(self, most_central_node):
@@ -98,6 +98,8 @@ class Simulation_Car:
                 break 
 
         self.tasks_list.append(roam_task)
+        if isinstance(self.current_task , Task_Roam): 
+            self.current_task = roam_task
 
 
     def get_refuel_task (self) -> Task_Refuel:    # creates it if there isnt any

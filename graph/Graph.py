@@ -69,12 +69,11 @@ class Graph:
         return True
     
     def str_edges(self) -> str:
-        edge: str = ""
+        edge_str: str = ""
         for node in self.node_dict.keys():
-            for (node2, dist, speed, cur_speed, _) in self.adjacency_lists_dict[node]:
-                edge = edge + f"{node} -> {node2} | dist: {dist} | max speed: {speed} | current speed: {cur_speed}\n"
-        return edge
-
+            for (node2, edge) in self.adjacency_lists_dict[node]:
+                edge_str = edge_str + f"{node} -> {node2} | dist: {edge.dist} | max speed: {edge.max_speed} | current speed: {edge.curr_speed}\n"
+        return edge_str
 
     def str_nodes(self) -> str:
         result: str = ""
@@ -839,7 +838,7 @@ class Graph:
     # returns in minutes
     def calc_time_between_nodes(self, curr_node: str, goal_node : str) -> float:
             distance = self.get_arc_distance(curr_node, goal_node) # in meters
-            speed = self.get_arc_speed(curr_node, goal_node)       # in km/h
+            speed = self.get_arc_current_speed(curr_node, goal_node)       # in km/h
             if (distance == math.inf or speed == math.inf):
                 print (f"Path not found when calculating time: {curr_node} - {goal_node}")
                 return 0
@@ -867,9 +866,46 @@ class Graph:
                 return None
 
     # uses the car's current node as the starting point to create the path 
-    def create_path_to_client(self, car, client, choosing_preference) -> tuple[list[str], float, int] | None:
-        return self.create_path_to_client_and_goal(car, client, car.curr_node, choosing_preference)
+    def create_path_to_client(self, cars : set[Car], client, choosing_preference) -> tuple[Car, list[str], float, int] | None:
+        if self.ALGORITHM == 'A_STAR':
+            if choosing_preference == "TIME":
+                return self.find_closest_car(client.start, cars, client.goal)
+            elif choosing_preference == "COST":
+                return self.find_closest_car_by_op_cost(client.start, cars, client.goal)
+            else:
+                print ("unknown preference assigning client!") # shouldnt happen
+                return False
 
+        best_trip = None
+        best_parameter = None
+        best_car = None
+
+        for car in cars: 
+            trip = self.create_path_to_client_and_goal(car, client, car.curr_node, choosing_preference)
+            if trip == None:
+                continue
+            path, time_taken, dist_travelled = trip
+            
+            if choosing_preference == "TIME":
+                if best_parameter == None or time_taken < best_parameter:
+                    best_parameter = time_taken
+                    best_trip = trip
+                    best_car = car 
+            elif choosing_preference == "COST":
+                if best_parameter == None or dist_travelled < best_parameter:
+                    best_parameter = dist_travelled
+                    best_trip = trip
+                    best_car = car 
+            else:
+                print ("unknown preference assigning client!") # shouldnt happen
+        
+        if best_car == None:
+            # couldnt find a suitable car, will wait
+            print ("No suitable car found")
+            return None
+            
+        path, time_taken, dist_travelled = best_trip
+        return (best_car, path, time_taken, dist_travelled)
 
     # updates a path that already started
     def update_path(self, car, client, last_completed_node: str, choosing_preference) -> tuple[list[str], float, int] | None:    
@@ -882,7 +918,7 @@ class Graph:
     # creates the entire path from the given origin node to the client and then to the goal
     def create_path_to_client_and_goal(self, car, client, origin_node: str, choosing_preference) -> tuple[list[str], float, int] | None:
         if client.how_many > car.capacity - car.passengers_inside:
-            print("No capacity!") 
+            #print("No capacity!") 
             return None
 
         algorithm = self.get_algorithm(choosing_preference)
@@ -892,12 +928,12 @@ class Graph:
         # Car to Client 
         to_client = algorithm(origin_node, client.start)
         if to_client is None:
-            print(f"Can't get from {origin_node} to client {client.start}!")
+            #print(f"Can't get from {origin_node} to client {client.start}!")
             return None
         to_client_path, to_client_time, to_client_dist = to_client
 
-        if not utils.is_trip_feasible(car, to_client_dist, car.energy_level):
-            print("Runs out of fuel going to client!")
+        if not utils.is_trip_feasible(car, to_client_dist):
+            #print("Runs out of fuel going to client!")
             return None
 
         # Client to Goal
@@ -909,8 +945,8 @@ class Graph:
         
 
         total_dist_meters = to_client_dist + to_goal_dist
-        if not utils.is_trip_feasible(car, total_dist_meters, car.energy_level):
-            print("Runs out of fuel delivering client!")
+        if not utils.is_trip_feasible(car, total_dist_meters):
+            #print("Runs out of fuel delivering client!")
             return None
 
         total_time = to_client_time + to_goal_time
@@ -936,7 +972,7 @@ class Graph:
         
         path, time, dist = to_goal
         
-        if not utils.is_trip_feasible(car, dist, car.energy_level):
+        if not utils.is_trip_feasible(car, dist):
             print("Runs out of fuel on the way to the goal!")
             return None
             

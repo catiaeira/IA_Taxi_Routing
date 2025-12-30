@@ -35,4 +35,4 @@ class Task_Deliver_Client (Task):
             car.update_car_clients(True, self.client)
             self.client_controller.client_arrived_at_goal(self.client)
             self.completed = True
-            print ("client trip completed!")
+            print ("Client trip completed!")

@@ -7,13 +7,14 @@ from Client_Controller import Client_Controller
 from utils import is_int
 
 def main():
-    dynamic_traffic = False
-    dynamic_car = False  
-    dynamic_client = False  
+    dynamic_traffic = True
+    dynamic_car = True  
+    dynamic_client = True
+    roam = True
 
     graph = parse_graph()
     car_controller = Car_Controller(dynamic_car)
-    client_controller = Client_Controller(dynamic_client, graph)
+    client_controller = Client_Controller(dynamic_client, roam, graph)
 
     currTime = 0
     skipping = 0
@@ -32,8 +33,8 @@ def main():
         graph_changed = graph.update_traffic(dynamic_traffic)
         # graph_changed = True # << for now
         
-        client_controller.update(currTime, graph)
-        car_controller.update(currTime, client_controller, graph, graph_changed)
+        client_controller.update(currTime, graph, roam)
+        car_controller.update(currTime, client_controller, graph, graph_changed, roam)
         currTime += 1 
         if skipping > 0: 
             skipping -=1
@@ -206,7 +207,17 @@ def car_menu (graph, car_controller):
                     print("Node doesn't exist, cancelling operation.")
                     continue
 
-                car_controller.add_car(int(car_type), int(car_capacity), car_energy_level, car_curr_node)
+                # car cost
+                car_cost = input("Enter the car's cost (cent/km) (Min. 1 / Max. 10) -> ")
+                if not is_int(car_cost):
+                    print("Invalid input, cancelling operation.")
+                    continue
+
+                if not(1 <= int(car_capacity) <= 10):
+                    print("Invalid amount, cancelling operation.")
+                    continue
+
+                car_controller.add_car(int(car_type), int(car_capacity), car_energy_level, car_curr_node, car_cost)
                 car_controller.see_cars()
             
             case 3:

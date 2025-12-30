@@ -50,4 +50,4 @@ class Task_Refuel (Task):
         elif self.time_left_refuel <= 0:
             self.completed = True
             car.energy_level = 100 
-            print (f"Car {car} completed refueling")
+            print (f"{car} Completed refueling")

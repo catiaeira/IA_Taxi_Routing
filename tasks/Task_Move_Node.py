@@ -23,6 +23,7 @@ class Task_Move_Node(Task):      # will only deal with neighboring nodes
     def update(self, curr_time, graph, car, graph_changed :bool):
         if self.time_started == -1:
             self.time_started = curr_time
+            return
 
         self.remaining_time -= 1
 
@@ -39,5 +40,6 @@ class Task_Move_Node(Task):      # will only deal with neighboring nodes
             car.curr_node = self.goal_node
             car.update_car_after_trip(distance, True)
             if car.energy_level <= 0:
-                print (f"{car} ran out of energy!") # allowing it, for now
+                print (f"Ran out of energy!")
+                self.completed = True
 
