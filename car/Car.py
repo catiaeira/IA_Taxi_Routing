@@ -50,14 +50,14 @@ class Car:
         if client is not None:
             if client.start == self.curr_node:
                 self.passengers_inside += client.how_many 
-                print ("added clients to car")
+                #print ("added clients to car")
 
             if client.goal == self.curr_node:
                 self.trips_done += 1
                 if count_for_global_stats:
                     Car.total_trips_done += 1
                 self.passengers_inside -= client.how_many 
-                print ("removed clients from car")
+                #print ("removed clients from car")
         
     def copy(self):
         return copy.copy(self)

@@ -26,7 +26,7 @@ class Car_Controller:
         car1.assign_location("Elvas")
         car2.assign_location("Elvas")
 
-        return [car1, car2]
+        return [car1]
     
     def get_number_of_cars (self):
         return len(self.simulation_cars)
@@ -108,44 +108,31 @@ class Car_Controller:
                         self.simulation_cars.remove(to_delete)
                         print(f"\n[CAR DELETED] {to_delete.car}\n")
         
-    def assign_car_to_client (self, client, graph, client_controller): # returns 1 if sucessfull, 0 otherwise
-        best_path = []
-        best_parameter = None
-        best_car = None
-
+    def assign_car_to_client (self, client, graph, client_controller) -> bool:
+        car_set = set([])
         for sim_car in self.simulation_cars:
             if sim_car.is_car_busy():       # if a car already has a trip assigned, dont consider it
-                continue    
-
-            car = sim_car.car                     
-
-            trip_to_client = graph.create_path_to_client(car, client, self.CHOOSING_PREFERENCE)
-            if trip_to_client == None:
                 continue
+            car_set.add(sim_car.car)
 
-            path, time_taken, dist_travelled = trip_to_client
-            
-            # here we need to choose which parameter we're focusing on (eg fastest time, less cost). 
+        trip = graph.create_path_to_client(car_set, client, self.CHOOSING_PREFERENCE)
 
-            if self.CHOOSING_PREFERENCE == "TIME":
-                if best_parameter == None or time_taken < best_parameter:
-                    best_parameter = time_taken
-                    best_path = path
-                    best_car = sim_car 
-            elif self.CHOOSING_PREFERENCE == "COST":
-                if best_parameter == None or dist_travelled < best_parameter:
-                    best_parameter = dist_travelled
-                    best_path = path
-                    best_car = sim_car 
-            else:
-                print ("unknown preference assigning client!") # shouldnt happen
-        
-        if best_car == None:
-            # couldnt find a suitable car, will wait
-            print ("no suitable car found")
-            return 0
-        
-        print (f"{client} assigned to {best_car.car}")
-        task = Task_Deliver_Client (best_path, graph, client, client_controller, self.CHOOSING_PREFERENCE)
-        best_car.tasks_list.append (task)
-        return 1
+        if trip == None: # couldnt find a suitable car, will wait
+            return False
+
+        best_car, path, _, _ = trip
+
+        best_sim_car = None
+        for sim_car in self.simulation_cars:
+            if sim_car.car == best_car:
+                best_sim_car = sim_car
+                break
+
+        if best_sim_car == None:
+            print ("error finding sim car assigning a car!") # shouldnt happen
+            return False
+
+        print (f"{client} assigned to {best_car}")
+        task = Task_Deliver_Client (path, graph, client, client_controller, self.CHOOSING_PREFERENCE)
+        best_sim_car.tasks_list.append (task)
+        return True

@@ -40,6 +40,10 @@ class Task_Move(Task):
             
         if len(self.moves) == 0 or graph_changed:   # create or recreate path to destination
             self.update_path(graph, car, graph_changed)
+
+        if len(self.moves) == 0:
+            self.completed = True
+            return
         
         #loop to process moves until the current move is incomplete
         while self.current_move_index < len(self.moves):

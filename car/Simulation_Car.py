@@ -39,11 +39,9 @@ class Simulation_Car:
         for task in self.tasks_list:
             if (isinstance(task, Task_Deliver_Client)):
                 has_to_deliver_client = True
-                break 
+                break
 
-        if self.current_task != None or has_to_deliver_client:
-            return True
-        return False
+        return has_to_deliver_client
 
     def update(self, curr_time, graph, graph_changed: bool, most_central_node: str):
         self.check_energy_level()
@@ -78,11 +76,13 @@ class Simulation_Car:
             refuel_task = self.get_refuel_task()
             
             if kms_left < average_km_per_trip:  # very low energy
-                print ("increasing refuel task priority to max")
-                refuel_task.priority = 5
+                if refuel_task.priority != 5:
+                    print ("Increasing refuel task priority to max")
+                    refuel_task.priority = 5
             elif kms_left < 2 * average_km_per_trip:  # low energy:
-                print ("increasing refuel task priority")
-                refuel_task.priority = 3        # same priority as delivering normal clients       
+                if refuel_task.priority != 3:
+                    print ("Increasing refuel task priority")
+                    refuel_task.priority = 3        # same priority as delivering normal clients       
 
         
     def check_roam(self, most_central_node):
