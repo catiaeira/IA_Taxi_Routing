@@ -13,4 +13,4 @@ class Client:
 
     @override
     def __repr__(self) -> str:
-        return "Client: " + self.start + " - " + self.goal + " [" + str(self.how_many) + " passengers]"
+        return "Client: " + self.start + " -> " + self.goal + " [" + str(self.how_many) + " passengers]"

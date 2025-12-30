@@ -1,5 +1,6 @@
 from graph.Energy_Station import Energy_Station
 from parser.parse_json_graph import parse_graph
+from parser.get_osmnx_graph import get_graph
 from car.Car import ElectricCar
 from Client import Client
 from Car_Controller import Car_Controller
@@ -12,7 +13,15 @@ def main():
     dynamic_client = True
     roam = True
 
-    graph = parse_graph()
+    osmnx = input("Load graph from OSMnx? [y/n]")
+
+    if osmnx == "y":
+        graph = get_graph()
+        print("OSMnx graph successfully loaded")
+    else:
+        print("JSON graph successfully loaded")
+        graph = parse_graph()
+
     car_controller = Car_Controller(dynamic_car)
     client_controller = Client_Controller(dynamic_client, roam, graph)
 
@@ -217,7 +226,7 @@ def car_menu (graph, car_controller):
                     print("Invalid amount, cancelling operation.")
                     continue
 
-                car_controller.add_car(int(car_type), int(car_capacity), car_energy_level, car_curr_node, car_cost)
+                car_controller.add_car(int(car_type), int(car_capacity), car_energy_level, car_curr_node, int(car_cost))
                 car_controller.see_cars()
             
             case 3:
