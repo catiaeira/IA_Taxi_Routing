@@ -1,5 +1,5 @@
 import time
-from car.Car import Car
+from car.Car import Car, ElectricCar, FuelCar
 from graph.Energy_Station import Energy_Station
 from parser.parse_json_graph import parse_graph
 from parser.get_osmnx_graph import get_graph
@@ -132,6 +132,7 @@ def main():
 
             case 14:
                 origin = input("Origin node -> ").lower().capitalize()
+                destination = input("Destination node -> ").lower().capitalize()
                 cars: set[Car] = set()
                 print("Enter nodes with available cars (type 'end' when you're done)")
                 while True:
@@ -139,17 +140,22 @@ def main():
                     if node == "End":
                         break
                     op_cost = int(input("Op cost (cents) per km -> "))
-                    car = Car(op_cost_km=op_cost)
+                    car_type = input("Electric or combustion [e/c] -> ")
+                    if car_type == "c":
+                        car = FuelCar(op_cost_km=op_cost)
+                    else:
+                        car = ElectricCar(op_cost_km=op_cost)
                     car.assign_location(node)
                     cars.add(car)
 
                 start = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
-                print(graph.find_closest_car(origin, cars))
+                print(graph.find_closest_car(origin, cars, destination))
                 end = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
                 print(f"Time elapsed: {(end-start)/1_000_000}ms")
 
             case 15:
                 origin = input("Origin node -> ").lower().capitalize()
+                destination = input("Destination node -> ").lower().capitalize()
                 cars: set[Car] = set()
                 print("Enter nodes with available cars (type 'end' when you're done)")
                 while True:
@@ -157,15 +163,18 @@ def main():
                     if node == "End":
                         break
                     op_cost = int(input("Op cost (cents) per km -> "))
-                    car = Car(op_cost_km=op_cost)
+                    car_type = input("Electric or combustion [e/c] -> ")
+                    if car_type == "c":
+                        car = FuelCar(op_cost_km=op_cost)
+                    else:
+                        car = ElectricCar(op_cost_km=op_cost)
                     car.assign_location(node)
                     cars.add(car)
 
                 start = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
-                print(graph.find_closest_car_by_op_cost(origin, cars))
+                print(graph.find_closest_car_by_op_cost(origin, cars, destination))
                 end = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
                 print(f"Time elapsed: {(end-start)/1_000_000}ms")
-
 
             case 16:
                 origin = input("Origin node -> ").lower().capitalize()
