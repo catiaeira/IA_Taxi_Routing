@@ -54,7 +54,7 @@ class Simulation_Car:
                 (best_task.priority > self.current_task.priority and not isinstance(self.current_task, Task_Deliver_Client)): # dont choose a new task if currently delivering a client
 
                 if (self.current_task):
-                     self.tasks_list.remove(self.current_task)  # destroy curr task if its less important 
+                    self.tasks_list.remove(self.current_task)  # destroy curr task if its less important 
                 self.current_task = best_task
 
         if self.current_task:
@@ -98,6 +98,8 @@ class Simulation_Car:
                 break 
 
         self.tasks_list.append(roam_task)
+        if isinstance(self.current_task , Task_Roam): 
+            self.current_task = roam_task
 
 
     def get_refuel_task (self) -> Task_Refuel:    # creates it if there isnt any

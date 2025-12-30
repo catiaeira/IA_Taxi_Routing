@@ -838,7 +838,7 @@ class Graph:
     # returns in minutes
     def calc_time_between_nodes(self, curr_node: str, goal_node : str) -> float:
             distance = self.get_arc_distance(curr_node, goal_node) # in meters
-            speed = self.get_arc_speed(curr_node, goal_node)       # in km/h
+            speed = self.get_arc_current_speed(curr_node, goal_node)       # in km/h
             if (distance == math.inf or speed == math.inf):
                 print (f"Path not found when calculating time: {curr_node} - {goal_node}")
                 return 0
@@ -972,7 +972,7 @@ class Graph:
         
         path, time, dist = to_goal
         
-        if not utils.is_trip_feasible(car, dist, car.energy_level):
+        if not utils.is_trip_feasible(car, dist):
             print("Runs out of fuel on the way to the goal!")
             return None
             

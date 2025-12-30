@@ -26,7 +26,7 @@ class Car_Controller:
         car1.assign_location("Elvas")
         car2.assign_location("Elvas")
 
-        return [car1]
+        return [car1, car2]
     
     def get_number_of_cars (self):
         return len(self.simulation_cars)
@@ -78,6 +78,9 @@ class Car_Controller:
             
         for s_car in self.simulation_cars: # update all cars
             s_car.update(curr_time, graph, graph_changed, most_central_node)
+            if s_car.car.energy_level <= 0:
+                print (f"Removing {s_car}")
+                self.simulation_cars.remove (s_car)
         
         if self.dynamic_car is True:
             action = random.choice(["create", "delete"])
@@ -89,11 +92,12 @@ class Car_Controller:
                     car_type = random.choice([FuelCar, ElectricCar])
                     car_capacity = random.randint(3,9)
                     car_energy = random.randint(50,100)
+                    car_cost = random.randint(1,10)
 
                     nodes = list(graph.node_dict.keys())
                     curr_node = random.choice(nodes)
 
-                    new_car = car_type(capacity=car_capacity, energy_level=car_energy, curr_node=curr_node)
+                    new_car = car_type(capacity=car_capacity, energy_level=car_energy, curr_node=curr_node, op_cost_km=car_cost)
 
                     self.simulation_cars.append(Simulation_Car(new_car))
 
@@ -101,7 +105,7 @@ class Car_Controller:
                     
             elif action == "delete":
                 if self.simulation_cars and random.random() < delete_chance:
-                    idle_cars = list(filter(lambda c : c.current_task != Task_Deliver_Client, self.simulation_cars)) #filters and keeps the cars that aren't transporting clients
+                    idle_cars = list(filter(lambda c : not isinstance(c.current_task, Task_Deliver_Client), self.simulation_cars)) #filters and keeps the cars that aren't transporting clients
                     if len(idle_cars) > 0:
                         to_delete = random.choice(idle_cars)
 

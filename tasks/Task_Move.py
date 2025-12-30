@@ -80,7 +80,7 @@ class Task_Move(Task):
             origin = car.curr_node
         
         path_tuple = None
-        if isinstance(self.main_task, Task_Deliver_Client) == 'deliver_client':
+        if isinstance(self.main_task, Task_Deliver_Client):
             path_tuple = graph.update_path (car, self.main_task.client, curr_move.goal_node, self.main_task.CHOOSING_PREFERENCE)
         elif isinstance(self.main_task, Task_Refuel):
             path_tuple = graph.find_closest_station_by_distance(origin, car.charges_in())   # find the closest station, prioritizing shortest path
@@ -88,7 +88,6 @@ class Task_Move(Task):
             path_tuple = graph.a_star_search_by_distance(origin, self.main_task.node)
 
         if path_tuple == None:
-            print ("No path found!")
             return 
 
         path = path_tuple[0]

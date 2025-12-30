@@ -9,7 +9,7 @@ class Car:
     total_kms_travelled_w_passengers:int = 0
 
     # op cost is in cents per km
-    def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str ="", op_cost_km: int = 40):
+    def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str ="", op_cost_km: int = 5):
         self.trips_done: int = trips_done
         self.kms_travelled: int = kms_travelled
         self.kms_travelled_w_passengers: int = kms_travelled_w_passengers
@@ -77,8 +77,11 @@ class Car:
 
 
 class ElectricCar (Car):
-    def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str ="", op_cost_km: int = 40):
-        super().__init__(trips_done, kms_travelled, kms_travelled_w_passengers, energy_level, capacity, passengers_inside, curr_node, op_cost_km)
+    def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str ="", op_cost_km: int = 5):
+        cost = op_cost_km + (capacity-3)*2
+        # 4 lugares fica 7 cent/km
+        # 8 lugares fica 15 cent/km
+        super().__init__(trips_done, kms_travelled, kms_travelled_w_passengers, energy_level, capacity, passengers_inside, curr_node, cost)
         self.consumption_per_km = 0.25 # 400km
         self.recharge_per_min = 4      # 25 mins to fully recharge
 
@@ -96,8 +99,12 @@ class ElectricCar (Car):
         return "\n- Electric " + super().__str__()
 
 class FuelCar (Car):
-    def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str ="", op_cost_km: int = 40):
-        super().__init__(trips_done, kms_travelled, kms_travelled_w_passengers, energy_level, capacity, passengers_inside, curr_node, op_cost_km)
+    def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str ="", op_cost_km: int = 5):
+        cost = op_cost_km*2 + (capacity-3)*2
+        # 4 lugares fica 12 cent/km
+        # 8 lugares fica 20 cent/km
+
+        super().__init__(trips_done, kms_travelled, kms_travelled_w_passengers, energy_level, capacity, passengers_inside, curr_node, cost)
         self.consumption_per_km = 0.1 # 1000 km
         self.recharge_per_min = 20    # 5 minutes
 
