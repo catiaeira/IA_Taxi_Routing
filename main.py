@@ -1,6 +1,7 @@
 from graph.Energy_Station import Energy_Station
 from parser.parse_json_graph import parse_graph
 from car.Car import Car
+from parser.get_osmnx_graph import get_graph
 from Client import Client
 from tasks.Task_Deliver_Client import Task_Deliver_Client
 from Car_Controller import Car_Controller
@@ -13,7 +14,15 @@ def main():
     dynamic_client = True
     roam = True
 
-    graph = parse_graph()
+    osmnx = input("Load graph from OSMnx? [y/n]")
+
+    if osmnx == "y":
+        graph = get_graph()
+        print("OSMnx graph successfully loaded")
+    else:
+        print("JSON graph successfully loaded")
+        graph = parse_graph()
+
     car_controller = Car_Controller(dynamic_car)
     client_controller = Client_Controller(dynamic_client, roam, graph)
 

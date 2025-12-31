@@ -20,13 +20,13 @@ class Car_Controller:
     CHOOSING_PREFERENCE = "TIME"        # time taken is the default choice when a car is being chosen
 
     def get_cars (self) -> list[Car]: # default cars it starts with... maybe change to import from a file
-        car1 = FuelCar(energy_level=30)
-        car2 = ElectricCar()
+        #car1 = FuelCar(energy_level=30)
+        #car2 = ElectricCar()
 
-        car1.assign_location("Elvas")
-        car2.assign_location("Elvas")
+        #car1.assign_location("Elvas")
+        #car2.assign_location("Elvas")
 
-        return [car1, car2]
+        return []
     
     def get_number_of_cars (self):
         return len(self.simulation_cars)
@@ -45,11 +45,11 @@ class Car_Controller:
             print(sim_car)
             i += 1
 
-    def add_car (self, car_type: int, car_capacity: int, car_energy_level: float, car_curr_node: str, car_cost : int): #make car_type a str ?
+    def add_car (self, car_type: int, car_capacity: int, car_energy_level: float, car_curr_node: str, op_cost: int): #make car_type a str ?
         if(car_type == 1):
-            car = FuelCar(energy_level=car_energy_level, capacity=car_capacity, curr_node=car_curr_node, op_cost_km =car_cost)
+            car = FuelCar(energy_level=car_energy_level, capacity=car_capacity, curr_node=car_curr_node, op_cost_km=op_cost)
         elif(car_type == 2):
-            car = ElectricCar(energy_level=car_energy_level, capacity=car_capacity, curr_node=car_curr_node, op_cost_km = car_cost)
+            car = ElectricCar(energy_level=car_energy_level, capacity=car_capacity, curr_node=car_curr_node, op_cost_km=op_cost)
 
         sim_car = Simulation_Car(car)
         self.simulation_cars.append(sim_car)
