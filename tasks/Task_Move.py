@@ -45,31 +45,31 @@ class Task_Move(Task):
             self.completed = True
             return
         
+        remaining_time = 1.0 # one minute per tick
+
         #loop to process moves until the current move is incomplete
-        while self.current_move_index < len(self.moves):
+        while remaining_time > 0 and self.current_move_index < len(self.moves):
             current_move = self.moves[self.current_move_index]
-            current_move.update(curr_time, graph, car, graph_changed)
 
-            if isinstance(self.main_task, Task_Deliver_Client) and \
-                current_move.curr_node == self.main_task.client.start and \
-                not self.main_task.client.is_in_car:
-
-                self.main_task.client.enter_car()
-                car.update_car_clients(self.main_task.client) # update car, has picked up client
-
+            remaining_time = current_move.update(curr_time, remaining_time, graph, car, graph_changed)
             self.recalc_estimated_time()
 
             if current_move.completed:
                 self.current_move_index += 1
-                
-                if self.current_move_index >= len(self.moves):  # has finished all the moves
-                    self.completed = True
-                    return
-                
+
+                if isinstance(self.main_task, Task_Deliver_Client) and \
+                    current_move.goal_node == self.main_task.client.start and \
+                    not self.main_task.client.is_in_car:
+
+                    self.main_task.client.enter_car()
+                    car.update_car_clients(self.main_task.client) # update car, has picked up client
                 # we keep looping bc of the cenario where multiple moves are possible in the same minute
             else:
                 # the current move isnt completed, so we are done for this time step
                 break 
+        if self.current_move_index >= len(self.moves):  # has finished all the moves
+                self.completed = True
+
 
     def update_path(self, graph, car, graph_changed):
         path_changed_midway = graph_changed and len(self.moves)>0

@@ -61,8 +61,8 @@ def get_graph() -> Graph:
     counter = 0
     stations = (Energy_Station.CHARGING_AND_FUEL_STATION, Energy_Station.CHARGING_STATION, Energy_Station.FUEL_STATION)
     for node, data in graph_osmnx.nodes(data=True):
-        if counter % 100 == 0:
-            station = stations[(counter // 100) % 3]
+        if counter % 50 == 0:
+            station = stations[(counter // 50) % 3]
         else:
             station = Energy_Station.NONE
         graph.add_node(str(node), data['y'], data['x'], station)

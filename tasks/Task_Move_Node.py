@@ -20,26 +20,28 @@ class Task_Move_Node(Task):      # will only deal with neighboring nodes
             )
         )
 
-    def update(self, curr_time, graph, car, graph_changed :bool):
+    def update(self, curr_time, available_time, graph, car, graph_changed) -> float:
         if self.time_started == -1:
             self.time_started = curr_time
-            return
 
-        self.remaining_time -= 1
-
-        if graph_changed: # needs to recalculate the estimated time if the traffic has worsened
+        if graph_changed:
             new_total_time = graph.calc_time_between_nodes(self.curr_node, self.goal_node)
             time_elapsed = curr_time - self.time_started
             self.remaining_time = max(0, new_total_time - time_elapsed)
 
+        time_used = min(self.remaining_time, available_time)
+        self.remaining_time -= time_used
+        available_time -= time_used
+
         if self.remaining_time <= 0:
-            print (f"move {self.curr_node} to {self.goal_node} completed at {curr_time}")
+            #print (f"move {self.curr_node} to {self.goal_node} completed at {curr_time}")
             self.completed = True
 
             distance = graph.get_arc_distance(self.curr_node, self.goal_node) # in meters
             car.curr_node = self.goal_node
             car.update_car_after_trip(distance)
             if car.energy_level <= 0:
-                print (f"Ran out of energy!")
+                print ("Ran out of energy!")
                 self.completed = True
 
+        return available_time

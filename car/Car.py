@@ -56,7 +56,10 @@ class Car:
             if client.goal == self.curr_node:
                 self.trips_done += 1
                 Car.total_trips_done += 1
+
                 self.passengers_inside -= client.how_many 
+                if self.passengers_inside < 0:
+                    self.passengers_inside = 0
                 #print ("removed clients from car")
         
     def copy(self):
