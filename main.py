@@ -1,7 +1,8 @@
 from graph.Energy_Station import Energy_Station
 from parser.parse_json_graph import parse_graph
-from car.Car import ElectricCar
+from car.Car import Car
 from Client import Client
+from tasks.Task_Deliver_Client import Task_Deliver_Client
 from Car_Controller import Car_Controller
 from Client_Controller import Client_Controller
 from utils import is_int
@@ -50,6 +51,7 @@ def main_menu(graph, car_controller, client_controller):
         print("5 - Specify the number of time instances skips")
         print("6 - Print the graph menu")
         print("7 - Change the algorithm used for pathing")
+        print("8 - See global statistics")
         print("0 - Quit\n")
 
         user_input = input("Enter your option -> ")
@@ -96,6 +98,10 @@ def main_menu(graph, car_controller, client_controller):
 
             case 7:
                 algorithm_menu(graph)
+                continue
+
+            case 8:
+                global_stats_menu()
                 continue
 
             case _:
@@ -217,7 +223,7 @@ def car_menu (graph, car_controller):
                     print("Invalid amount, cancelling operation.")
                     continue
 
-                car_controller.add_car(int(car_type), int(car_capacity), car_energy_level, car_curr_node, car_cost)
+                car_controller.add_car(int(car_type), int(car_capacity), car_energy_level, car_curr_node, int(car_cost))
                 car_controller.see_cars()
             
             case 3:
@@ -499,6 +505,43 @@ def algorithm_menu (graph):
     return 0
     
 
+def global_stats_menu ():
+    if Car.total_trips_done > 0:
+        avg_time = Task_Deliver_Client.total_time_trip / Car.total_trips_done
+    else:
+        avg_time = 0
+
+    if Client_Controller.how_many_clients > 0:
+        avg_waiting_time = Client_Controller.sum_waiting_time / Client_Controller.how_many_clients
+    else:
+        avg_waiting_time = 0
+
+    print (f"Total trips done: {Car.total_trips_done}")
+    print (f"Total kms travelled: {Car.total_kms_travelled}")
+    print (f"Total kms travelled with clients: {Car.total_kms_travelled_w_passengers}")
+    print (f"Operational costs (euros): {Car.total_operational_costs/100}")
+
+    print (f"Average time taken per trip: {avg_time}")
+    print (f"Average time client waits: {avg_waiting_time}")
+    print (f"Most central node: {Client_Controller.central_popular_node}")
+
+# operational cost 
+    user_input = -1
+    while user_input == -1:
+        print("\n0 - Quit\n")
+
+        user_input = input("Enter your option -> ")
+        if not is_int(user_input):
+            print("Invalid input, please enter a number.")
+            continue
+
+        match int(user_input):
+            case 0:
+                return 0
+            case _:
+                print("Enter a valid option")
+                user_input = -1
+    return 0
 
 if __name__ == "__main__":
     main()

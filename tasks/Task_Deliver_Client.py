@@ -3,6 +3,8 @@ from graph import Graph
 from tasks.Task import Task
 # will handle the entire trip of one client
 class Task_Deliver_Client (Task):
+    total_time_trip : int = 0
+
     def __init__(self, path, graph, client, client_controller, choosing_preference): # path needs to include the trip to the client 
         from tasks.Task_Move import Task_Move
         super().__init__()
@@ -32,7 +34,8 @@ class Task_Deliver_Client (Task):
         self.remaining_time = self.move.remaining_time
         
         if self.move.completed:
-            car.update_car_clients(True, self.client)
+            car.update_car_clients(self.client)
             self.client_controller.client_arrived_at_goal(self.client)
             self.completed = True
+            Task_Deliver_Client.total_time_trip += (curr_time - self.time_started)
             print ("Client trip completed!")

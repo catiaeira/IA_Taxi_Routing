@@ -45,11 +45,11 @@ class Car_Controller:
             print(sim_car)
             i += 1
 
-    def add_car (self, car_type: int, car_capacity: int, car_energy_level: float, car_curr_node: str): #make car_type a str ?
+    def add_car (self, car_type: int, car_capacity: int, car_energy_level: float, car_curr_node: str, car_cost : int): #make car_type a str ?
         if(car_type == 1):
-            car = FuelCar(energy_level=car_energy_level, capacity=car_capacity, curr_node=car_curr_node)
+            car = FuelCar(energy_level=car_energy_level, capacity=car_capacity, curr_node=car_curr_node, op_cost_km =car_cost)
         elif(car_type == 2):
-            car = ElectricCar(energy_level=car_energy_level, capacity=car_capacity, curr_node=car_curr_node)
+            car = ElectricCar(energy_level=car_energy_level, capacity=car_capacity, curr_node=car_curr_node, op_cost_km = car_cost)
 
         sim_car = Simulation_Car(car)
         self.simulation_cars.append(sim_car)

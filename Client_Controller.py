@@ -8,6 +8,8 @@ class Client_Controller:
     sum_starting_coordinates = [0.0, 0.0] # lat, lng; sum of coords the clients started in
     how_many_clients : int = 0                     # counter of how many clients have requested a ride
 
+    sum_waiting_time : int = 0
+
     def __init__(self, dynamic_client: bool, roam : bool, graph):
         self.waiting_clients : list [Client] = [] # swap for a priority queue?
         self.clients_on_route : list [Client] = []
@@ -18,6 +20,9 @@ class Client_Controller:
             self.calculate_central_node(graph)
 
     def update(self, curr_time, graph, roam : bool):
+        for client in self.waiting_clients:
+            Client_Controller.sum_waiting_time += 1
+
         if self.dynamic_client is True:
             spawn_chance = 0.2 # 20% chance of spawning a new client
 
@@ -34,12 +39,12 @@ class Client_Controller:
 
                 self.waiting_clients.append(new_client)
 
-                self.how_many_clients += 1
+                Client_Controller.how_many_clients += 1
 
                 if roam: 
                     node_start = graph.get_node_by_name (new_client.start)
-                    self.sum_starting_coordinates[0] += node_start.getLatitude()
-                    self.sum_starting_coordinates[1] += node_start.getLongitude()
+                    Client_Controller.sum_starting_coordinates[0] += node_start.getLatitude()
+                    Client_Controller.sum_starting_coordinates[1] += node_start.getLongitude()
 
                     self.calculate_central_node(graph)
 
@@ -59,9 +64,9 @@ class Client_Controller:
         clients = [c1, c2]
         for c in clients:
             node_start = graph.get_node_by_name (c.start)
-            self.sum_starting_coordinates[0] += node_start.getLatitude()
-            self.sum_starting_coordinates[1] += node_start.getLongitude()
-        self.how_many_clients += len(clients)
+            Client_Controller.sum_starting_coordinates[0] += node_start.getLatitude()
+            Client_Controller.sum_starting_coordinates[1] += node_start.getLongitude()
+        Client_Controller.how_many_clients += len(clients)
         return clients
 
     def get_n_waiting_clients (self):
@@ -93,11 +98,11 @@ class Client_Controller:
         self.waiting_clients[index] = new_client
 
     def calculate_central_node (self, graph):
-        if self.how_many_clients == 0:
+        if Client_Controller.how_many_clients == 0:
             return None
-        lat, lng = self.sum_starting_coordinates
-        lat_avg = lat / self.how_many_clients
-        lng_avg = lng / self.how_many_clients
+        lat, lng = Client_Controller.sum_starting_coordinates
+        lat_avg = lat / Client_Controller.how_many_clients
+        lng_avg = lng / Client_Controller.how_many_clients
 
         closest_node = "" 
         closest_dist = float("inf")
@@ -108,4 +113,4 @@ class Client_Controller:
                 closest_dist = dist
 
         print ("central node ", closest_node)
-        self.central_popular_node = closest_node
+        Client_Controller.central_popular_node = closest_node

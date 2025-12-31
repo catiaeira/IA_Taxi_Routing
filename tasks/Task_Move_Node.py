@@ -38,7 +38,7 @@ class Task_Move_Node(Task):      # will only deal with neighboring nodes
 
             distance = graph.get_arc_distance(self.curr_node, self.goal_node) # in meters
             car.curr_node = self.goal_node
-            car.update_car_after_trip(distance, True)
+            car.update_car_after_trip(distance)
             if car.energy_level <= 0:
                 print (f"Ran out of energy!")
                 self.completed = True

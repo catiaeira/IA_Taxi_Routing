@@ -7,6 +7,7 @@ class Car:
     total_trips_done:int = 0
     total_kms_travelled:int = 0
     total_kms_travelled_w_passengers:int = 0
+    total_operational_costs: float = 0
 
     # op cost is in cents per km
     def __init__(self, trips_done: int =0, kms_travelled: int =0, kms_travelled_w_passengers: int =0, energy_level: float =100, capacity: int =4, passengers_inside: int =0, curr_node: str ="", op_cost_km: int = 5):
@@ -33,20 +34,20 @@ class Car:
     def assign_location (self, curr_node :str):
         self.curr_node = curr_node
 
-    def update_car_after_trip (self, distance_meters :int, count_for_global_stats : bool): 
+    def update_car_after_trip (self, distance_meters :int): 
         distance = distance_meters / 1000
         self.energy_level -= self.consumption(distance)
-        if count_for_global_stats:
-            Car.total_kms_travelled += distance
         self.kms_travelled += distance
 
+        Car.total_kms_travelled += distance
+        Car.total_operational_costs += distance * self.op_cost_km
+
         if self.passengers_inside > 0:
-            if count_for_global_stats:
-                Car.total_kms_travelled_w_passengers += distance
+            Car.total_kms_travelled_w_passengers += distance
             self.kms_travelled_w_passengers += distance
 
 
-    def update_car_clients (self, count_for_global_stats : bool, client : Client): 
+    def update_car_clients (self, client : Client): 
         if client is not None:
             if client.start == self.curr_node:
                 self.passengers_inside += client.how_many 
@@ -54,8 +55,7 @@ class Car:
 
             if client.goal == self.curr_node:
                 self.trips_done += 1
-                if count_for_global_stats:
-                    Car.total_trips_done += 1
+                Car.total_trips_done += 1
                 self.passengers_inside -= client.how_many 
                 #print ("removed clients from car")
         

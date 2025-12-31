@@ -53,7 +53,7 @@ def get_graph() -> Graph:
     if osp.isfile(graph_path):
         graph_osmnx = oxio.load_graphml(graph_path)
     else:
-        graph_osmnx = oxgraph.graph_from_place("Porto", network_type="drive")
+        graph_osmnx = oxgraph.graph_from_place("Gualtar, Braga", network_type="drive")
         oxio.save_graphml(graph_osmnx, filepath=graph_path)
 
     graph = Graph()

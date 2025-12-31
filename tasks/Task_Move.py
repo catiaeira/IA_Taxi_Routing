@@ -55,7 +55,7 @@ class Task_Move(Task):
                 not self.main_task.client.is_in_car:
 
                 self.main_task.client.enter_car()
-                car.update_car_clients(True, self.main_task.client) # update car, has picked up client
+                car.update_car_clients(self.main_task.client) # update car, has picked up client
 
             self.recalc_estimated_time()
 
