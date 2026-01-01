@@ -16,6 +16,8 @@ def dist(latOr: float, longOr: float, latDest: float, longDest: float) -> float:
 
 # returns the travel time in seconds
 def calculate_time(dist: int, speed: int) -> float:
+    if speed == 0:
+        return 0
     return (dist/speed) * 3.6
 
 def is_trip_feasible(car: Car, total_distance_meters: int) -> bool:
