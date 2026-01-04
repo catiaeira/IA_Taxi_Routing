@@ -63,19 +63,20 @@ class Car_Controller:
         sim_car.car = new_car
 
     def update (self, curr_time, client_controller, graph, graph_changed : bool, roam : bool):
-        waiting_clients  : list[Client] = client_controller.waiting_clients
-        clients_on_route : list[Client] = client_controller.clients_on_route
         most_central_node : dict[str, int] = client_controller.central_popular_node
         if not roam: 
             most_central_node = None
+        
         i = 0
-        while i < len(waiting_clients):
-            client = waiting_clients[i]
+        while i < len(client_controller.waiting_clients):
+            client = client_controller.waiting_clients[i]
             if self.assign_car_to_client(client, graph, client_controller):
                 client_controller.client_got_car_assigned(client)
             else:
                 i += 1
-            
+
+        client_controller.waiting_clients.sort(key=lambda c: not c.is_premium)
+
         for s_car in self.simulation_cars: # update all cars
             s_car.update(curr_time, graph, graph_changed, most_central_node)
             if s_car.car.energy_level <= 0:
@@ -115,7 +116,7 @@ class Car_Controller:
     def assign_car_to_client (self, client, graph, client_controller) -> bool:
         car_set = set([])
         for sim_car in self.simulation_cars:
-            if sim_car.is_car_busy():       # if a car already has a trip assigned, dont consider it
+            if sim_car.is_car_busy() or (client.is_green and isinstance (sim_car.car, FuelCar)):       # if a car already has a trip assigned, dont consider it
                 continue
             car_set.add(sim_car.car)
 
@@ -137,6 +138,6 @@ class Car_Controller:
             return False
 
         print (f"{client} assigned to {best_car}")
-        task = Task_Deliver_Client (path, graph, client, client_controller, self.CHOOSING_PREFERENCE)
+        task = Task_Deliver_Client (path, graph, client, client_controller, self.CHOOSING_PREFERENCE, client.is_premium)
         best_sim_car.tasks_list.append (task)
         return True

@@ -17,7 +17,7 @@ def match_single_type(road_type: str) -> int:
             return 90
         case "motorway_link" | "trunk_link" | "primary_link" | "secondary":
             return 70
-        case "secondary_link" | "tertiary" | "busway":
+        case "secondary_link" | "tertiary" | "busway" | "ladder":
             return 50
         case "tertiary_link" | "residential" | "unclassified" | "road":
             return 30

@@ -35,9 +35,14 @@ class Client_Controller:
 
                 num_passengers = random.randint(1, 4)
 
-                new_client = Client(start_node, goal_node, num_passengers)
+                wants_green = random.random() < 0.3 # 30% want an electric car
+
+                is_premium = random.random() < 0.2 # 20% premium
+                
+                new_client = Client(start_node, goal_node, num_passengers, wants_green, is_premium)
 
                 self.waiting_clients.append(new_client)
+                self.waiting_clients.sort(key=lambda c: not c.is_premium)
 
                 Client_Controller.how_many_clients += 1
 

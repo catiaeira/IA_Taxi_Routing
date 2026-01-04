@@ -382,11 +382,21 @@ def client_menu (graph, client_controller):
                     print("Invalid input, cancelling operation.")
                     continue
 
-                if not (1 <= int(client_how_many) <= 8):
+                client_is_green = input ("Does the client have a preference for electric cars? (0 - NO, 1 - YES)")
+                if not (0 <= int(client_is_green) <= 1):
                     print("Invalid amount, cancelling operation.")
                     continue
 
-                client_controller.add_client(client_start, client_goal, int(client_how_many))
+                client_is_premium = input ("Is the client premium? (0 - NO, 1 - YES)")
+                if not (0 <= int(client_is_premium) <= 1):
+                    print("Invalid amount, cancelling operation.")
+                    continue
+
+                client_green = True if client_is_green == 1 else False
+
+                client_premium = True if client_is_premium == 1 else False
+
+                client_controller.add_client(client_start, client_goal, int(client_how_many), client_green, client_premium)
                 
                 print("\nWaiting Clients:")
                 client_controller.see_waiting_clients()

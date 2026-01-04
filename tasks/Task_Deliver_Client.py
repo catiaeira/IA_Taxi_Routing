@@ -5,10 +5,13 @@ from tasks.Task import Task
 class Task_Deliver_Client (Task):
     total_time_trip : int = 0
 
-    def __init__(self, path, graph, client, client_controller, choosing_preference): # path needs to include the trip to the client 
+    def __init__(self, path, graph, client, client_controller, choosing_preference, is_premium = False): # path needs to include the trip to the client 
         from tasks.Task_Move import Task_Move
         super().__init__()
-        self.priority = 3
+        if is_premium:
+            self.priority = 4
+        else:
+            self.priority = 3
         self.current_move_index = 0
         self.client = client
         self.CHOOSING_PREFERENCE = choosing_preference
