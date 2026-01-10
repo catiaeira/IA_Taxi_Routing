@@ -67,6 +67,8 @@ class Car_Controller:
         if not roam: 
             most_central_node = None
         
+        client_controller.waiting_clients.sort(key=lambda c: not c.is_premium)
+        
         i = 0
         while i < len(client_controller.waiting_clients):
             client = client_controller.waiting_clients[i]
@@ -74,8 +76,6 @@ class Car_Controller:
                 client_controller.client_got_car_assigned(client)
             else:
                 i += 1
-
-        client_controller.waiting_clients.sort(key=lambda c: not c.is_premium)
 
         for s_car in self.simulation_cars: # update all cars
             s_car.update(curr_time, graph, graph_changed, most_central_node)
@@ -85,8 +85,8 @@ class Car_Controller:
         
         if self.dynamic_car is True:
             action = random.choice(["create", "delete"])
-            new_spawn_chance = 0.2 # 20% chance of spawning a new car
-            delete_chance = 0.1 # 10% chance to delete a car
+            new_spawn_chance = 0.4 # 50% * 40% = 20% chance of spawning a new car
+            delete_chance = 0.1 # 50% * 10% = 5% chance to delete a car
 
             if action == "create":
                 if random.random() < new_spawn_chance:

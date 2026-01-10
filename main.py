@@ -392,9 +392,9 @@ def client_menu (graph, client_controller):
                     print("Invalid amount, cancelling operation.")
                     continue
 
-                client_green = True if client_is_green == 1 else False
-
-                client_premium = True if client_is_premium == 1 else False
+                client_green = bool(int(client_is_green))
+                
+                client_premium = bool(int(client_is_premium))
 
                 client_controller.add_client(client_start, client_goal, int(client_how_many), client_green, client_premium)
                 

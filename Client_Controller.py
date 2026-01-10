@@ -91,8 +91,8 @@ class Client_Controller:
             print(client)
             i += 1
 
-    def add_client (self, client_start: str, client_goal: str, client_how_many: int):
-        client = Client(client_start, client_goal, client_how_many)
+    def add_client (self, client_start: str, client_goal: str, client_how_many: int, client_green: bool, client_premium: bool):
+        client = Client(client_start, client_goal, client_how_many, client_green, client_premium)
         self.waiting_clients.append(client)
 
     def delete_client(self, index: int):
